@@ -3,6 +3,7 @@ package storage
 import (
 	"bytes"
 	"context"
+	"errors"
 	"io"
 	"net/http"
 
@@ -12,6 +13,8 @@ import (
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/telemetry"
 )
+
+var errMetricsCaptured = errors.New("metrics response captured before SDK parsing")
 
 type boundedMetricsTransport struct {
 	Base http.RoundTripper `json:"-"`
@@ -39,6 +42,12 @@ func (t boundedMetricsTransport) RoundTrip(r *http.Request) (*http.Response, err
 	if t.Data != nil {
 		*t.Data = data
 	}
+	if response.StatusCode == http.StatusOK {
+		// madmin-go still uses a zero-value Prometheus parser, which newer
+		// expfmt releases reject. Keep SDK authentication, but parse the captured
+		// response once in the service with an explicitly configured parser.
+		return nil, errMetricsCaptured
+	}
 	response.Body = io.NopCloser(bytes.NewReader(data))
 	return response, nil
 }
@@ -50,6 +59,9 @@ func ReadS3Metrics(ctx context.Context, c Config, transport http.RoundTripper) (
 		return nil, err
 	}
 	if _, err = client.ClusterMetrics(ctx); err != nil {
+		if errors.Is(err, errMetricsCaptured) {
+			return raw, nil
+		}
 		telemetry.SDKError(ctx, err)
 		return nil, err
 	}

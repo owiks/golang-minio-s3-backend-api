@@ -10,6 +10,7 @@ import (
 
 	dto "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
+	"github.com/prometheus/common/model"
 
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
@@ -155,7 +156,7 @@ func ReadLiveMetrics(ctx context.Context, s ReadLiveMetricsClient) (LiveMetrics,
 	if e != nil {
 		return LiveMetrics{}, ServerOperationError(e)
 	}
-	var parser expfmt.TextParser
+	parser := expfmt.NewTextParser(model.UTF8Validation)
 	families, e := parser.TextToMetricFamilies(bytes.NewReader(raw))
 	if e != nil {
 		return LiveMetrics{}, apperror.New(502, "InvalidMetrics", messages.ServerInvalidMetrics)
