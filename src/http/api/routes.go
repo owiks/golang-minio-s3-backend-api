@@ -5,17 +5,17 @@ import (
 	"strings"
 	"time"
 
-	"minio-web/api/src/http/api/routes"
-	"minio-web/api/src/http/httperrors"
-	"minio-web/api/src/http/middleware"
-	"minio-web/api/src/http/requestctx"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/localization"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/mutation"
-	runtimesvc "minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/telemetry"
-	validationsvc "minio-web/api/src/services/validation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/httperrors"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/middleware"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/requestctx"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/localization"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/mutation"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/telemetry"
+	validationsvc "github.com/owiks/golang-minio-s3-backend-api/src/services/validation"
 )
 
 func ServeHTTP(app *runtimesvc.State, w http.ResponseWriter, r *http.Request) {

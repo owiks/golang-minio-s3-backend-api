@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"time"
 
-	"minio-web/api/src/http/stream"
-	"minio-web/api/src/http/validation"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/result"
-	"minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/selectquery"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/stream"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/validation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/result"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/selectquery"
 )
 
 func HandleSelectObject(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session) error {

@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"minio-web/api/src/config"
-	"minio-web/api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/config"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
 )
 
 func TestLoginAdmissionAndTransfers(t *testing.T) {

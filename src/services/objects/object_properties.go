@@ -11,10 +11,10 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/tags"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	objectstate "minio-web/api/src/services/objects/state"
-	"minio-web/api/src/services/revision"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	objectstate "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/state"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/revision"
 )
 
 type ObjectProperties struct {

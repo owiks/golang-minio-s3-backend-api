@@ -7,7 +7,7 @@ import (
 	"github.com/minio/madmin-go/v3"
 	"github.com/minio/minio-go/v7"
 
-	"minio-web/api/src/services/iam"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/iam"
 )
 
 // Interfaces belong to the use cases that consume them. Only required

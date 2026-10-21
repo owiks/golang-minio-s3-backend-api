@@ -3,12 +3,12 @@ package controllers
 import (
 	"net/http"
 
-	httpcommon "minio-web/api/src/http/api/common"
-	httpvalidation "minio-web/api/src/http/validation"
-	"minio-web/api/src/services/apperror"
-	bucketssvc "minio-web/api/src/services/buckets"
-	"minio-web/api/src/services/messages"
-	runtimesvc "minio-web/api/src/services/runtime"
+	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	httpvalidation "github.com/owiks/golang-minio-s3-backend-api/src/http/validation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	bucketssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/buckets"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 func HandleUpdateBucketSetting(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, bucket, kind string) error {

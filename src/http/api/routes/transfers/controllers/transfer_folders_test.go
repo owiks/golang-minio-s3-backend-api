@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"testing"
 
-	"minio-web/api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
 )
 
 func TestTransferPreparationDecodesQueryAndPreservesErrors(t *testing.T) {

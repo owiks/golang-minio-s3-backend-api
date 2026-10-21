@@ -16,13 +16,13 @@ import (
 	"github.com/minio/madmin-go/v3"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
-	apihttp "minio-web/api/src/http/api"
-	httpcommon "minio-web/api/src/http/api/common"
-	"minio-web/api/src/services/revision"
-	runtimesvc "minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/securetoken"
-	"minio-web/api/src/services/storage"
-	"minio-web/api/tests/testsession"
+	apihttp "github.com/owiks/golang-minio-s3-backend-api/src/http/api"
+	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/revision"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/securetoken"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/tests/testsession"
 )
 
 func TestIAMHTTPRevisionFollowsCommandEffectNotError(t *testing.T) {

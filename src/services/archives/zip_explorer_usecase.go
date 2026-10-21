@@ -6,12 +6,12 @@ import (
 	"mime"
 	"path"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	objectssvc "minio-web/api/src/services/objects"
-	objectwrite "minio-web/api/src/services/objects/write"
-	"minio-web/api/src/services/staging"
-	validationsvc "minio-web/api/src/services/validation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	objectwrite "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/write"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/staging"
+	validationsvc "github.com/owiks/golang-minio-s3-backend-api/src/services/validation"
 )
 
 func InspectZIP(ctx context.Context, cache ZIPArchiveCache, s InspectZIPClient, bucket, key string) (ZIPContents, error) {

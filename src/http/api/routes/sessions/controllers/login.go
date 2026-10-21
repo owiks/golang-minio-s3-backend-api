@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"strconv"
 
-	httpcommon "minio-web/api/src/http/api/common"
-	"minio-web/api/src/http/middleware"
-	httpvalidation "minio-web/api/src/http/validation"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	runtimesvc "minio-web/api/src/services/runtime"
-	sessionssvc "minio-web/api/src/services/sessions"
+	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/middleware"
+	httpvalidation "github.com/owiks/golang-minio-s3-backend-api/src/http/validation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	sessionssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/sessions"
 )
 
 func HandleLogin(app *runtimesvc.State, w http.ResponseWriter, r *http.Request) error {

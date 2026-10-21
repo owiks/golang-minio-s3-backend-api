@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"minio-web/api/src/services/securetoken"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/securetoken"
 )
 
 const accessRevisionLimit = 4096

@@ -12,12 +12,12 @@ import (
 
 	"github.com/minio/madmin-go/v3"
 
-	httpcommon "minio-web/api/src/http/api/common"
-	servercontroller "minio-web/api/src/http/api/routes/server/controllers"
-	"minio-web/api/src/http/presentation"
-	"minio-web/api/src/services/apperror"
-	runtimesvc "minio-web/api/src/services/runtime"
-	serversvc "minio-web/api/src/services/server"
+	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	servercontroller "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/server/controllers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	serversvc "github.com/owiks/golang-minio-s3-backend-api/src/services/server"
 )
 
 func TestAdminResponseBoundsProtectConfigReadsAndRestoreBeforeWrite(t *testing.T) {

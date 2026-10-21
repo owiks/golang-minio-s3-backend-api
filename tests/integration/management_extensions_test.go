@@ -18,16 +18,16 @@ import (
 	"github.com/minio/minio-go/v7/pkg/cors"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
-	apihttp "minio-web/api/src/http/api"
-	"minio-web/api/src/http/presentation"
-	"minio-web/api/src/services/apperror"
-	batchsvc "minio-web/api/src/services/batch"
-	bucketssvc "minio-web/api/src/services/buckets"
-	objectssvc "minio-web/api/src/services/objects"
-	runtimesvc "minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/securetoken"
-	serversvc "minio-web/api/src/services/server"
-	"minio-web/api/tests/testsession"
+	apihttp "github.com/owiks/golang-minio-s3-backend-api/src/http/api"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	batchsvc "github.com/owiks/golang-minio-s3-backend-api/src/services/batch"
+	bucketssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/buckets"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/securetoken"
+	serversvc "github.com/owiks/golang-minio-s3-backend-api/src/services/server"
+	"github.com/owiks/golang-minio-s3-backend-api/tests/testsession"
 )
 
 func TestCORSS3RoundTrip(t *testing.T) {

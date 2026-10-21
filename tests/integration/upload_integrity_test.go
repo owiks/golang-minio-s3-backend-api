@@ -15,8 +15,8 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	objectwrite "minio-web/api/src/services/objects/write"
-	"minio-web/api/src/services/uploads"
+	objectwrite "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/write"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads"
 )
 
 func TestUploadIntegrityNativeIntegration(t *testing.T) {

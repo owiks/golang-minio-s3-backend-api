@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
 )
 
 func versionCursor(bucket, key, marker, version string) string {

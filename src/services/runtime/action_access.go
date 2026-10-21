@@ -4,8 +4,8 @@ import (
 	"context"
 	"log/slog"
 
-	"minio-web/api/src/services/iam"
-	"minio-web/api/src/services/telemetry"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/iam"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/telemetry"
 )
 
 // UI hints, never an authorization boundary. Keep policy documents on the API.

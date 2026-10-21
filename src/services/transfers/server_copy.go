@@ -5,7 +5,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"minio-web/api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
 )
 
 func copyOnServer(ctx context.Context, s CopyOnServerClient, body FileTransferRequest, source minio.ObjectInfo, opts minio.PutObjectOptions) (minio.UploadInfo, bool, error) {

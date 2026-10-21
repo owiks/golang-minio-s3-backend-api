@@ -3,7 +3,7 @@ package api
 import (
 	"net/http"
 
-	"minio-web/api/src/http/api/routes"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes"
 )
 
 func operationName(r *http.Request) string {

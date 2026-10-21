@@ -10,12 +10,12 @@ import (
 	"strings"
 	"testing"
 
-	"minio-web/api/src/http/requestctx"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/localization"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/result"
-	"minio-web/api/src/services/transfers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/requestctx"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/localization"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/result"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/transfers"
 )
 
 func TestStreamLocalizesTerminalMessageWithoutChangingEvents(t *testing.T) {

@@ -3,13 +3,13 @@ package uploads
 import (
 	"context"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	objectwrite "minio-web/api/src/services/objects/write"
-	"minio-web/api/src/services/result"
-	"minio-web/api/src/services/staging"
-	"minio-web/api/src/services/uploads/source"
-	validationsvc "minio-web/api/src/services/validation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	objectwrite "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/write"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/result"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/staging"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads/source"
+	validationsvc "github.com/owiks/golang-minio-s3-backend-api/src/services/validation"
 )
 
 type ImportRequest struct {

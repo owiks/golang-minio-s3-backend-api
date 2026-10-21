@@ -19,14 +19,14 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/prometheus/common/expfmt"
 
-	apihttp "minio-web/api/src/http/api"
-	httpcommon "minio-web/api/src/http/api/common"
-	servercontroller "minio-web/api/src/http/api/routes/server/controllers"
-	"minio-web/api/src/http/presentation"
-	"minio-web/api/src/services/apperror"
-	runtimesvc "minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/securetoken"
-	serversvc "minio-web/api/src/services/server"
+	apihttp "github.com/owiks/golang-minio-s3-backend-api/src/http/api"
+	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	servercontroller "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/server/controllers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/securetoken"
+	serversvc "github.com/owiks/golang-minio-s3-backend-api/src/services/server"
 )
 
 func TestServerConfigAllowlistEnvAndHistory(t *testing.T) {

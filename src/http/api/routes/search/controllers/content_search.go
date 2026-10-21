@@ -3,13 +3,13 @@ package controllers
 import (
 	"net/http"
 
-	httpcommon "minio-web/api/src/http/api/common"
-	httpvalidation "minio-web/api/src/http/validation"
-	"minio-web/api/src/services/apperror"
-	searchsvc "minio-web/api/src/services/files"
-	"minio-web/api/src/services/messages"
-	runtimesvc "minio-web/api/src/services/runtime"
-	searchtypes "minio-web/api/src/services/search"
+	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	httpvalidation "github.com/owiks/golang-minio-s3-backend-api/src/http/validation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	searchsvc "github.com/owiks/golang-minio-s3-backend-api/src/services/files"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	searchtypes "github.com/owiks/golang-minio-s3-backend-api/src/services/search"
 )
 
 func HandleContentSearch(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {

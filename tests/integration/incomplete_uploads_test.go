@@ -13,11 +13,11 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
-	uploadscontroller "minio-web/api/src/http/api/routes/uploads/controllers"
-	"minio-web/api/src/services/apperror"
-	runtimesvc "minio-web/api/src/services/runtime"
-	uploadssvc "minio-web/api/src/services/uploads"
-	"minio-web/api/tests/testsession"
+	uploadscontroller "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/uploads/controllers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	uploadssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/uploads"
+	"github.com/owiks/golang-minio-s3-backend-api/tests/testsession"
 )
 
 func TestIncompleteAbortVerification(t *testing.T) {

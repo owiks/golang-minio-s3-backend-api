@@ -14,8 +14,8 @@ import (
 	"testing"
 	"time"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/tests/testmessage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/tests/testmessage"
 )
 
 type countedBody struct {

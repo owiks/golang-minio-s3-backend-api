@@ -8,11 +8,11 @@ import (
 	"net/url"
 	"strings"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	objectssvc "minio-web/api/src/services/objects"
-	searchsvc "minio-web/api/src/services/search"
-	"minio-web/api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	searchsvc "github.com/owiks/golang-minio-s3-backend-api/src/services/search"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
 )
 
 type ObjectUsageOptions struct {

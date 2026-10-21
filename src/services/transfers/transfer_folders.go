@@ -3,7 +3,7 @@ package transfers
 import (
 	"strings"
 
-	validationsvc "minio-web/api/src/services/validation"
+	validationsvc "github.com/owiks/golang-minio-s3-backend-api/src/services/validation"
 )
 
 func ValidTransferKey(key string) bool {

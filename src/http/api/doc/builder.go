@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"strings"
 
-	"minio-web/api/src/http/api/openapi"
-	"minio-web/api/src/http/api/routes"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/openapi"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes"
 )
 
 func Build(catalog []routes.APIRoute) openapi.Document {
 	d := openapi.Document{OpenAPI: "3.0.3", Info: map[string]string{
-		"title": "MinIO Web API", "version": "1.0.0",
-		"description": "BFF API MinIO Web. Подключение создаётся через POST /api/sessions. Cookie имеет динамическое имя minio_session_{sessionID}, HttpOnly и ограничен путём сессии. Для изменений нужны Origin интерфейса и X-CSRF-Token из ответа подключения. Swagger UI служит документацией; выполнение запросов отключено. Право на каждую операцию окончательно проверяет MinIO. Ключи и токены не сохраняются в документации.",
+		"title": "MinIO S3 Backend API", "version": "1.0.0",
+		"description": "HTTP API для S3-совместимых хранилищ и MinIO Admin API. Подключение создаётся через POST /api/sessions. Cookie имеет динамическое имя minio_session_{sessionID}, HttpOnly и ограничен путём сессии. Для изменений нужны Origin интерфейса и X-CSRF-Token из ответа подключения. Swagger UI служит документацией; выполнение запросов отключено. Право на каждую операцию окончательно проверяет MinIO. Ключи и токены не сохраняются в документации.",
 	}, Servers: []map[string]string{{"url": "/"}}, Paths: map[string]map[string]openapi.Operation{}, Components: map[string]any{
 		"securitySchemes": map[string]any{
 			"SessionCookie": map[string]any{"type": "apiKey", "in": "header", "name": "Cookie", "description": "Cookie minio_session_{sessionID}, полученная после подключения. Браузер передаёт её автоматически; JavaScript не читает HttpOnly cookie."},

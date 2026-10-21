@@ -3,10 +3,10 @@ package attributes
 import (
 	"net/http"
 
-	"minio-web/api/src/http/api/routes"
-	"minio-web/api/src/http/api/routes/attributes/controllers"
-	"minio-web/api/src/services/objects"
-	"minio-web/api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/attributes/controllers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 func GetRoutes() []routes.APIRoute {

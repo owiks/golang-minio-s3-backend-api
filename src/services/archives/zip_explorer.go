@@ -7,9 +7,9 @@ import (
 	"os"
 	"strings"
 
-	"minio-web/api/src/services/archives/zipread"
-	"minio-web/api/src/services/messages"
-	validationsvc "minio-web/api/src/services/validation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/archives/zipread"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	validationsvc "github.com/owiks/golang-minio-s3-backend-api/src/services/validation"
 )
 
 const MaxZIPEntry int64 = 256 * 1024 * 1024

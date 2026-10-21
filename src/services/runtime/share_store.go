@@ -4,10 +4,10 @@ import (
 	"sync"
 	"time"
 
-	"minio-web/api/src/services/apperror"
-	foldershare "minio-web/api/src/services/folders/share"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/securetoken"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	foldershare "github.com/owiks/golang-minio-s3-backend-api/src/services/folders/share"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/securetoken"
 )
 
 // Links and download tickets share an owner so revoke and ticket creation are atomic.

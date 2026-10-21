@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/minio/minio-go/v7"
-	"minio-web/api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
 )
 
 type Client interface {

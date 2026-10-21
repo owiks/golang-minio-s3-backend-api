@@ -10,13 +10,13 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	uploadscontroller "minio-web/api/src/http/api/routes/uploads/controllers"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	runtimesvc "minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/telemetry"
-	"minio-web/api/src/services/uploads/source"
-	"minio-web/api/tests/testsession"
+	uploadscontroller "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/uploads/controllers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/telemetry"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads/source"
+	"github.com/owiks/golang-minio-s3-backend-api/tests/testsession"
 )
 
 type rejectingStreamWriter struct {

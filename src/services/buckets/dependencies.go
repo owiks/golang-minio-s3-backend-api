@@ -11,7 +11,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/sse"
 	"github.com/minio/minio-go/v7/pkg/tags"
 
-	"minio-web/api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
 )
 
 // Interfaces belong to the use cases that consume them. Only required

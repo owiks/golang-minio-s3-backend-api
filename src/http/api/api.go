@@ -4,13 +4,13 @@ import (
 	"net/http"
 	"sync"
 
-	"minio-web/api/src/config"
-	"minio-web/api/src/http/api/doc"
-	"minio-web/api/src/http/api/routes"
-	"minio-web/api/src/http/middleware"
-	"minio-web/api/src/services/localization"
-	"minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/telemetry"
+	"github.com/owiks/golang-minio-s3-backend-api/src/config"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/doc"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/middleware"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/localization"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/telemetry"
 )
 
 var documentation = sync.OnceValue(func() http.Handler { return doc.NewHandler(Catalog()) })

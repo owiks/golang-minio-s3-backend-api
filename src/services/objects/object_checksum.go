@@ -5,7 +5,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"minio-web/api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
 )
 
 type StoredChecksum struct {

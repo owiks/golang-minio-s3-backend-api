@@ -13,11 +13,11 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	apihttp "minio-web/api/src/http/api"
-	httpcommon "minio-web/api/src/http/api/common"
-	"minio-web/api/src/http/presentation"
-	objectssvc "minio-web/api/src/services/objects"
-	runtimesvc "minio-web/api/src/services/runtime"
+	apihttp "github.com/owiks/golang-minio-s3-backend-api/src/http/api"
+	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 func TestVersionPaginationNativeIntegration(t *testing.T) {

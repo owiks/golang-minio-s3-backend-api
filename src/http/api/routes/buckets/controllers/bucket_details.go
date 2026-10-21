@@ -3,9 +3,9 @@ package controllers
 import (
 	"net/http"
 
-	httpcommon "minio-web/api/src/http/api/common"
-	bucketssvc "minio-web/api/src/services/buckets"
-	runtimesvc "minio-web/api/src/services/runtime"
+	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	bucketssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/buckets"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 func HandleBucketUsage(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {

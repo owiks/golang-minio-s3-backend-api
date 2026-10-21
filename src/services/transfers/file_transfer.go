@@ -6,13 +6,13 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"minio-web/api/src/services/apperror"
-	folderssvc "minio-web/api/src/services/folders"
-	"minio-web/api/src/services/messages"
-	objectssvc "minio-web/api/src/services/objects"
-	objectstate "minio-web/api/src/services/objects/state"
-	objectwrite "minio-web/api/src/services/objects/write"
-	"minio-web/api/src/services/telemetry"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	folderssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/folders"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	objectstate "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/state"
+	objectwrite "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/write"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/telemetry"
 )
 
 type FileTransferRequest struct {

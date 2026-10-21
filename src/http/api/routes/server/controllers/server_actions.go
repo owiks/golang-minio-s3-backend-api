@@ -3,10 +3,10 @@ package controllers
 import (
 	"net/http"
 
-	httpcommon "minio-web/api/src/http/api/common"
-	httpvalidation "minio-web/api/src/http/validation"
-	runtimesvc "minio-web/api/src/services/runtime"
-	serversvc "minio-web/api/src/services/server"
+	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	httpvalidation "github.com/owiks/golang-minio-s3-backend-api/src/http/validation"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	serversvc "github.com/owiks/golang-minio-s3-backend-api/src/services/server"
 )
 
 func HandleReadServerConfig(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {

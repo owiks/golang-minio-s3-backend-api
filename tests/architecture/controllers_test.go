@@ -91,7 +91,7 @@ import (
  "context"
  sdk "github.com/minio/minio-go/v7"
  native "github.com/minio/madmin-go/v3"
- connection "minio-web/api/src/services/runtime"
+ connection "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 type wrapper struct {*sdk.Client}
 func delegate(*native.AdminClient) {}
@@ -118,8 +118,8 @@ func Handle(s *connection.Session,c *sdk.Client) {
 		fset := token.NewFileSet()
 		file, err := parser.ParseFile(fset, "controller.go", `package controllers
 import (
- sdk "minio-web/api/src/services/storage"
- connection "minio-web/api/src/services/runtime"
+ sdk "github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
+ connection "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 func delegate(*sdk.AdminClient) {}
 func Handle(s *connection.Session) { delegate(connection.NewClients(s).AdminClient); _=connection.NewClients(s) }
@@ -136,7 +136,7 @@ func Handle(s *connection.Session) { delegate(connection.NewClients(s).AdminClie
 		file, err := parser.ParseFile(fset, "controller.go", `package controllers
 import (
  "context"
- connection "minio-web/api/src/services/runtime"
+ connection "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 func Handle(s *connection.Session) {
  c:=connection.NewClients(s)
@@ -209,7 +209,7 @@ func isSDKClient(value types.Type) bool {
 	if !ok || named.Obj().Pkg() == nil {
 		return false
 	}
-	if named.Obj().Pkg().Path() == "minio-web/api/src/services/storage" && named.Obj().Name() == "AdminClient" {
+	if named.Obj().Pkg().Path() == "github.com/owiks/golang-minio-s3-backend-api/src/services/storage" && named.Obj().Name() == "AdminClient" {
 		return true
 	}
 	if !isStorageSDK(named.Obj().Pkg()) {

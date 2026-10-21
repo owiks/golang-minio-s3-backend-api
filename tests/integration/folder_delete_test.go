@@ -12,9 +12,9 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	folderscontroller "minio-web/api/src/http/api/routes/folders/controllers"
-	folderssvc "minio-web/api/src/services/folders"
-	"minio-web/api/src/services/securetoken"
+	folderscontroller "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/folders/controllers"
+	folderssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/folders"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/securetoken"
 )
 
 func folderDeleteURL(bucket, prefix string, key *string) string {

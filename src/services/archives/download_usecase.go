@@ -10,12 +10,12 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"minio-web/api/src/services/apperror"
-	archiveplan "minio-web/api/src/services/archives/plan"
-	"minio-web/api/src/services/messages"
-	objectstate "minio-web/api/src/services/objects/state"
-	"minio-web/api/src/services/result"
-	"minio-web/api/src/services/telemetry"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	archiveplan "github.com/owiks/golang-minio-s3-backend-api/src/services/archives/plan"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	objectstate "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/state"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/result"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/telemetry"
 )
 
 type ArchiveRequest struct {

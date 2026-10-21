@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"strconv"
 
-	httpcommon "minio-web/api/src/http/api/common"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	runtimesvc "minio-web/api/src/services/runtime"
-	serversvc "minio-web/api/src/services/server"
+	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	serversvc "github.com/owiks/golang-minio-s3-backend-api/src/services/server"
 )
 
 func HandleDiagnostics(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {

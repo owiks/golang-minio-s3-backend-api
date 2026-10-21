@@ -18,15 +18,15 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/lifecycle"
 
-	apihttp "minio-web/api/src/http/api"
-	bucketscontroller "minio-web/api/src/http/api/routes/buckets/controllers"
-	"minio-web/api/src/http/presentation"
-	"minio-web/api/src/services/apperror"
-	bucketssvc "minio-web/api/src/services/buckets"
-	"minio-web/api/src/services/messages"
-	runtimesvc "minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/securetoken"
-	"minio-web/api/tests/testsession"
+	apihttp "github.com/owiks/golang-minio-s3-backend-api/src/http/api"
+	bucketscontroller "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/buckets/controllers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	bucketssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/buckets"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/securetoken"
+	"github.com/owiks/golang-minio-s3-backend-api/tests/testsession"
 )
 
 func TestLifecycleRoundTripGuard(t *testing.T) {

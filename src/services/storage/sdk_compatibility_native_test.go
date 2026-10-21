@@ -15,8 +15,8 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
-	"minio-web/api/src/services/objects/write"
-	"minio-web/api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/objects/write"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
 )
 
 // Only the fixed disposable docker-compose.test.yml fixture is accepted. The racing

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"minio-web/api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 type Handler func(*runtime.State, http.ResponseWriter, *http.Request, *runtime.Session, string) error

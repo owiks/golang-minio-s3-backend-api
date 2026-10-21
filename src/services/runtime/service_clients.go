@@ -5,8 +5,8 @@ import (
 	"net/url"
 	"time"
 
-	"minio-web/api/src/services/iam"
-	"minio-web/api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/iam"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
 )
 
 // Clients adapts the authenticated connection to consumer-owned interfaces.

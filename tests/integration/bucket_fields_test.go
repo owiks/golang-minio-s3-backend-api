@@ -9,9 +9,9 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	bucketscontroller "minio-web/api/src/http/api/routes/buckets/controllers"
-	runtimesvc "minio-web/api/src/services/runtime"
-	"minio-web/api/tests/testsession"
+	bucketscontroller "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/buckets/controllers"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/tests/testsession"
 )
 
 func TestBucketDetailsSelectedFields(t *testing.T) {

@@ -1,6 +1,6 @@
 package sessions
 
-import "minio-web/api/src/services/runtime"
+import "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 
 type ConnectionRegistry interface {
 	AdmitIdentity(string, string) error

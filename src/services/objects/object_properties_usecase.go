@@ -8,9 +8,9 @@ import (
 	"github.com/minio/minio-go/v7/pkg/encrypt"
 	"github.com/minio/minio-go/v7/pkg/tags"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	objectwrite "minio-web/api/src/services/objects/write"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	objectwrite "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/write"
 )
 
 func GetProperties(ctx context.Context, s GetPropertiesClient, bucket, key string) (ObjectProperties, error) {

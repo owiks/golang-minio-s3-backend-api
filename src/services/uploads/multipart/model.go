@@ -5,10 +5,10 @@ import (
 	"sync"
 	"time"
 
-	"minio-web/api/src/services/coordination"
-	"minio-web/api/src/services/objects/write"
-	"minio-web/api/src/services/uploads"
-	"minio-web/api/src/services/uploads/integrity"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/coordination"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/objects/write"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads/integrity"
 )
 
 const (

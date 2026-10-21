@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"minio-web/api/src/services/staging"
-	uploadssvc "minio-web/api/src/services/uploads"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/staging"
+	uploadssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/uploads"
 )
 
 type remoteTestTransport func(*http.Request) (*http.Response, error)

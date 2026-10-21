@@ -11,9 +11,9 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/tags"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/objects"
-	"minio-web/api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
 )
 
 // The hooks perform real competing S3 writes between the service's requests.

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"minio-web/api/src/http/api/routes"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes"
 )
 
 func matchedOperation(t *testing.T, method, path string) routes.Match {

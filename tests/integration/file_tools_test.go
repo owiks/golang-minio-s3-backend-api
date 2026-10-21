@@ -17,18 +17,18 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	settings "minio-web/api/src/config"
-	apihttp "minio-web/api/src/http/api"
-	uploadscontroller "minio-web/api/src/http/api/routes/uploads/controllers"
-	"minio-web/api/src/http/presentation"
-	"minio-web/api/src/services/apperror"
-	archivessvc "minio-web/api/src/services/archives"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/remotesource"
-	runtimesvc "minio-web/api/src/services/runtime"
-	uploadinvite "minio-web/api/src/services/uploads/invite"
-	"minio-web/api/src/services/uploads/source"
-	"minio-web/api/tests/testsession"
+	settings "github.com/owiks/golang-minio-s3-backend-api/src/config"
+	apihttp "github.com/owiks/golang-minio-s3-backend-api/src/http/api"
+	uploadscontroller "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/uploads/controllers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	archivessvc "github.com/owiks/golang-minio-s3-backend-api/src/services/archives"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/remotesource"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	uploadinvite "github.com/owiks/golang-minio-s3-backend-api/src/services/uploads/invite"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads/source"
+	"github.com/owiks/golang-minio-s3-backend-api/tests/testsession"
 )
 
 func TestRemoteURLSecurity(t *testing.T) {

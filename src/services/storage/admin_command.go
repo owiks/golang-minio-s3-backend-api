@@ -12,8 +12,8 @@ import (
 
 	"github.com/minio/madmin-go/v3"
 
-	"minio-web/api/src/services/mutation"
-	"minio-web/api/src/services/telemetry"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/mutation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/telemetry"
 )
 
 // AdminClient preserves SDK signing, encryption and read retries. Commands use

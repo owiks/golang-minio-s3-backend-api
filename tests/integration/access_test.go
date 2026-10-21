@@ -8,11 +8,11 @@ import (
 	"strings"
 	"testing"
 
-	apihttp "minio-web/api/src/http/api"
-	"minio-web/api/src/http/presentation"
-	objectssvc "minio-web/api/src/services/objects"
-	runtimesvc "minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/securetoken"
+	apihttp "github.com/owiks/golang-minio-s3-backend-api/src/http/api"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/securetoken"
 )
 
 func TestNavigationAccessIntegration(t *testing.T) {

@@ -1,8 +1,8 @@
 package presentation
 
 import (
-	"minio-web/api/src/services/identities"
-	"minio-web/api/src/services/localization"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/identities"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/localization"
 )
 
 type GroupSummary struct {

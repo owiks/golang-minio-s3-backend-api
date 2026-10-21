@@ -3,7 +3,7 @@ package runtime
 import (
 	"context"
 	"github.com/minio/madmin-go/v3"
-	"minio-web/api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
 )
 
 func (c *Clients) OpenDiagnosticTrace(parent context.Context, onlyErrors bool) (storage.DiagnosticStream[madmin.ServiceTraceInfo], error) {

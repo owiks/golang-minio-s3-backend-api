@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"testing"
 
-	"minio-web/api/src/services/uploads"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads"
 )
 
 func TestImportDependsOnSourcePortInsteadOfHTTPClient(t *testing.T) {
@@ -30,7 +30,7 @@ func TestImportDependsOnSourcePortInsteadOfHTTPClient(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if dependency == "net/http" || dependency == "net" || dependency == "crypto/tls" || dependency == "minio-web/api/src/services/remotesource" {
+			if dependency == "net/http" || dependency == "net" || dependency == "crypto/tls" || dependency == "github.com/owiks/golang-minio-s3-backend-api/src/services/remotesource" {
 				t.Errorf("import scenario depends on outgoing transport: %s -> %s", name, dependency)
 			}
 		}

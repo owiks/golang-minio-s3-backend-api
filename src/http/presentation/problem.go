@@ -3,8 +3,8 @@ package presentation
 import (
 	"context"
 
-	"minio-web/api/src/http/requestctx"
-	"minio-web/api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/requestctx"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
 )
 
 func Problem(ctx context.Context, problem *apperror.Error) *Error {

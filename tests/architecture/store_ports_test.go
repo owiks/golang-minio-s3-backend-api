@@ -19,7 +19,7 @@ func runtimeDependency(owner string, file *ast.File) bool {
 	}
 	for _, spec := range file.Imports {
 		path, _ := strconv.Unquote(spec.Path.Value)
-		if path == "minio-web/api/src/services/runtime" {
+		if path == "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime" {
 			return true
 		}
 	}
@@ -51,7 +51,7 @@ func TestBusinessPackagesDoNotDependOnRuntimeStores(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, declaration := range []string{`import "minio-web/api/src/services/runtime"`, `import container "minio-web/api/src/services/runtime"`, `import . "minio-web/api/src/services/runtime"`} {
+	for _, declaration := range []string{`import "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"`, `import container "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"`, `import . "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"`} {
 		file, err := parser.ParseFile(token.NewFileSet(), "fixture.go", "package example\n"+declaration, 0)
 		if err != nil {
 			t.Fatal(err)

@@ -3,8 +3,8 @@ package folders
 import (
 	"time"
 
-	objectssvc "minio-web/api/src/services/objects"
-	"minio-web/api/src/services/result"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/result"
 )
 
 type CreatedFolder struct {

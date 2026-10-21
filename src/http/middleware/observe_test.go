@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"minio-web/api/src/http/httperrors"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/telemetry"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/httperrors"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/telemetry"
 )
 
 func TestObserveStreamingAndSafeErrors(t *testing.T) {

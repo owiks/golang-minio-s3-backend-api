@@ -14,11 +14,11 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
-	"minio-web/api/src/config"
-	"minio-web/api/src/services/folders/share"
-	runtimesvc "minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/storage"
-	"minio-web/api/src/services/telemetry"
+	"github.com/owiks/golang-minio-s3-backend-api/src/config"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/folders/share"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/telemetry"
 )
 
 type sharedTransport func(*http.Request) (*http.Response, error)

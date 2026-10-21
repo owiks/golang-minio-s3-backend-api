@@ -15,10 +15,10 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"minio-web/api/src/config"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/localization"
-	objectwrite "minio-web/api/src/services/objects/write"
+	"github.com/owiks/golang-minio-s3-backend-api/src/config"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/localization"
+	objectwrite "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/write"
 )
 
 func localizedRequest(t *testing.T, c *apiClient, method, path string, body any, lang string, want int) ([]byte, http.Header) {

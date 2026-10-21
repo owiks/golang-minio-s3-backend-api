@@ -5,14 +5,14 @@ import (
 	"strings"
 	"time"
 
-	settings "minio-web/api/src/config"
-	accesssvc "minio-web/api/src/services/access"
-	"minio-web/api/src/services/apperror"
-	endpoints "minio-web/api/src/services/endpoint"
-	"minio-web/api/src/services/messages"
-	objectssvc "minio-web/api/src/services/objects"
-	runtimesvc "minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/telemetry"
+	settings "github.com/owiks/golang-minio-s3-backend-api/src/config"
+	accesssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/access"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	endpoints "github.com/owiks/golang-minio-s3-backend-api/src/services/endpoint"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/telemetry"
 )
 
 type LoginResponse struct {

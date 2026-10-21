@@ -4,14 +4,14 @@ import (
 	"reflect"
 	"testing"
 
-	"minio-web/api/src/services/archives"
-	"minio-web/api/src/services/archives/plan"
-	"minio-web/api/src/services/archives/zipread"
-	"minio-web/api/src/services/folders"
-	"minio-web/api/src/services/folders/share"
-	"minio-web/api/src/services/objects"
-	"minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/uploads/invite"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/archives"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/archives/plan"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/archives/zipread"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/folders"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/folders/share"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads/invite"
 )
 
 func TestLiveDomainModelsExposeNoMutableFields(t *testing.T) {

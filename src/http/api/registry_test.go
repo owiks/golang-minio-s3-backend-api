@@ -7,11 +7,11 @@ import (
 	"strings"
 	"testing"
 
-	"minio-web/api/src/config"
-	httpcommon "minio-web/api/src/http/api/common"
-	"minio-web/api/src/http/api/doc"
-	"minio-web/api/src/services/runtime"
-	"minio-web/api/tests/testsession"
+	"github.com/owiks/golang-minio-s3-backend-api/src/config"
+	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/doc"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/tests/testsession"
 )
 
 func TestEveryDocumentedOperationResolvesThroughRegistry(t *testing.T) {

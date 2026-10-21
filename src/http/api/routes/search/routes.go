@@ -3,11 +3,11 @@ package search
 import (
 	"net/http"
 
-	"minio-web/api/src/http/api/routes"
-	"minio-web/api/src/http/api/routes/search/controllers"
-	filesdto "minio-web/api/src/services/files"
-	"minio-web/api/src/services/runtime"
-	searchdto "minio-web/api/src/services/search"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/search/controllers"
+	filesdto "github.com/owiks/golang-minio-s3-backend-api/src/services/files"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	searchdto "github.com/owiks/golang-minio-s3-backend-api/src/services/search"
 )
 
 func GetRoutes() []routes.APIRoute {

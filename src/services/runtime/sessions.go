@@ -9,11 +9,11 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
-	settings "minio-web/api/src/config"
-	"minio-web/api/src/services/coordination"
-	"minio-web/api/src/services/iam"
-	"minio-web/api/src/services/staging"
-	"minio-web/api/src/services/storage"
+	settings "github.com/owiks/golang-minio-s3-backend-api/src/config"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/coordination"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/iam"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/staging"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
 )
 
 type Connection struct {

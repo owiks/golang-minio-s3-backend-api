@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "description": "BFF API MinIO Web. Подключение создаётся через POST /api/sessions. Cookie имеет динамическое имя minio_session_{sessionID}, HttpOnly и ограничен путём сессии. Для изменений нужны Origin интерфейса и X-CSRF-Token из ответа подключения. Swagger UI служит документацией; выполнение запросов отключено. Право на каждую операцию окончательно проверяет MinIO. Ключи и токены не сохраняются в документации.",
-    "title": "MinIO Web API",
+    "description": "HTTP API для S3-совместимых хранилищ и MinIO Admin API. Подключение создаётся через POST /api/sessions. Cookie имеет динамическое имя minio_session_{sessionID}, HttpOnly и ограничен путём сессии. Для изменений нужны Origin интерфейса и X-CSRF-Token из ответа подключения. Swagger UI служит документацией; выполнение запросов отключено. Право на каждую операцию окончательно проверяет MinIO. Ключи и токены не сохраняются в документации.",
+    "title": "MinIO S3 Backend API",
     "version": "1.0.0"
   },
   "servers": [

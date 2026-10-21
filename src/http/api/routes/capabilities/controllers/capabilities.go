@@ -3,9 +3,9 @@ package controllers
 import (
 	"net/http"
 
-	httpcommon "minio-web/api/src/http/api/common"
-	"minio-web/api/src/services/capabilities"
-	"minio-web/api/src/services/runtime"
+	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/capabilities"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 func HandleCapabilities(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session) error {

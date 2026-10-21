@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"minio-web/api/src/services/upstream"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/upstream"
 )
 
 // UpstreamSnapshot is a value snapshot, not a list of URLs or SDK error codes.

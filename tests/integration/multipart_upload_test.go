@@ -14,10 +14,10 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"minio-web/api/src/config"
-	objectwrite "minio-web/api/src/services/objects/write"
-	"minio-web/api/src/services/uploads/integrity"
-	"minio-web/api/src/services/uploads/multipart"
+	"github.com/owiks/golang-minio-s3-backend-api/src/config"
+	objectwrite "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/write"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads/integrity"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads/multipart"
 )
 
 func managedFixture(t *testing.T) (*apiClient, *minio.Client, string) {

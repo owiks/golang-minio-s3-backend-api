@@ -1,8 +1,8 @@
 package access
 
 import (
-	"minio-web/api/src/services/iam"
-	"minio-web/api/src/services/objects"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/iam"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
 )
 
 type AccessSnapshot struct {

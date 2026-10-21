@@ -3,9 +3,9 @@ package controllers
 import (
 	"net/http"
 
-	httpcommon "minio-web/api/src/http/api/common"
-	"minio-web/api/src/services/identities"
-	runtimesvc "minio-web/api/src/services/runtime"
+	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/identities"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 func HandleGroupSummaries(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {

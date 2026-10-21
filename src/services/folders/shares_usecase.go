@@ -4,12 +4,12 @@ import (
 	"context"
 	"time"
 
-	"minio-web/api/src/services/apperror"
-	foldershare "minio-web/api/src/services/folders/share"
-	"minio-web/api/src/services/iam"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/result"
-	"minio-web/api/src/services/securetoken"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	foldershare "github.com/owiks/golang-minio-s3-backend-api/src/services/folders/share"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/iam"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/result"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/securetoken"
 )
 
 func ListFolderShares(ctx context.Context, store FolderShareLister, owner string, bucket, prefix string) ([]foldershare.FolderShareSummary, error) {

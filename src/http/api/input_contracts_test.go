@@ -8,11 +8,11 @@ import (
 	"strings"
 	"testing"
 
-	"minio-web/api/src/http/api/doc"
-	"minio-web/api/src/http/api/openapi"
-	servercontroller "minio-web/api/src/http/api/routes/server/controllers"
-	uploadcontroller "minio-web/api/src/http/api/routes/uploads/controllers"
-	"minio-web/api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/doc"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/openapi"
+	servercontroller "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/server/controllers"
+	uploadcontroller "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/uploads/controllers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
 )
 
 func TestInputContractsMatchValidationFailures(t *testing.T) {

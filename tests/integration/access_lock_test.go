@@ -11,12 +11,12 @@ import (
 	"testing"
 	"time"
 
-	apihttp "minio-web/api/src/http/api"
-	httpcommon "minio-web/api/src/http/api/common"
-	"minio-web/api/src/http/presentation"
-	accesssvc "minio-web/api/src/services/access"
-	"minio-web/api/src/services/iam"
-	runtimesvc "minio-web/api/src/services/runtime"
+	apihttp "github.com/owiks/golang-minio-s3-backend-api/src/http/api"
+	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	accesssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/access"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/iam"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 func TestAccessDiscoveryCancelledWaitReturnsBeforeOwnerUnlocks(t *testing.T) {

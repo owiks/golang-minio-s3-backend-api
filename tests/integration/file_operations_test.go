@@ -19,17 +19,17 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/tags"
 
-	settings "minio-web/api/src/config"
-	apihttp "minio-web/api/src/http/api"
-	"minio-web/api/src/http/presentation"
-	httpvalidation "minio-web/api/src/http/validation"
-	archiveplan "minio-web/api/src/services/archives/plan"
-	objectssvc "minio-web/api/src/services/objects"
-	objectwrite "minio-web/api/src/services/objects/write"
-	runtimesvc "minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/securetoken"
-	uploadssvc "minio-web/api/src/services/uploads"
-	validationsvc "minio-web/api/src/services/validation"
+	settings "github.com/owiks/golang-minio-s3-backend-api/src/config"
+	apihttp "github.com/owiks/golang-minio-s3-backend-api/src/http/api"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	httpvalidation "github.com/owiks/golang-minio-s3-backend-api/src/http/validation"
+	archiveplan "github.com/owiks/golang-minio-s3-backend-api/src/services/archives/plan"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	objectwrite "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/write"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/securetoken"
+	uploadssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/uploads"
+	validationsvc "github.com/owiks/golang-minio-s3-backend-api/src/services/validation"
 )
 
 func fileFixture(t *testing.T, configure ...func(*settings.Config)) (*apiClient, *minio.Client, string) {

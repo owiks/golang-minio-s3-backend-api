@@ -12,9 +12,9 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
-	"minio-web/api/src/services/apperror"
-	objectssvc "minio-web/api/src/services/objects"
-	"minio-web/api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
 )
 
 type previewTransport func(*http.Request) (*http.Response, error)

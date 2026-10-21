@@ -6,9 +6,9 @@ import (
 	"encoding/hex"
 	"time"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/telemetry"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/telemetry"
 )
 
 func (app *State) AcquireMutation(ctx context.Context, s *Session, resource string) (func(), error) {

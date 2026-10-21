@@ -17,9 +17,9 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/lifecycle"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	validationsvc "minio-web/api/src/services/validation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	validationsvc "github.com/owiks/golang-minio-s3-backend-api/src/services/validation"
 )
 
 type LifecycleTiering struct {

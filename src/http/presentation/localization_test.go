@@ -11,17 +11,17 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"minio-web/api/src/http/requestctx"
-	"minio-web/api/src/services/access"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/archives"
-	"minio-web/api/src/services/archives/plan"
-	"minio-web/api/src/services/buckets"
-	"minio-web/api/src/services/iam"
-	"minio-web/api/src/services/localization"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/objects"
-	"minio-web/api/src/services/transfers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/requestctx"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/access"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/archives"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/archives/plan"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/buckets"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/iam"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/localization"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/transfers"
 )
 
 func languageContext(lang string) context.Context {

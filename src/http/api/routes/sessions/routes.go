@@ -3,11 +3,11 @@ package sessions
 import (
 	"net/http"
 
-	"minio-web/api/src/http/api/routes"
-	"minio-web/api/src/http/api/routes/sessions/controllers"
-	resultdto "minio-web/api/src/services/result"
-	"minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/sessions"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/sessions/controllers"
+	resultdto "github.com/owiks/golang-minio-s3-backend-api/src/services/result"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/sessions"
 )
 
 func GetRoutes() []routes.APIRoute {

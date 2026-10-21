@@ -5,9 +5,9 @@ import (
 	"net/url"
 	"time"
 
-	"minio-web/api/src/services/capabilities"
-	"minio-web/api/src/services/storage"
-	"minio-web/api/src/services/uploads/multipart"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/capabilities"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads/multipart"
 )
 
 // MultipartClients binds internal S3 operations and public signatures to the

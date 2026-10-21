@@ -3,13 +3,13 @@ package folders
 import (
 	"net/http"
 
-	"minio-web/api/src/http/api/routes"
-	"minio-web/api/src/http/api/routes/folders/controllers"
-	foldersdto "minio-web/api/src/services/folders"
-	"minio-web/api/src/services/folders/share"
-	objectsdto "minio-web/api/src/services/objects"
-	resultdto "minio-web/api/src/services/result"
-	"minio-web/api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/folders/controllers"
+	foldersdto "github.com/owiks/golang-minio-s3-backend-api/src/services/folders"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/folders/share"
+	objectsdto "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	resultdto "github.com/owiks/golang-minio-s3-backend-api/src/services/result"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 func GetRoutes() []routes.APIRoute {

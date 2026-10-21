@@ -6,7 +6,7 @@ import (
 	"slices"
 	"time"
 
-	"minio-web/api/src/services/endpoint"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/endpoint"
 )
 
 type Config struct {

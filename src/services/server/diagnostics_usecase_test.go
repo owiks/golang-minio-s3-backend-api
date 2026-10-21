@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/minio/madmin-go/v3"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
 )
 
 type diagnosticFixtureStream[T any] struct {

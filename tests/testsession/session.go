@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"minio-web/api/src/config"
-	"minio-web/api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/config"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 func New(t testing.TB, endpoint string) *runtime.Session {

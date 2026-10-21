@@ -7,12 +7,12 @@ import (
 	"strings"
 	"testing"
 
-	"minio-web/api/src/http/api"
-	"minio-web/api/src/http/presentation"
-	"minio-web/api/src/http/requestctx"
-	"minio-web/api/src/services/archives"
-	"minio-web/api/src/services/localization"
-	"minio-web/api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/requestctx"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/archives"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/localization"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
 )
 
 // Reflection is confined to the test fixture: exercise every declared response

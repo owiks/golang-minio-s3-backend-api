@@ -4,16 +4,16 @@ import (
 	"net/http"
 	"strings"
 
-	"minio-web/api/src/http/api/routes"
-	"minio-web/api/src/http/api/routes/buckets/controllers"
-	httpvalidation "minio-web/api/src/http/validation"
-	"minio-web/api/src/services/apperror"
-	bucketsdto "minio-web/api/src/services/buckets"
-	bucketssvc "minio-web/api/src/services/buckets"
-	"minio-web/api/src/services/messages"
-	objectsdto "minio-web/api/src/services/objects"
-	resultdto "minio-web/api/src/services/result"
-	"minio-web/api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/buckets/controllers"
+	httpvalidation "github.com/owiks/golang-minio-s3-backend-api/src/http/validation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	bucketsdto "github.com/owiks/golang-minio-s3-backend-api/src/services/buckets"
+	bucketssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/buckets"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	objectsdto "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	resultdto "github.com/owiks/golang-minio-s3-backend-api/src/services/result"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 func GetRoutes() []routes.APIRoute {

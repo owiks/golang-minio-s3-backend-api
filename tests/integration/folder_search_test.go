@@ -13,14 +13,14 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	settings "minio-web/api/src/config"
-	apihttp "minio-web/api/src/http/api"
-	"minio-web/api/src/http/presentation"
-	folderssvc "minio-web/api/src/services/folders"
-	foldershare "minio-web/api/src/services/folders/share"
-	objectssvc "minio-web/api/src/services/objects"
-	runtimesvc "minio-web/api/src/services/runtime"
-	searchsvc "minio-web/api/src/services/search"
+	settings "github.com/owiks/golang-minio-s3-backend-api/src/config"
+	apihttp "github.com/owiks/golang-minio-s3-backend-api/src/http/api"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	folderssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/folders"
+	foldershare "github.com/owiks/golang-minio-s3-backend-api/src/services/folders/share"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	searchsvc "github.com/owiks/golang-minio-s3-backend-api/src/services/search"
 )
 
 func publicRead(t *testing.T, base, token string, params url.Values, want int) []byte {

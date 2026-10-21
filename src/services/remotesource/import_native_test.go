@@ -15,13 +15,13 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/result"
-	"minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/securetoken"
-	"minio-web/api/src/services/staging"
-	"minio-web/api/src/services/uploads"
-	"minio-web/api/tests/testsession"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/result"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/securetoken"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/staging"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads"
+	"github.com/owiks/golang-minio-s3-backend-api/tests/testsession"
 )
 
 func TestHTTPSourceImportNativeIntegration(t *testing.T) {

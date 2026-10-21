@@ -18,9 +18,9 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
-	"minio-web/api/src/services/objects/write"
-	"minio-web/api/src/services/storage"
-	"minio-web/api/src/services/uploads"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/objects/write"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads"
 )
 
 func compatibilityClient(t *testing.T, endpoint string, transport http.RoundTripper) *minio.Client {

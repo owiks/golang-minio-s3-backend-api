@@ -13,9 +13,9 @@ import (
 	"time"
 
 	"github.com/minio/minio-go/v7"
-	"minio-web/api/src/config"
-	httpapi "minio-web/api/src/http/api"
-	"minio-web/api/src/services/folders/share"
+	"github.com/owiks/golang-minio-s3-backend-api/src/config"
+	httpapi "github.com/owiks/golang-minio-s3-backend-api/src/http/api"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/folders/share"
 )
 
 func TestServeFailureClosesAcceptedKeepAlive(t *testing.T) {

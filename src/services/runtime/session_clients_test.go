@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"minio-web/api/src/config"
+	"github.com/owiks/golang-minio-s3-backend-api/src/config"
 )
 
 func TestConnectedSessionKeepsSigningAndRequestEndpointsSeparate(t *testing.T) {

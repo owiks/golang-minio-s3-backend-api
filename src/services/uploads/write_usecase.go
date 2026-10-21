@@ -8,10 +8,10 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	objectwrite "minio-web/api/src/services/objects/write"
-	validationsvc "minio-web/api/src/services/validation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	objectwrite "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/write"
+	validationsvc "github.com/owiks/golang-minio-s3-backend-api/src/services/validation"
 )
 
 func PrepareFile(ctx context.Context, s objectwrite.StateReader, bucket, key string) (objectwrite.FileState, error) {

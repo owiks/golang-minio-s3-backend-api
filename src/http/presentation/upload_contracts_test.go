@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"testing"
 
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/uploads"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads"
 )
 
 func TestIncompleteUploadResultPreservesOmittedFieldsAndFalse(t *testing.T) {

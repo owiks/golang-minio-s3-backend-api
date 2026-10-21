@@ -5,12 +5,12 @@ import (
 	"io"
 	"strings"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/coordination"
-	"minio-web/api/src/services/messages"
-	objectwrite "minio-web/api/src/services/objects/write"
-	"minio-web/api/src/services/result"
-	validationsvc "minio-web/api/src/services/validation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/coordination"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	objectwrite "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/write"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/result"
+	validationsvc "github.com/owiks/golang-minio-s3-backend-api/src/services/validation"
 )
 
 func InspectUploadInvite(ctx context.Context, store UploadInviteReader, token string) (InviteInfo, error) {

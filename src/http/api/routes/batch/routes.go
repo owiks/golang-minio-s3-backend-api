@@ -1,16 +1,16 @@
 package batch
 
 import (
-	httpvalidation "minio-web/api/src/http/validation"
+	httpvalidation "github.com/owiks/golang-minio-s3-backend-api/src/http/validation"
 	"net/http"
 	"strings"
 
-	"minio-web/api/src/http/api/routes"
-	"minio-web/api/src/http/api/routes/batch/controllers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/batch/controllers"
 
-	batchdto "minio-web/api/src/services/batch"
-	resultdto "minio-web/api/src/services/result"
-	"minio-web/api/src/services/runtime"
+	batchdto "github.com/owiks/golang-minio-s3-backend-api/src/services/batch"
+	resultdto "github.com/owiks/golang-minio-s3-backend-api/src/services/result"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 func GetRoutes() []routes.APIRoute {

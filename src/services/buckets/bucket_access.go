@@ -8,9 +8,9 @@ import (
 
 	"github.com/minio/pkg/v3/wildcard"
 
-	"minio-web/api/src/services/apperror"
-	identitiessvc "minio-web/api/src/services/identities"
-	"minio-web/api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	identitiessvc "github.com/owiks/golang-minio-s3-backend-api/src/services/identities"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
 )
 
 // This is a relationship report, not an effective-policy simulator. Conditions,

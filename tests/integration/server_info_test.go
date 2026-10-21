@@ -11,11 +11,11 @@ import (
 
 	"github.com/minio/madmin-go/v3"
 
-	apihttp "minio-web/api/src/http/api"
-	"minio-web/api/src/http/presentation"
-	runtimesvc "minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/securetoken"
-	serversvc "minio-web/api/src/services/server"
+	apihttp "github.com/owiks/golang-minio-s3-backend-api/src/http/api"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/securetoken"
+	serversvc "github.com/owiks/golang-minio-s3-backend-api/src/services/server"
 )
 
 func TestServerDiagnosticProjection(t *testing.T) {

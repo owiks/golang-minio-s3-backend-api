@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"testing"
 
-	"minio-web/api/src/services/search"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/search"
 )
 
 func TestFileSearchReceivesDecodedInputAndPreparesFiltersInService(t *testing.T) {

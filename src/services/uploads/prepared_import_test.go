@@ -3,11 +3,11 @@ package uploads
 import (
 	"context"
 	"github.com/minio/minio-go/v7"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/result"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/staging"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads/source"
 	"io"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/result"
-	"minio-web/api/src/services/staging"
-	"minio-web/api/src/services/uploads/source"
 	"strings"
 	"testing"
 )

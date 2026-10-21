@@ -7,10 +7,10 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/coordination"
-	"minio-web/api/src/services/messages"
-	objectssvc "minio-web/api/src/services/objects"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/coordination"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
 )
 
 func ReadGzip(ctx context.Context, admission coordination.TransferAdmission, s InspectZIPClient, bucket, key string) (GzipContent, error) {

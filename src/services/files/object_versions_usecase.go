@@ -10,11 +10,11 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"minio-web/api/src/services/apperror"
-	bucketssvc "minio-web/api/src/services/buckets"
-	"minio-web/api/src/services/messages"
-	objectssvc "minio-web/api/src/services/objects"
-	"minio-web/api/src/services/result"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	bucketssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/buckets"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/result"
 )
 
 func GetVersions(ctx context.Context, s GetVersionsClient, bucket, key string, cursor string) (objectssvc.VersionsPage, error) {

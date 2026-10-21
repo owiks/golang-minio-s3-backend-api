@@ -1,9 +1,9 @@
 package presentation
 
 import (
-	"minio-web/api/src/services/access"
-	"minio-web/api/src/services/iam"
-	"minio-web/api/src/services/localization"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/access"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/iam"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/localization"
 )
 
 type AccessSnapshot struct {

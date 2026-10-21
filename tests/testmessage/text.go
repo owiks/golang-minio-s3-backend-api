@@ -2,8 +2,8 @@
 package testmessage
 
 import (
-	"minio-web/api/src/services/localization"
-	"minio-web/api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/localization"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
 )
 
 func Russian(ref messages.Ref) string { return localization.Default().For("ru").Render(ref) }

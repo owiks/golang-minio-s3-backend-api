@@ -10,9 +10,9 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"minio-web/api/src/services/apperror"
-	folderssvc "minio-web/api/src/services/folders"
-	"minio-web/api/src/services/objects/write"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	folderssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/folders"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/objects/write"
 )
 
 type destinationReaderFunc func(context.Context, string, string, minio.StatObjectOptions) (minio.ObjectInfo, error)

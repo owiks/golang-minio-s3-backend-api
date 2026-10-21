@@ -79,7 +79,7 @@ func TestMessageParametersMatchCatalogAndLocalizationStaysAtHTTPBoundary(t *test
 		})
 		for _, imp := range file.Imports {
 			dependency, _ := strconv.Unquote(imp.Path.Value)
-			if strings.Contains(path, "/services/") && !strings.Contains(path, "/services/localization/") && (dependency == "minio-web/api/src/services/localization" || strings.HasPrefix(dependency, "github.com/nicksnyder/go-i18n")) {
+			if strings.Contains(path, "/services/") && !strings.Contains(path, "/services/localization/") && (dependency == "github.com/owiks/golang-minio-s3-backend-api/src/services/localization" || strings.HasPrefix(dependency, "github.com/nicksnyder/go-i18n")) {
 				t.Error("service chooses a language", path)
 			}
 			if strings.Contains(path, "/http/presentation/") && (dependency == "reflect" || dependency == "regexp") {

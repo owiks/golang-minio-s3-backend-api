@@ -14,14 +14,14 @@ import (
 
 	"github.com/minio/madmin-go/v3"
 
-	"minio-web/api/src/config"
-	"minio-web/api/src/http/api/routes"
-	"minio-web/api/src/http/middleware"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/server"
-	"minio-web/api/src/services/telemetry"
+	"github.com/owiks/golang-minio-s3-backend-api/src/config"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/middleware"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/server"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/telemetry"
 )
 
 type upstreamTestWire func(*http.Request) (*http.Response, error)

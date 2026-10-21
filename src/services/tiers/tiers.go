@@ -6,12 +6,12 @@ import (
 
 	"github.com/minio/madmin-go/v3"
 
-	"minio-web/api/src/services/apperror"
-	bucketssvc "minio-web/api/src/services/buckets"
-	endpoints "minio-web/api/src/services/endpoint"
-	"minio-web/api/src/services/iam"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/revision"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	bucketssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/buckets"
+	endpoints "github.com/owiks/golang-minio-s3-backend-api/src/services/endpoint"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/iam"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/revision"
 )
 
 type TierView struct {

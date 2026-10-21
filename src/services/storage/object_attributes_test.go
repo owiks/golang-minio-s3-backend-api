@@ -20,8 +20,8 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/tests/testmessage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/tests/testmessage"
 )
 
 const attributesModified = "Tue, 20 Oct 2026 10:00:00 GMT"

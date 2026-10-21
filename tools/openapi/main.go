@@ -9,8 +9,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"minio-web/api/src/http/api"
-	"minio-web/api/src/http/api/doc"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/doc"
 )
 
 func main() {

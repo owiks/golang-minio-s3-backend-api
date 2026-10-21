@@ -17,7 +17,7 @@ import (
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
 
-	"minio-web/api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
 )
 
 //go:embed locales/active.*.json

@@ -20,9 +20,9 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
-	settings "minio-web/api/src/config"
-	"minio-web/api/src/services/archives/zipread"
-	"minio-web/api/src/services/staging"
+	settings "github.com/owiks/golang-minio-s3-backend-api/src/config"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/archives/zipread"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/staging"
 )
 
 func TestZIPCacheRetainsFileForEntryAfterLeaseClose(t *testing.T) {

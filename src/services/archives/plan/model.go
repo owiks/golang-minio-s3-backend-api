@@ -5,9 +5,9 @@ import (
 	"sync"
 	"time"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	objectstate "minio-web/api/src/services/objects/state"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	objectstate "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/state"
 )
 
 // Config is detached preparation data; New copies its slices and maps.

@@ -16,13 +16,13 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/lifecycle"
 
-	apihttp "minio-web/api/src/http/api"
-	"minio-web/api/src/http/presentation"
-	archivessvc "minio-web/api/src/services/archives"
-	bucketssvc "minio-web/api/src/services/buckets"
-	runtimesvc "minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/securetoken"
-	tierssvc "minio-web/api/src/services/tiers"
+	apihttp "github.com/owiks/golang-minio-s3-backend-api/src/http/api"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	archivessvc "github.com/owiks/golang-minio-s3-backend-api/src/services/archives"
+	bucketssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/buckets"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/securetoken"
+	tierssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/tiers"
 )
 
 func zipped(text []byte) []byte {

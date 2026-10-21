@@ -3,14 +3,14 @@ package archives
 import (
 	"net/http"
 
-	"minio-web/api/src/http/api/routes"
-	"minio-web/api/src/http/api/routes/archives/controllers"
-	"minio-web/api/src/services/apperror"
-	archivesdto "minio-web/api/src/services/archives"
-	archiveplan "minio-web/api/src/services/archives/plan"
-	"minio-web/api/src/services/messages"
-	resultdto "minio-web/api/src/services/result"
-	"minio-web/api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/archives/controllers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	archivesdto "github.com/owiks/golang-minio-s3-backend-api/src/services/archives"
+	archiveplan "github.com/owiks/golang-minio-s3-backend-api/src/services/archives/plan"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	resultdto "github.com/owiks/golang-minio-s3-backend-api/src/services/result"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 func GetRoutes() []routes.APIRoute {

@@ -3,11 +3,11 @@ package controllers
 import (
 	"net/http"
 
-	httpcommon "minio-web/api/src/http/api/common"
-	httpvalidation "minio-web/api/src/http/validation"
-	bucketssvc "minio-web/api/src/services/buckets"
-	filessvc "minio-web/api/src/services/files"
-	runtimesvc "minio-web/api/src/services/runtime"
+	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	httpvalidation "github.com/owiks/golang-minio-s3-backend-api/src/http/validation"
+	bucketssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/buckets"
+	filessvc "github.com/owiks/golang-minio-s3-backend-api/src/services/files"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 func HandleListBuckets(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {

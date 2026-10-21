@@ -2,7 +2,7 @@ package server
 
 import (
 	"context"
-	"minio-web/api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
 	"testing"
 )
 

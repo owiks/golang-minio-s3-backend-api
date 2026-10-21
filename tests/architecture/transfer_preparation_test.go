@@ -39,11 +39,11 @@ func TestTransferControllersInvokeUseCasesOnly(t *testing.T) {
 	fset := token.NewFileSet()
 	fixture, err := parser.ParseFile(fset, "fixture.go", `package controllers
 import (
- . "minio-web/api/src/services/transfers"
- folders "minio-web/api/src/services/folders"
- write "minio-web/api/src/services/objects/write"
- app "minio-web/api/src/services/apperror"
- runtime "minio-web/api/src/services/runtime"
+ . "github.com/owiks/golang-minio-s3-backend-api/src/services/transfers"
+ folders "github.com/owiks/golang-minio-s3-backend-api/src/services/folders"
+ write "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/write"
+ app "github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+ runtime "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 var _,_,_,_,_ = PrepareFolderTransfer, PrepareDestination, Transfer, runtime.NewClients, app.New
 var _,_,_,_ = ValidTransferKey, folders.FolderDeleteItems, write.DestinationState, app.Public
@@ -64,14 +64,14 @@ func transferControllerHelpers(t *testing.T, fset *token.FileSet, path string, f
 		t.Fatal(err)
 	}
 	allowed := map[string]map[string]bool{
-		"minio-web/api/src/services/transfers": {"PrepareFolderTransfer": true, "PrepareDestination": true, "Transfer": true},
-		"minio-web/api/src/services/runtime":   {"NewClients": true},
-		"minio-web/api/src/services/apperror":  {"New": true},
+		"github.com/owiks/golang-minio-s3-backend-api/src/services/transfers": {"PrepareFolderTransfer": true, "PrepareDestination": true, "Transfer": true},
+		"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime":   {"NewClients": true},
+		"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror":  {"New": true},
 	}
 	var violations []string
 	for identifier, object := range info.Uses {
 		function, ok := object.(*types.Func)
-		if !ok || function.Pkg() == nil || !strings.HasPrefix(function.Pkg().Path(), "minio-web/api/src/services/") {
+		if !ok || function.Pkg() == nil || !strings.HasPrefix(function.Pkg().Path(), "github.com/owiks/golang-minio-s3-backend-api/src/services/") {
 			continue
 		}
 		if !allowed[function.Pkg().Path()][function.Name()] {

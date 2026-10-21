@@ -11,10 +11,10 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	accesssvc "minio-web/api/src/services/access"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	objectssvc "minio-web/api/src/services/objects"
+	accesssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/access"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
 )
 
 type ObjectListOptions struct {

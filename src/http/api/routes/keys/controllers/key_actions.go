@@ -3,10 +3,10 @@ package controllers
 import (
 	"net/http"
 
-	httpcommon "minio-web/api/src/http/api/common"
-	httpvalidation "minio-web/api/src/http/validation"
-	keyssvc "minio-web/api/src/services/keys"
-	runtimesvc "minio-web/api/src/services/runtime"
+	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	httpvalidation "github.com/owiks/golang-minio-s3-backend-api/src/http/validation"
+	keyssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/keys"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 func HandleListKeys(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, temporary bool) error {

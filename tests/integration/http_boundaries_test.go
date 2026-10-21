@@ -9,12 +9,12 @@ import (
 	"strings"
 	"testing"
 
-	folders "minio-web/api/src/http/api/routes/folders/controllers"
-	objects "minio-web/api/src/http/api/routes/objects/controllers"
-	search "minio-web/api/src/http/api/routes/search/controllers"
-	"minio-web/api/src/services/apperror"
-	objecttypes "minio-web/api/src/services/objects"
-	"minio-web/api/tests/testsession"
+	folders "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/folders/controllers"
+	objects "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/objects/controllers"
+	search "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/search/controllers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	objecttypes "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	"github.com/owiks/golang-minio-s3-backend-api/tests/testsession"
 )
 
 func TestSearchQueryLimitPrecedesUnicodeCaseFolding(t *testing.T) {

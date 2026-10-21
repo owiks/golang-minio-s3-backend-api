@@ -8,9 +8,9 @@ import (
 
 	"github.com/minio/madmin-go/v3"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/iam"
-	"minio-web/api/src/services/server"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/iam"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/server"
 )
 
 type poolChangeClient struct {

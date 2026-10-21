@@ -16,12 +16,12 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
-	"minio-web/api/src/http/presentation"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/iam"
-	objectssvc "minio-web/api/src/services/objects"
-	resultdto "minio-web/api/src/services/result"
-	storagesvc "minio-web/api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/iam"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	resultdto "github.com/owiks/golang-minio-s3-backend-api/src/services/result"
+	storagesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
 )
 
 func TestPropertyPatchValidationAndMerge(t *testing.T) {

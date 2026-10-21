@@ -11,8 +11,8 @@ import (
 
 	"github.com/minio/madmin-go/v3"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/telemetry"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/telemetry"
 )
 
 type countedAdminBody struct {

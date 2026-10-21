@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"minio-web/api/src/http/requestctx"
-	"minio-web/api/src/services/localization"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/requestctx"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/localization"
 )
 
 func TestChooseLanguage(t *testing.T) {

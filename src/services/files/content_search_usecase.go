@@ -7,12 +7,12 @@ import (
 	"sync"
 	"unicode/utf8"
 
-	"minio-web/api/src/services/apperror"
-	folderssvc "minio-web/api/src/services/folders"
-	"minio-web/api/src/services/messages"
-	objectssvc "minio-web/api/src/services/objects"
-	searchsvc "minio-web/api/src/services/search"
-	"minio-web/api/src/services/telemetry"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	folderssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/folders"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	searchsvc "github.com/owiks/golang-minio-s3-backend-api/src/services/search"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/telemetry"
 )
 
 func SearchContent(ctx context.Context, s SearchContentClient, body searchsvc.ContentSearchBody) (ContentSearchResult, error) {

@@ -12,7 +12,7 @@ import (
 	"sync"
 	"testing"
 
-	"minio-web/api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 func TestRuntimeCollectionsHavePrivateOwners(t *testing.T) {
@@ -63,7 +63,7 @@ func TestLayerBoundaries(t *testing.T) {
 			if strings.Contains(dependency, "/internal/httpapi") || strings.Contains(dependency, "/src/cmd") && owner != "." {
 				t.Errorf("invalid dependency: %s -> %s", owner, dependency)
 			}
-			if strings.HasPrefix(owner, "services/") && (strings.HasPrefix(dependency, "minio-web/api/src/http") || strings.HasPrefix(dependency, "minio-web/api/src/cmd")) {
+			if strings.HasPrefix(owner, "services/") && (strings.HasPrefix(dependency, "github.com/owiks/golang-minio-s3-backend-api/src/http") || strings.HasPrefix(dependency, "github.com/owiks/golang-minio-s3-backend-api/src/cmd")) {
 				t.Errorf("service imports transport or command: %s -> %s", owner, dependency)
 			}
 			if strings.HasPrefix(owner, "http/") && strings.Contains(dependency, "/tests/") {
@@ -188,7 +188,7 @@ func TestBusinessServicesReceiveSpecificDependencies(t *testing.T) {
 		aliases := map[string]bool{}
 		for _, spec := range file.Imports {
 			dependency, _ := strconv.Unquote(spec.Path.Value)
-			if dependency != "minio-web/api/src/services/runtime" {
+			if dependency != "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime" {
 				continue
 			}
 			name := "runtime"

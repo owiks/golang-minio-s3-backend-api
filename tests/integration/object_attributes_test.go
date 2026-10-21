@@ -10,7 +10,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"minio-web/api/src/services/objects"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
 )
 
 func TestObjectAttributesNativeIntegration(t *testing.T) {

@@ -9,7 +9,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	searchsvc "minio-web/api/src/services/search"
+	searchsvc "github.com/owiks/golang-minio-s3-backend-api/src/services/search"
 )
 
 func TestSearchFilterDatesAndZeroSizeIntegration(t *testing.T) {

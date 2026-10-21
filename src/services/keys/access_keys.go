@@ -9,11 +9,11 @@ import (
 
 	"github.com/minio/madmin-go/v3"
 
-	"minio-web/api/src/services/apperror"
-	identitiessvc "minio-web/api/src/services/identities"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/revision"
-	validationsvc "minio-web/api/src/services/validation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	identitiessvc "github.com/owiks/golang-minio-s3-backend-api/src/services/identities"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/revision"
+	validationsvc "github.com/owiks/golang-minio-s3-backend-api/src/services/validation"
 )
 
 type AccessKeyRow struct {

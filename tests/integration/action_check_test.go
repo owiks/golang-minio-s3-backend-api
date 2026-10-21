@@ -14,13 +14,13 @@ import (
 	"testing"
 	"time"
 
-	httpcommon "minio-web/api/src/http/api/common"
-	accesscontroller "minio-web/api/src/http/api/routes/access/controllers"
-	"minio-web/api/src/http/presentation"
-	accesssvc "minio-web/api/src/services/access"
-	"minio-web/api/src/services/iam"
-	runtimesvc "minio-web/api/src/services/runtime"
-	"minio-web/api/tests/testsession"
+	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	accesscontroller "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/access/controllers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	accesssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/access"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/iam"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/tests/testsession"
 )
 
 var actionCheckPolicy = json.RawMessage(`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["admin:*"],"Resource":["*"]},{"Effect":"Allow","Action":["s3:*"],"Resource":["arn:aws:s3:::*"]}]}`)

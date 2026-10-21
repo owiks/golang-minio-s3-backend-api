@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"minio-web/api/src/http/httperrors"
-	"minio-web/api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/httperrors"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
 )
 
 func TestChecksumPreflightErrorsRemainHTTPJSON(t *testing.T) {

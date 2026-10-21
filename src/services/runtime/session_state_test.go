@@ -13,11 +13,11 @@ import (
 	"testing"
 	"time"
 
-	"minio-web/api/src/config"
-	"minio-web/api/src/services/iam"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/runtime"
-	"minio-web/api/tests/testsession"
+	"github.com/owiks/golang-minio-s3-backend-api/src/config"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/iam"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/tests/testsession"
 )
 
 func TestSessionOwnsEndpointsAndReturnsDetachedValues(t *testing.T) {

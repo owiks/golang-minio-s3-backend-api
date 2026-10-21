@@ -5,12 +5,12 @@ import (
 	"strings"
 	"time"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/result"
-	"minio-web/api/src/services/securetoken"
-	uploadinvite "minio-web/api/src/services/uploads/invite"
-	validationsvc "minio-web/api/src/services/validation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/result"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/securetoken"
+	uploadinvite "github.com/owiks/golang-minio-s3-backend-api/src/services/uploads/invite"
+	validationsvc "github.com/owiks/golang-minio-s3-backend-api/src/services/validation"
 )
 
 func ListUploadInvites(ctx context.Context, store UploadInviteLister, owner string, bucket, prefix string) ([]uploadinvite.UploadInviteSummary, error) {

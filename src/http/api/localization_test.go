@@ -8,12 +8,12 @@ import (
 	"sync"
 	"testing"
 
-	"minio-web/api/src/config"
-	"minio-web/api/src/http/middleware"
-	"minio-web/api/src/http/presentation"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/telemetry"
-	"minio-web/api/tests/testsession"
+	"github.com/owiks/golang-minio-s3-backend-api/src/config"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/middleware"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/telemetry"
+	"github.com/owiks/golang-minio-s3-backend-api/tests/testsession"
 )
 
 func TestLocalizedHTTPBoundary(t *testing.T) {

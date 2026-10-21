@@ -4,12 +4,12 @@ import (
 	"mime"
 	"net/http"
 
-	httpcommon "minio-web/api/src/http/api/common"
-	"minio-web/api/src/http/presentation"
-	"minio-web/api/src/http/stream"
-	httpvalidation "minio-web/api/src/http/validation"
-	archivessvc "minio-web/api/src/services/archives"
-	runtimesvc "minio-web/api/src/services/runtime"
+	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/stream"
+	httpvalidation "github.com/owiks/golang-minio-s3-backend-api/src/http/validation"
+	archivessvc "github.com/owiks/golang-minio-s3-backend-api/src/services/archives"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 func HandleArchiveStatus(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, ticket string) error {

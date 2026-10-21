@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"strconv"
 
-	httpcommon "minio-web/api/src/http/api/common"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/objects"
-	"minio-web/api/src/services/runtime"
+	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 func HandleGetObjectAttributes(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session) error {

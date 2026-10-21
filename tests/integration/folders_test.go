@@ -11,9 +11,9 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	folderssvc "minio-web/api/src/services/folders"
-	objectssvc "minio-web/api/src/services/objects"
-	"minio-web/api/src/services/securetoken"
+	folderssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/folders"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/securetoken"
 )
 
 func TestFolderKeyValidation(t *testing.T) {

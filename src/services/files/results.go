@@ -3,9 +3,9 @@ package files
 import (
 	"time"
 
-	bucketssvc "minio-web/api/src/services/buckets"
-	objectssvc "minio-web/api/src/services/objects"
-	searchsvc "minio-web/api/src/services/search"
+	bucketssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/buckets"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	searchsvc "github.com/owiks/golang-minio-s3-backend-api/src/services/search"
 )
 
 type ObjectInfo struct {

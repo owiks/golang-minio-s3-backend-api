@@ -71,9 +71,9 @@ func controllerStreamHelpers(t *testing.T, fset *token.FileSet, path string, fil
 		switch function.Pkg().Path() + "." + function.Name() {
 		case "encoding/json.NewEncoder", "context.AfterFunc", "net/http.Flush":
 			violations = append(violations, fset.Position(identifier.Pos()).String()+" "+function.FullName())
-		case "minio-web/api/src/http/stream.WriteNDJSON":
+		case "github.com/owiks/golang-minio-s3-backend-api/src/http/stream.WriteNDJSON":
 			ndjson++
-		case "minio-web/api/src/http/stream.InterruptOnCancel":
+		case "github.com/owiks/golang-minio-s3-backend-api/src/http/stream.InterruptOnCancel":
 			interrupts++
 		}
 	}

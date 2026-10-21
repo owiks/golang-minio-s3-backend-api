@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"time"
 
-	"minio-web/api/src/http/api/common"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 func Authenticate(state *runtime.State, r *http.Request, id string) (*runtime.Session, error) {

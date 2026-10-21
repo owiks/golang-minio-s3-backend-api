@@ -8,13 +8,13 @@ import (
 	"sync"
 	"time"
 
-	"minio-web/api/src/http/api/common"
-	httpvalidation "minio-web/api/src/http/validation"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/uploads/integrity"
-	"minio-web/api/src/services/uploads/multipart"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	httpvalidation "github.com/owiks/golang-minio-s3-backend-api/src/http/validation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads/integrity"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads/multipart"
 )
 
 func writeSnapshot(w http.ResponseWriter, r *http.Request, s multipart.Snapshot, created bool) {

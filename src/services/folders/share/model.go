@@ -7,10 +7,10 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/coordination"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/securetoken"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/coordination"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/securetoken"
 )
 
 type Config struct {

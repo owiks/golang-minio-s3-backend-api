@@ -6,8 +6,8 @@ import (
 	"net/url"
 	"testing"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
 )
 
 type versionReader func(context.Context, string, string, string, string, int) (storage.VersionPage, error)

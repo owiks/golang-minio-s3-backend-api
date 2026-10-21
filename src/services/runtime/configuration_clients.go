@@ -7,7 +7,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/lifecycle"
 	"github.com/minio/minio-go/v7/pkg/sse"
 
-	"minio-web/api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
 )
 
 func (c *Clients) ReadLifecycleConfig(ctx context.Context, bucket string) (storage.ConfigRead[*lifecycle.Configuration], error) {

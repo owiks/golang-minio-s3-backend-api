@@ -1,4 +1,4 @@
-module minio-web/api
+module github.com/owiks/golang-minio-s3-backend-api
 
 go 1.26.0
 

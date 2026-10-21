@@ -9,13 +9,13 @@ import (
 	"strings"
 	"time"
 
-	httpcommon "minio-web/api/src/http/api/common"
-	"minio-web/api/src/http/stream"
-	"minio-web/api/src/services/apperror"
-	folderssvc "minio-web/api/src/services/folders"
-	"minio-web/api/src/services/messages"
-	runtimesvc "minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/telemetry"
+	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/stream"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	folderssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/folders"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/telemetry"
 )
 
 func HandlePublicFolder(app *runtimesvc.State, w http.ResponseWriter, r *http.Request) error {

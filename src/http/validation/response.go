@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
 )
 
 func Decode(w http.ResponseWriter, r *http.Request, value any) error {

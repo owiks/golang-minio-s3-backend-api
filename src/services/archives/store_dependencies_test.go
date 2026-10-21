@@ -11,10 +11,10 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/archives/plan"
-	"minio-web/api/src/services/archives/zipread"
-	"minio-web/api/src/services/staging"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/archives/plan"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/archives/zipread"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/staging"
 )
 
 type archivePublisher struct {

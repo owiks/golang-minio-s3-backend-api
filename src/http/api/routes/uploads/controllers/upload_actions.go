@@ -6,15 +6,15 @@ import (
 	"strings"
 	"time"
 
-	httpcommon "minio-web/api/src/http/api/common"
-	httpvalidation "minio-web/api/src/http/validation"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	objectssvc "minio-web/api/src/services/objects"
-	objectwrite "minio-web/api/src/services/objects/write"
-	runtimesvc "minio-web/api/src/services/runtime"
-	uploadssvc "minio-web/api/src/services/uploads"
-	"minio-web/api/src/services/uploads/integrity"
+	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	httpvalidation "github.com/owiks/golang-minio-s3-backend-api/src/http/validation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	objectwrite "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/write"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	uploadssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/uploads"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads/integrity"
 )
 
 func HandlePrepareFile(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {

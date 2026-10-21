@@ -7,11 +7,11 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	objectwrite "minio-web/api/src/services/objects/write"
-	"minio-web/api/src/services/uploads"
-	"minio-web/api/src/services/uploads/integrity"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	objectwrite "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/write"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads/integrity"
 )
 
 func Complete(ctx context.Context, store Store, c Client, id string) (Snapshot, error) {

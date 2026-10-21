@@ -11,9 +11,9 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
-	"minio-web/api/src/services/objects/state"
-	"minio-web/api/src/services/securetoken"
-	"minio-web/api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/objects/state"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/securetoken"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
 )
 
 type minioMoveClient struct{ *storage.S3Client }

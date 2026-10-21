@@ -10,10 +10,10 @@ import (
 	"time"
 
 	"github.com/minio/minio-go/v7"
-	"minio-web/api/src/config"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/archives/zipread"
-	"minio-web/api/src/services/objects/state"
+	"github.com/owiks/golang-minio-s3-backend-api/src/config"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/archives/zipread"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/objects/state"
 )
 
 type cachedSessionSource struct {

@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"minio-web/api/src/config"
-	httpapi "minio-web/api/src/http/api"
+	"github.com/owiks/golang-minio-s3-backend-api/src/config"
+	httpapi "github.com/owiks/golang-minio-s3-backend-api/src/http/api"
 )
 
 func TestServeHealthAndGracefulCancellation(t *testing.T) {

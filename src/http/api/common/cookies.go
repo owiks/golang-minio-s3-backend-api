@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"minio-web/api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 func SessionCookie(s *runtime.Session, r *http.Request, remove bool) *http.Cookie {

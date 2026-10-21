@@ -11,11 +11,11 @@ import (
 
 	"github.com/minio/madmin-go/v3"
 
-	apihttp "minio-web/api/src/http/api"
-	"minio-web/api/src/http/presentation"
-	identitiessvc "minio-web/api/src/services/identities"
-	runtimesvc "minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/securetoken"
+	apihttp "github.com/owiks/golang-minio-s3-backend-api/src/http/api"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	identitiessvc "github.com/owiks/golang-minio-s3-backend-api/src/services/identities"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/securetoken"
 )
 
 func TestPolicySummary(t *testing.T) {

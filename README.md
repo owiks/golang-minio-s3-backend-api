@@ -1,4 +1,4 @@
-# MinIO S3 API
+# MinIO S3 Backend API
 
 Go API для работы с S3-совместимыми хранилищами и администрирования MinIO.
 Сервис управляет подключениями, выполняет запросы с учётными данными пользователя
@@ -26,9 +26,11 @@ Go API для работы с S3-совместимыми хранилищами
 
 ## Запуск API в Docker
 
-Нужны Docker с Compose и Make. Команды выполняются из корня этого репозитория:
+Нужны Docker с Compose и Make. Команды выполняются из корня репозитория:
 
 ```sh
+git clone https://github.com/owiks/golang-minio-s3-backend-api.git
+cd golang-minio-s3-backend-api
 cp .env.example .env
 # При необходимости настройте доступ к хранилищу в .env.
 make docker-up

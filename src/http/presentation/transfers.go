@@ -1,8 +1,8 @@
 package presentation
 
 import (
-	"minio-web/api/src/services/localization"
-	"minio-web/api/src/services/transfers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/localization"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/transfers"
 )
 
 type TransferResult struct {

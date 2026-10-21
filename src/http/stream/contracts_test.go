@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"testing"
 
-	"minio-web/api/src/http/presentation"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/result"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/result"
 )
 
 func TestStreamEventsPreserveWireEnvelope(t *testing.T) {

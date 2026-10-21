@@ -13,13 +13,13 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	selectcontroller "minio-web/api/src/http/api/routes/selectquery/controllers"
-	"minio-web/api/src/http/presentation"
-	"minio-web/api/src/http/stream"
-	"minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/selectquery"
-	"minio-web/api/src/services/telemetry"
-	"minio-web/api/tests/testsession"
+	selectcontroller "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/selectquery/controllers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/stream"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/selectquery"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/telemetry"
+	"github.com/owiks/golang-minio-s3-backend-api/tests/testsession"
 )
 
 func readSelectEvents(t *testing.T, data []byte) ([]byte, *selectquery.Result, *presentation.Error) {

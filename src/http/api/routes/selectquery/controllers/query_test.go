@@ -5,12 +5,12 @@ import (
 	"strings"
 	"testing"
 
-	"minio-web/api/src/config"
-	"minio-web/api/src/http/httperrors"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/selectquery"
-	"minio-web/api/tests/testsession"
+	"github.com/owiks/golang-minio-s3-backend-api/src/config"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/httperrors"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/selectquery"
+	"github.com/owiks/golang-minio-s3-backend-api/tests/testsession"
 )
 
 func TestSelectPreflightErrorsDoNotStartNDJSON(t *testing.T) {

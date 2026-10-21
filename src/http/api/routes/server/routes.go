@@ -3,13 +3,13 @@ package server
 import (
 	"net/http"
 
-	"minio-web/api/src/http/api/routes"
-	"minio-web/api/src/http/api/routes/server/controllers"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	resultdto "minio-web/api/src/services/result"
-	"minio-web/api/src/services/runtime"
-	serverdto "minio-web/api/src/services/server"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/server/controllers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	resultdto "github.com/owiks/golang-minio-s3-backend-api/src/services/result"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	serverdto "github.com/owiks/golang-minio-s3-backend-api/src/services/server"
 )
 
 func GetRoutes() []routes.APIRoute {

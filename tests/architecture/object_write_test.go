@@ -27,10 +27,10 @@ func TestConditionalWritesAreIndependentOfUploadUseCases(t *testing.T) {
 			}
 			for _, spec := range file.Imports {
 				importPath, _ := strconv.Unquote(spec.Path.Value)
-				if importPath == "minio-web/api/src/services/uploads" {
+				if importPath == "github.com/owiks/golang-minio-s3-backend-api/src/services/uploads" {
 					t.Error("object operation depends on upload use cases", path)
 				}
-				if filepath.Dir(path) == filepath.Join(root, "objects", "write") && strings.HasPrefix(importPath, "minio-web/api/src/services/") && importPath != "minio-web/api/src/services/apperror" && importPath != "minio-web/api/src/services/messages" && importPath != "minio-web/api/src/services/objects/state" {
+				if filepath.Dir(path) == filepath.Join(root, "objects", "write") && strings.HasPrefix(importPath, "github.com/owiks/golang-minio-s3-backend-api/src/services/") && importPath != "github.com/owiks/golang-minio-s3-backend-api/src/services/apperror" && importPath != "github.com/owiks/golang-minio-s3-backend-api/src/services/messages" && importPath != "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/state" {
 					t.Error("conditional write mechanism imports a use case", path, importPath)
 				}
 			}

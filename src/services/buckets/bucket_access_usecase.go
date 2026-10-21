@@ -10,11 +10,11 @@ import (
 	"github.com/minio/madmin-go/v3"
 	"github.com/minio/minio-go/v7/pkg/s3utils"
 
-	"minio-web/api/src/services/apperror"
-	identitiessvc "minio-web/api/src/services/identities"
-	keyssvc "minio-web/api/src/services/keys"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/telemetry"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	identitiessvc "github.com/owiks/golang-minio-s3-backend-api/src/services/identities"
+	keyssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/keys"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/telemetry"
 )
 
 func ReadBucketAccess(ctx context.Context, s ReadBucketAccessClient, bucket string) (BucketAccessReport, error) {

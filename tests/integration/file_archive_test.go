@@ -17,15 +17,15 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	httpcommon "minio-web/api/src/http/api/common"
-	archivescontroller "minio-web/api/src/http/api/routes/archives/controllers"
-	"minio-web/api/src/services/apperror"
-	archivessvc "minio-web/api/src/services/archives"
-	archiveplan "minio-web/api/src/services/archives/plan"
-	"minio-web/api/src/services/messages"
-	objectstate "minio-web/api/src/services/objects/state"
-	runtimesvc "minio-web/api/src/services/runtime"
-	"minio-web/api/tests/testsession"
+	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	archivescontroller "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/archives/controllers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	archivessvc "github.com/owiks/golang-minio-s3-backend-api/src/services/archives"
+	archiveplan "github.com/owiks/golang-minio-s3-backend-api/src/services/archives/plan"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	objectstate "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/state"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/tests/testsession"
 )
 
 func TestArchiveNamesAndPaths(t *testing.T) {

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"minio-web/api/src/cmd"
+	"github.com/owiks/golang-minio-s3-backend-api/src/cmd"
 )
 
 func main() { cmd.Execute() }

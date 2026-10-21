@@ -3,7 +3,7 @@ package runtime
 import (
 	"context"
 
-	"minio-web/api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
 )
 
 func (c *Clients) ReadS3Metrics(ctx context.Context) ([]byte, error) {

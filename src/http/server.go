@@ -10,12 +10,12 @@ import (
 	"sync"
 	"time"
 
-	"minio-web/api/src/config"
-	httpapi "minio-web/api/src/http/api"
-	"minio-web/api/src/http/middleware"
-	"minio-web/api/src/http/presentation"
-	"minio-web/api/src/http/requestctx"
-	"minio-web/api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/config"
+	httpapi "github.com/owiks/golang-minio-s3-backend-api/src/http/api"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/middleware"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/requestctx"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
 )
 
 var (

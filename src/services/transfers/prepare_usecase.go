@@ -3,11 +3,11 @@ package transfers
 import (
 	"context"
 
-	"minio-web/api/src/services/apperror"
-	folderssvc "minio-web/api/src/services/folders"
-	"minio-web/api/src/services/messages"
-	objectssvc "minio-web/api/src/services/objects"
-	objectwrite "minio-web/api/src/services/objects/write"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	folderssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/folders"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	objectwrite "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/write"
 )
 
 type PrepareFolderOptions struct {

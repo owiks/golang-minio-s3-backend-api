@@ -15,12 +15,12 @@ func TestBusinessServicesDoNotConstructOrExposeSDKClients(t *testing.T) {
 	packages, lookup := loadExportedPackages(t, "./src/services/...")
 	checked := 0
 	for _, p := range packages {
-		if !strings.HasPrefix(p.ImportPath, "minio-web/api/src/services/") {
+		if !strings.HasPrefix(p.ImportPath, "github.com/owiks/golang-minio-s3-backend-api/src/services/") {
 			continue
 		}
 		// Native SDK construction/transport adapters live exclusively in these two
 		// infrastructure packages; business packages may use SDK DTOs and readers.
-		if p.ImportPath == "minio-web/api/src/services/storage" || p.ImportPath == "minio-web/api/src/services/runtime" {
+		if p.ImportPath == "github.com/owiks/golang-minio-s3-backend-api/src/services/storage" || p.ImportPath == "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime" {
 			continue
 		}
 		checked++

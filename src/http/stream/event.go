@@ -1,8 +1,8 @@
 package stream
 
 import (
-	"minio-web/api/src/http/presentation"
-	"minio-web/api/src/services/result"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/result"
 )
 
 // Event is one localized wire record; services produce result.StreamEvent.

@@ -4,9 +4,9 @@ import (
 	"sync"
 	"time"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	uploadinvite "minio-web/api/src/services/uploads/invite"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	uploadinvite "github.com/owiks/golang-minio-s3-backend-api/src/services/uploads/invite"
 )
 
 type UploadInviteStore struct {

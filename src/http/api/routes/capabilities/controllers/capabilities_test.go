@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"minio-web/api/src/config"
-	"minio-web/api/src/services/capabilities"
-	"minio-web/api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/config"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/capabilities"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 func capabilityConnection(t *testing.T, handler http.HandlerFunc) (*runtime.State, *runtime.Session, *atomic.Int32) {

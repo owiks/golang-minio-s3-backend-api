@@ -3,11 +3,11 @@ package tiers
 import (
 	"net/http"
 
-	"minio-web/api/src/http/api/routes"
-	"minio-web/api/src/http/api/routes/tiers/controllers"
-	resultdto "minio-web/api/src/services/result"
-	"minio-web/api/src/services/runtime"
-	tiersdto "minio-web/api/src/services/tiers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/tiers/controllers"
+	resultdto "github.com/owiks/golang-minio-s3-backend-api/src/services/result"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	tiersdto "github.com/owiks/golang-minio-s3-backend-api/src/services/tiers"
 )
 
 func GetRoutes() []routes.APIRoute {

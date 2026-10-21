@@ -3,11 +3,11 @@ package selectquery
 import (
 	"net/http"
 
-	"minio-web/api/src/http/api/routes"
-	"minio-web/api/src/http/api/routes/selectquery/controllers"
-	"minio-web/api/src/services/result"
-	"minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/selectquery"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/selectquery/controllers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/result"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/selectquery"
 )
 
 func GetRoutes() []routes.APIRoute {

@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"minio-web/api/src/config"
-	"minio-web/api/src/http/api/doc"
-	"minio-web/api/src/http/api/openapi"
+	"github.com/owiks/golang-minio-s3-backend-api/src/config"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/doc"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/openapi"
 )
 
 func TestDocumentationMatchesCatalogAndGeneratedFile(t *testing.T) {

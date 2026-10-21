@@ -13,14 +13,14 @@ import (
 	"github.com/minio/madmin-go/v3"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
-	"minio-web/api/src/config"
-	"minio-web/api/src/http/api/common"
-	"minio-web/api/src/http/api/routes"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/storage"
-	"minio-web/api/tests/testsession"
+	"github.com/owiks/golang-minio-s3-backend-api/src/config"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/tests/testsession"
 )
 
 func TestAccessRevisionSurvivesPartialFailureCancellationAndPanic(t *testing.T) {

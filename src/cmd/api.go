@@ -6,8 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"minio-web/api/src/config"
-	app "minio-web/api/src/http"
+	"github.com/owiks/golang-minio-s3-backend-api/src/config"
+	app "github.com/owiks/golang-minio-s3-backend-api/src/http"
 )
 
 func run(logger *slog.Logger) error {

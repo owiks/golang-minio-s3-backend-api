@@ -10,9 +10,9 @@ import (
 	"sync"
 	"testing"
 
-	apihttp "minio-web/api/src/http/api"
-	"minio-web/api/src/http/api/doc"
-	"minio-web/api/src/http/api/routes"
+	apihttp "github.com/owiks/golang-minio-s3-backend-api/src/http/api"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/doc"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes"
 )
 
 // Successful fixture responses are checked against the same explicit models

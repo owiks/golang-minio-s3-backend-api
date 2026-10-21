@@ -5,7 +5,7 @@ import (
 	"path"
 	"strings"
 
-	objectssvc "minio-web/api/src/services/objects"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
 )
 
 func SearchFiles(ctx context.Context, s RecursivePageClient, input FileSearchInput) (FileSearchResult, error) {

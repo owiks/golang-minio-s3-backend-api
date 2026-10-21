@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"minio-web/api/src/http/api/doc"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/doc"
 )
 
 func TestResponseModelsAreSpecificToOperation(t *testing.T) {

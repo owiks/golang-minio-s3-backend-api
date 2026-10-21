@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/minio/minio-go/v7"
-	"minio-web/api/src/services/apperror"
-	searchsvc "minio-web/api/src/services/search"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	searchsvc "github.com/owiks/golang-minio-s3-backend-api/src/services/search"
 )
 
 type contentFilterClient struct{ calls int }

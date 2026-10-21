@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/minio/minio-go/v7"
-	"minio-web/api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
 )
 
 func (c *Clients) OpenSelect(ctx context.Context, bucket, key string, options minio.SelectObjectOptions) (storage.SelectStream, error) {

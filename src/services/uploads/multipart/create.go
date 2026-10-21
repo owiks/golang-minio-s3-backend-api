@@ -9,13 +9,13 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/iam"
-	"minio-web/api/src/services/messages"
-	objectwrite "minio-web/api/src/services/objects/write"
-	"minio-web/api/src/services/securetoken"
-	"minio-web/api/src/services/uploads/integrity"
-	"minio-web/api/src/services/validation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/iam"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	objectwrite "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/write"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/securetoken"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads/integrity"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/validation"
 )
 
 var metadataName = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{0,63}$`)

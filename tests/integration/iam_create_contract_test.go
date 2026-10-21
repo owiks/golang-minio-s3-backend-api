@@ -16,13 +16,13 @@ import (
 	"github.com/minio/madmin-go/v3"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
-	apihttp "minio-web/api/src/http/api"
-	"minio-web/api/src/http/api/common"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/identities"
-	runtimesvc "minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/securetoken"
-	"minio-web/api/src/services/storage"
+	apihttp "github.com/owiks/golang-minio-s3-backend-api/src/http/api"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/identities"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/securetoken"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
 )
 
 func TestPolicyAndGroupCreateConsentHTTP(t *testing.T) {

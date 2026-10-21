@@ -9,12 +9,12 @@ import (
 	"github.com/minio/madmin-go/v3"
 	"github.com/minio/minio-go/v7/pkg/s3utils"
 
-	"minio-web/api/src/services/apperror"
-	endpoints "minio-web/api/src/services/endpoint"
-	"minio-web/api/src/services/iam"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/result"
-	validationsvc "minio-web/api/src/services/validation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	endpoints "github.com/owiks/golang-minio-s3-backend-api/src/services/endpoint"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/iam"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/result"
+	validationsvc "github.com/owiks/golang-minio-s3-backend-api/src/services/validation"
 )
 
 func ListTiers(ctx context.Context, s ListTiersClient) ([]TierView, error) {

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"minio-web/api/src/services/revision"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/revision"
 )
 
 type DeletionSnapshot struct {

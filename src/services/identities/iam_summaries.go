@@ -9,8 +9,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
 )
 
 type GroupSummaryDetails struct {

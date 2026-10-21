@@ -1,8 +1,8 @@
 package presentation
 
 import (
-	"minio-web/api/src/services/localization"
-	"minio-web/api/src/services/sessions"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/localization"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/sessions"
 )
 
 type LoginResponse struct {

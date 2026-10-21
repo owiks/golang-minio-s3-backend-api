@@ -7,11 +7,11 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/messages"
-	objectssvc "minio-web/api/src/services/objects"
-	objectstate "minio-web/api/src/services/objects/state"
-	"minio-web/api/src/services/result"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	objectstate "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/state"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/result"
 )
 
 func InspectFolder(ctx context.Context, s FolderDeleteItemsClient, bucket, prefix string) (FolderDeletionInfo, error) {

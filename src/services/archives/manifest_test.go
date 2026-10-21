@@ -10,9 +10,9 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	archiveplan "minio-web/api/src/services/archives/plan"
-	"minio-web/api/src/services/localization"
-	"minio-web/api/src/services/messages"
+	archiveplan "github.com/owiks/golang-minio-s3-backend-api/src/services/archives/plan"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/localization"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
 )
 
 func testManifest(manifest Manifest) any {

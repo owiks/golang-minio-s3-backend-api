@@ -1,6 +1,6 @@
 package search
 
-import objectssvc "minio-web/api/src/services/objects"
+import objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
 
 type FileSearchResult struct {
 	Entries   []objectssvc.Entry `json:"entries"`

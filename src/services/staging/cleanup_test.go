@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"minio-web/api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
 )
 
 // A nonempty directory at the owned path makes unlink fail deterministically,

@@ -3,8 +3,8 @@ package openapi
 import (
 	"testing"
 
-	"minio-web/api/src/services/identities"
-	"minio-web/api/src/services/keys"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/identities"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/keys"
 )
 
 func TestExplicitContractsPreserveInheritanceAndRequiredPointers(t *testing.T) {

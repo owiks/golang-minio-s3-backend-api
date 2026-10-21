@@ -11,8 +11,8 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	objectssvc "minio-web/api/src/services/objects"
-	storagesvc "minio-web/api/src/services/storage"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
+	storagesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
 )
 
 func TestFolderDatesOnlyUseExactMarkers(t *testing.T) {

@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"minio-web/api/src/http/presentation"
-	"minio-web/api/src/http/requestctx"
-	"minio-web/api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/requestctx"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
 )
 
 func WriteJSON(w http.ResponseWriter, r *http.Request, status int, value any) {

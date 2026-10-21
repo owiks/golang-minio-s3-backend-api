@@ -10,10 +10,10 @@ import (
 	"net/netip"
 	"time"
 
-	"minio-web/api/src/services/apperror"
-	endpoints "minio-web/api/src/services/endpoint"
-	"minio-web/api/src/services/messages"
-	"minio-web/api/src/services/uploads/source"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	endpoints "github.com/owiks/golang-minio-s3-backend-api/src/services/endpoint"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads/source"
 )
 
 type Client struct{ http *http.Client }

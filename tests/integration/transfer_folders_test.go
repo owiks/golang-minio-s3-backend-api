@@ -9,10 +9,10 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"minio-web/api/src/http/presentation"
-	folderssvc "minio-web/api/src/services/folders"
-	objectwrite "minio-web/api/src/services/objects/write"
-	transferssvc "minio-web/api/src/services/transfers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
+	folderssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/folders"
+	objectwrite "github.com/owiks/golang-minio-s3-backend-api/src/services/objects/write"
+	transferssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/transfers"
 )
 
 func TestTransferMapping(t *testing.T) {

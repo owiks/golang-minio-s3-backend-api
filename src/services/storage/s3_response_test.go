@@ -15,9 +15,9 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/telemetry"
-	"minio-web/api/src/services/upstream"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/telemetry"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/upstream"
 )
 
 func s3Fixture(t *testing.T, tr http.RoundTripper) *minio.Client {

@@ -3,7 +3,7 @@ package integration
 import (
 	"testing"
 
-	objectssvc "minio-web/api/src/services/objects"
+	objectssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/objects"
 )
 
 func TestMarkdownAliasesAreBoundedTextPreviews(t *testing.T) {

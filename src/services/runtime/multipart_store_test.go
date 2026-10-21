@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"minio-web/api/src/config"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/uploads/multipart"
+	"github.com/owiks/golang-minio-s3-backend-api/src/config"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads/multipart"
 )
 
 func multipartStoreFixture(t *testing.T) (*State, *Session, *atomic.Int32, *atomic.Bool) {

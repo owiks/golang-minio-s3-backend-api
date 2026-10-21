@@ -3,12 +3,12 @@ package transfers
 import (
 	"net/http"
 
-	"minio-web/api/src/http/api/routes"
-	"minio-web/api/src/http/api/routes/transfers/controllers"
-	"minio-web/api/src/services/objects/write"
-	"minio-web/api/src/services/runtime"
-	transfersdto "minio-web/api/src/services/transfers"
-	transferssvc "minio-web/api/src/services/transfers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/transfers/controllers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/objects/write"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	transfersdto "github.com/owiks/golang-minio-s3-backend-api/src/services/transfers"
+	transferssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/transfers"
 )
 
 func GetRoutes() []routes.APIRoute {

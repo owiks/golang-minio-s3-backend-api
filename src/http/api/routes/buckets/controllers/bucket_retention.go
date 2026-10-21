@@ -3,9 +3,9 @@ package controllers
 import (
 	"net/http"
 
-	httpvalidation "minio-web/api/src/http/validation"
-	bucketssvc "minio-web/api/src/services/buckets"
-	runtimesvc "minio-web/api/src/services/runtime"
+	httpvalidation "github.com/owiks/golang-minio-s3-backend-api/src/http/validation"
+	bucketssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/buckets"
+	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 func HandleUpdateBucketRetention(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, bucket, kind string) error {

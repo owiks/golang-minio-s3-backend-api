@@ -30,7 +30,7 @@ func TestDomainHelpersDoNotReturnToRuntime(t *testing.T) {
 				checked++
 				for _, spec := range file.Imports {
 					path, _ := strconv.Unquote(spec.Path.Value)
-					if path == "minio-web/api/src/services/runtime" {
+					if path == "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime" {
 						t.Error("domain package depends on runtime", entry.Name())
 					}
 				}

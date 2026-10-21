@@ -4,7 +4,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"minio-web/api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
 )
 
 func TestAttributesInvalidQueryStopsBeforeClient(t *testing.T) {

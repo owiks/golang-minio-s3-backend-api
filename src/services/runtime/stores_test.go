@@ -9,12 +9,12 @@ import (
 	"testing"
 	"time"
 
-	"minio-web/api/src/config"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/archives/plan"
-	"minio-web/api/src/services/folders/share"
-	"minio-web/api/src/services/staging"
-	"minio-web/api/src/services/uploads/invite"
+	"github.com/owiks/golang-minio-s3-backend-api/src/config"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/archives/plan"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/folders/share"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/staging"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads/invite"
 )
 
 func TestStoresRejectPublicationAfterClose(t *testing.T) {

@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/buckets"
-	"minio-web/api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/buckets"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
 )
 
 func TestDetailsPreservePartialSelectionAndPolicyRevision(t *testing.T) {

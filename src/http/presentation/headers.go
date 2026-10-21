@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"minio-web/api/src/http/requestctx"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/requestctx"
 )
 
 // Called for representations containing API messages, including generated ZIP

@@ -3,13 +3,13 @@ package uploads
 import (
 	"net/http"
 
-	"minio-web/api/src/http/api/routes"
-	"minio-web/api/src/http/api/routes/uploads/controllers"
-	"minio-web/api/src/services/objects/write"
-	resultdto "minio-web/api/src/services/result"
-	"minio-web/api/src/services/runtime"
-	uploadsdto "minio-web/api/src/services/uploads"
-	"minio-web/api/src/services/uploads/invite"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/uploads/controllers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/objects/write"
+	resultdto "github.com/owiks/golang-minio-s3-backend-api/src/services/result"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	uploadsdto "github.com/owiks/golang-minio-s3-backend-api/src/services/uploads"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads/invite"
 )
 
 func GetRoutes() []routes.APIRoute {

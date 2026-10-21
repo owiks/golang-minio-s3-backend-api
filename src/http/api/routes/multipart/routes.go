@@ -3,10 +3,10 @@ package multipart
 import (
 	"net/http"
 
-	"minio-web/api/src/http/api/routes"
-	"minio-web/api/src/http/api/routes/multipart/controllers"
-	"minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/uploads/multipart"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes"
+	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/multipart/controllers"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/uploads/multipart"
 )
 
 func GetRoutes() []routes.APIRoute {

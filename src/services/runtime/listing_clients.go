@@ -5,7 +5,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"minio-web/api/src/services/storage"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
 )
 
 // Core's listing API has no context parameter. A request-scoped client binds

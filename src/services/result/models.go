@@ -1,7 +1,7 @@
 // Package result contains small result envelopes shared by independent use cases.
 package result
 
-import "minio-web/api/src/services/apperror"
+import "github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
 
 type Success struct {
 	OK bool `json:"ok"`

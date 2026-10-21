@@ -12,7 +12,7 @@ import (
 
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 
-	"minio-web/api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
 )
 
 func TestEmbeddedCatalogsCoverEveryMessage(t *testing.T) {
