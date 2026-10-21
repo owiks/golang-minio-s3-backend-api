@@ -31,3 +31,17 @@ func TestMetricsPortParsesPayloadAndSanitizesAdapterError(t *testing.T) {
 		t.Fatal("public error sanitization changed", err)
 	}
 }
+
+func TestMetricsPortRejectsMalformedPayload(t *testing.T) {
+	for _, raw := range []string{
+		"minio_s3_requests_total not-a-number\n",
+		"minio_s3_requests_total{api=\"unterminated} 1\n",
+	} {
+		reader := metricsReader(func(context.Context) ([]byte, error) { return []byte(raw), nil })
+		_, err := ReadLiveMetrics(context.Background(), reader)
+		public := apperror.Public(err)
+		if err == nil || public.Status != 502 || public.Code != "InvalidMetrics" {
+			t.Fatal("invalid metric data was accepted or its public error changed", err)
+		}
+	}
+}

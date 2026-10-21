@@ -18,6 +18,7 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/prometheus/common/expfmt"
+	"github.com/prometheus/common/model"
 
 	apihttp "github.com/owiks/golang-minio-s3-backend-api/src/http/api"
 	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
@@ -57,7 +58,7 @@ minio_s3_traffic_sent_bytes 512
 # TYPE secret_token gauge
 secret_token{password="forbidden"} 123
 `
-	var p expfmt.TextParser
+	p := expfmt.NewTextParser(model.UTF8Validation)
 	families, e := p.TextToMetricFamilies(strings.NewReader(text))
 	if e != nil {
 		t.Fatal(e)

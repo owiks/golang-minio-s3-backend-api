@@ -54,6 +54,12 @@ func TestReadAdaptersBoundBodiesAndRestorePayload(t *testing.T) {
 					}
 					return
 				}
+				if kind == "metrics" {
+					if !errors.Is(err, errMetricsCaptured) || res != nil || string(captured) != payload {
+						t.Fatal("native metrics were not captured before SDK parsing", err)
+					}
+					return
+				}
 				if err != nil {
 					t.Fatal(err)
 				}
