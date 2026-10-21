@@ -62,9 +62,13 @@ func TestServerCopyNativeConditions(t *testing.T) {
 				old, _ := plain.StatObject(ctx, bucket, dest, minio.StatObjectOptions{})
 				opts.SetMatchETag(old.ETag)
 			}
-			gets, parts, completes := 0, 0, 0
+			gets, parts, completes, aborts := 0, 0, 0, 0
+			uploadID, abortStatus := "", 0
 			changed := false
 			transport := copyTransport(func(r *http.Request) (*http.Response, error) {
+				if id := r.URL.Query().Get("uploadId"); id != "" {
+					uploadID = id
+				}
 				if r.Method == "GET" {
 					gets++
 				}
@@ -92,7 +96,14 @@ func TestServerCopyNativeConditions(t *testing.T) {
 						put(dest, "external")
 					}
 				}
-				return http.DefaultTransport.RoundTrip(r)
+				response, err := http.DefaultTransport.RoundTrip(r)
+				if r.Method == http.MethodDelete && r.URL.Query().Has("uploadId") {
+					aborts++
+					if response != nil {
+						abortStatus = response.StatusCode
+					}
+				}
+				return response, err
 			})
 			client, e := minio.New("127.0.0.1:19000", &minio.Options{Creds: creds, Region: "us-east-1", Transport: transport, MaxRetries: 1})
 			if e != nil {
@@ -128,9 +139,23 @@ func TestServerCopyNativeConditions(t *testing.T) {
 					t.Fatal("external destination lost")
 				}
 			}
-			pending, e := (minio.Core{Client: plain}).ListMultipartUploads(ctx, bucket, "", "", "", "", 100)
+			wantAborts := 1
+			if scenario == "normal" {
+				wantAborts = 0
+			}
+			if uploadID == "" || aborts != wantAborts {
+				t.Fatal("multipart cleanup was not attempted exactly once", uploadID, aborts, wantAborts)
+			}
+			core := minio.Core{Client: plain}
+			// An empty-prefix listing uses MinIO's node-local multipart cache.
+			// Check the exact upload and key against storage instead.
+			_, partsErr := core.ListObjectParts(ctx, bucket, dest, uploadID, 0, 1)
+			if minio.ToErrorResponse(partsErr).Code != "NoSuchUpload" {
+				t.Fatalf("copy upload still exists: key=%s upload=%s abort_status=%d error=%v", dest, uploadID, abortStatus, partsErr)
+			}
+			pending, e := core.ListMultipartUploads(ctx, bucket, dest, "", "", "", 100)
 			if e != nil || len(pending.Uploads) != 0 {
-				t.Fatal("multipart leaked", e)
+				t.Fatalf("multipart leaked: key=%s uploads=%+v abort_status=%d error=%v", dest, pending.Uploads, abortStatus, e)
 			}
 		})
 	}
