@@ -4,7 +4,8 @@ import (
 	"context"
 
 	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/objects/write"
+	"minio-web/api/src/services/messages"
+	objectwrite "minio-web/api/src/services/objects/write"
 	"minio-web/api/src/services/result"
 	"minio-web/api/src/services/staging"
 	"minio-web/api/src/services/uploads/source"
@@ -24,7 +25,7 @@ type PreparedImport struct {
 func PrepareImport(ctx context.Context, s ImportClient, bucket, key string, body ImportRequest) (*PreparedImport, error) {
 	var err error
 	if bucket == "" || len(bucket) > 63 || !validationsvc.ValidFileKey(key) {
-		return nil, apperror.New(400, "InvalidKey", "Некорректный путь назначения.")
+		return nil, apperror.New(400, "InvalidKey", messages.UploadsInvalidKey)
 	}
 	if _, err = source.ParseURL(body.URL); err != nil {
 		return nil, err
@@ -40,7 +41,7 @@ func PrepareImport(ctx context.Context, s ImportClient, bucket, key string, body
 }
 func Import(ctx context.Context, budget *staging.Budget, remote RemoteSource, job *PreparedImport, send func(result.StreamEvent[ImportResult])) (int64, error) {
 	if job == nil || job.client == nil {
-		return 0, apperror.New(400, "ImportNotPrepared", "Подготовьте импорт перед запуском.")
+		return 0, apperror.New(400, "ImportNotPrepared", messages.UploadsImportNotPrepared)
 	}
 	s, bucket, key := job.client, job.bucket, job.key
 	send(result.StreamEvent[ImportResult]{Progress: &result.Progress{Bytes: 0, Total: MaxRemoteSize}})

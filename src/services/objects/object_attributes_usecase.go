@@ -9,6 +9,7 @@ import (
 	"unicode"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/storage"
 )
 
@@ -37,21 +38,21 @@ func GetAttributes(ctx context.Context, client ReadAttributesClient, input Objec
 		return ObjectAttributes{}, err
 	}
 	if len(input.VersionID) > 1024 || strings.ContainsFunc(input.VersionID, unicode.IsControl) {
-		return ObjectAttributes{}, apperror.New(400, "InvalidVersion", "Укажите корректный идентификатор версии.")
+		return ObjectAttributes{}, apperror.New(400, "InvalidVersion", messages.ObjectsInvalidVersion)
 	}
 	if input.MaxParts == 0 {
 		input.MaxParts = 100
 	}
 	if input.MaxParts < 1 || input.MaxParts > MaxObjectAttributeParts || input.PartNumberMarker < 0 || input.PartNumberMarker > 10000 {
-		return ObjectAttributes{}, apperror.New(400, "InvalidObjectAttributes", "Размер страницы — от 1 до 1000, маркер части — от 0 до 10000.")
+		return ObjectAttributes{}, apperror.New(400, "InvalidObjectAttributes", messages.ObjectsInvalidObjectAttributes)
 	}
 	if input.Snapshot != "" {
 		if raw, e := hex.DecodeString(input.Snapshot); e != nil || len(raw) != sha256.Size {
-			return ObjectAttributes{}, apperror.New(400, "InvalidAttributesSnapshot", "Некорректный снимок атрибутов.")
+			return ObjectAttributes{}, apperror.New(400, "InvalidAttributesSnapshot", messages.ObjectsInvalidAttributesSnapshot)
 		}
 	}
 	if input.PartNumberMarker > 0 && !immutablePropertyVersion(input.VersionID) && input.Snapshot == "" {
-		return ObjectAttributes{}, apperror.New(400, "AttributesSnapshotRequired", "Для продолжения укажите snapshot предыдущей страницы либо конкретную неизменяемую версию.")
+		return ObjectAttributes{}, apperror.New(400, "AttributesSnapshotRequired", messages.ObjectsAttributesSnapshotRequired)
 	}
 	page, err := client.ReadObjectAttributes(ctx, bucket, key, storage.ObjectAttributesOptions{VersionID: input.VersionID, MaxParts: input.MaxParts, PartNumberMarker: input.PartNumberMarker})
 	if err != nil {
@@ -75,10 +76,10 @@ func GetAttributes(ctx context.Context, client ReadAttributesClient, input Objec
 		result.Snapshot = hex.EncodeToString(digest[:])
 	}
 	if input.Snapshot != "" && input.Snapshot != result.Snapshot {
-		return ObjectAttributes{}, apperror.New(409, "ObjectAttributesChanged", "Объект изменился между страницами. Начните чтение атрибутов заново.")
+		return ObjectAttributes{}, apperror.New(409, "ObjectAttributesChanged", messages.ObjectsObjectAttributesChanged)
 	}
 	if page.Truncated != nil && *page.Truncated && result.Snapshot == "" && !immutablePropertyVersion(input.VersionID) {
-		return ObjectAttributes{}, apperror.New(502, "AttributesSnapshotUnavailable", "Хранилище не вернуло идентификаторы для безопасного продолжения. Укажите конкретную версию объекта.")
+		return ObjectAttributes{}, apperror.New(502, "AttributesSnapshotUnavailable", messages.ObjectsAttributesSnapshotUnavailable)
 	}
 	return result, nil
 }

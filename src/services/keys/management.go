@@ -9,6 +9,7 @@ import (
 	"github.com/minio/madmin-go/v3"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	validationsvc "minio-web/api/src/services/validation"
 )
 
@@ -30,7 +31,7 @@ func ListKeys(ctx context.Context, s ListKeysClient, temporary bool, scope, pare
 		scope = "own"
 	}
 	if scope != "own" && scope != "all" && scope != "user" || scope == "user" && !validationsvc.ValidName(parent) || scope != "user" && parent != "" {
-		return nil, apperror.New(400, "InvalidScope", "Выберите свои ключи, все ключи или одного пользователя.")
+		return nil, apperror.New(400, "InvalidScope", messages.KeysInvalidScope)
 	}
 	rows := make([]AccessKeyRow, 0)
 	if !temporary && scope != "all" {
@@ -114,7 +115,7 @@ func CreateKey(ctx context.Context, s CreateKeyClient, b KeyInput) (GeneratedKey
 }
 func EnsureMutable(s EnsureMutableClient, name string) error {
 	if name == s.ActorName() {
-		return apperror.New(409, "CurrentAccessKey", "Нельзя менять или удалять ключ текущего подключения. Подключитесь с другим ключом.")
+		return apperror.New(409, "CurrentAccessKey", messages.KeysCurrentAccessKey)
 	}
 	return nil
 }

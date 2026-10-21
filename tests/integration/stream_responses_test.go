@@ -3,7 +3,6 @@ package integration
 import (
 	"context"
 	"io"
-	"minio-web/api/tests/testsession"
 	"net/http/httptest"
 	"net/url"
 	"strings"
@@ -13,9 +12,11 @@ import (
 
 	uploadscontroller "minio-web/api/src/http/api/routes/uploads/controllers"
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	runtimesvc "minio-web/api/src/services/runtime"
 	"minio-web/api/src/services/telemetry"
 	"minio-web/api/src/services/uploads/source"
+	"minio-web/api/tests/testsession"
 )
 
 type rejectingStreamWriter struct {
@@ -52,7 +53,7 @@ func TestImportStreamFailureDoesNotCommitIntegration(t *testing.T) {
 					return source.File{}, err
 				}
 				if phase == "source-error" {
-					return source.File{}, apperror.New(502, "SourceResponse", "Источник не вернул файл (ожидается HTTP 200).")
+					return source.File{}, apperror.New(502, "SourceResponse", messages.RemotesourceSourceResponse)
 				}
 				return source.File{Size: 4, Body: io.NopCloser(strings.NewReader("body")), ContentType: "text/plain"}, nil
 			})

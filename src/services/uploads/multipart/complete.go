@@ -8,7 +8,8 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/objects/write"
+	"minio-web/api/src/services/messages"
+	objectwrite "minio-web/api/src/services/objects/write"
 	"minio-web/api/src/services/uploads"
 	"minio-web/api/src/services/uploads/integrity"
 )
@@ -42,7 +43,7 @@ func Complete(ctx context.Context, store Store, c Client, id string) (Snapshot, 
 		return Snapshot{}, err
 	}
 	if len(parts) != o.count {
-		return Snapshot{}, apperror.New(409, "MissingUploadParts", "Передайте все части перед завершением загрузки.")
+		return Snapshot{}, apperror.New(409, "MissingUploadParts", messages.UploadsMissingUploadParts)
 	}
 	for i, p := range parts {
 		if p.Number != i+1 {
@@ -51,7 +52,7 @@ func Complete(ctx context.Context, store Store, c Client, id string) (Snapshot, 
 	}
 	checksum := composite(parts)
 	if o.checksum != nil && o.checksum.Value != checksum {
-		return Snapshot{}, invalid("ChecksumMismatch", "SHA256 COMPOSITE частей не совпадает с ожидаемой.")
+		return Snapshot{}, invalid("ChecksumMismatch", messages.UploadsTheSHA256COMPOSITEChecksumOfTheParts)
 	}
 	current, err := objectwrite.DestinationState(ctx, c, o.bucket, o.key)
 	if err != nil {
@@ -97,7 +98,7 @@ func Complete(ctx context.Context, store Store, c Client, id string) (Snapshot, 
 		return o.Snapshot(), nil
 	}
 	if info.ETag == "" || info.Bucket != "" && info.Bucket != o.bucket || info.Key != "" && info.Key != o.key {
-		observe(ctx, c, "complete", o.bucket, o.key, apperror.New(502, "InvalidCompleteResponse", "Некорректный ответ хранилища."))
+		observe(ctx, c, "complete", o.bucket, o.key, apperror.New(502, "InvalidCompleteResponse", messages.UploadsInvalidCompleteResponse))
 		o.mu.Lock()
 		o.state = "complete_uncertain"
 		o.reason = "InvalidCompleteResponse"

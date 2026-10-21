@@ -8,7 +8,8 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/objects/state"
+	"minio-web/api/src/services/messages"
+	objectstate "minio-web/api/src/services/objects/state"
 )
 
 const MaxFileSize int64 = 5 * 1024 * 1024 * 1024
@@ -34,7 +35,7 @@ func DestinationState(ctx context.Context, s StateReader, bucket, key string) (F
 
 func WriteOptions(current FileState, expected, contentType string) (minio.PutObjectOptions, error) {
 	if expected == "" || current.Revision != expected {
-		return minio.PutObjectOptions{}, apperror.New(409, "DestinationChanged", "Файл назначения изменился. Проверьте его и снова выберите: пропустить или перезаписать.")
+		return minio.PutObjectOptions{}, apperror.New(409, "DestinationChanged", messages.ObjectsDestinationChanged)
 	}
 	opts := minio.PutObjectOptions{ContentType: contentType, PartSize: 16 * 1024 * 1024, NumThreads: 1}
 	if current.Exists {
@@ -47,7 +48,7 @@ func WriteOptions(current FileState, expected, contentType string) (minio.PutObj
 
 func FileWriteError(err error) error {
 	if code := minio.ToErrorResponse(err).Code; code == "PreconditionFailed" || code == "ConditionalRequestConflict" {
-		return apperror.New(409, "DestinationChanged", "Файл изменился во время операции. Проверьте состояние перед повтором.")
+		return apperror.New(409, "DestinationChanged", messages.ObjectsDestinationChangedConditional)
 	}
 	return err
 }

@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 type Policy struct {
@@ -33,10 +34,10 @@ var reservedNetworks = [...]netip.Prefix{
 func Parse(value string) (*url.URL, error) {
 	u, err := url.Parse(strings.TrimSpace(value))
 	if err != nil || u == nil || (u.Scheme != "https" && u.Scheme != "http") || u.Hostname() == "" || u.User != nil || u.RawQuery != "" || u.ForceQuery || u.Fragment != "" || (u.Path != "" && u.Path != "/") {
-		return nil, apperror.New(400, "InvalidEndpoint", "Укажите HTTP(S) адрес S3 API без пути, параметров и встроенного пароля.")
+		return nil, apperror.New(400, "InvalidEndpoint", messages.EndpointInvalidEndpoint)
 	}
 	if u.Opaque != "" || strings.Contains(u.Hostname(), "%") {
-		return nil, apperror.New(400, "InvalidEndpoint", "Некорректный адрес S3 API.")
+		return nil, apperror.New(400, "InvalidEndpoint", messages.EndpointInvalidEndpointEndpoint)
 	}
 	u.Path = ""
 	u.RawPath = ""
@@ -75,17 +76,17 @@ func Transport(ctx context.Context, c Policy, public *url.URL) (*http.Transport,
 		trusted = true
 	}
 	if !trusted && public.Scheme != "https" {
-		return nil, nil, apperror.New(400, "EndpointNotAllowed", "Для HTTP или внутреннего MinIO добавьте адрес в MINIO_ALLOWED_ENDPOINTS сервиса API.")
+		return nil, nil, apperror.New(400, "EndpointNotAllowed", messages.EndpointEndpointNotAllowed)
 	}
 	resolve := func(ctx context.Context, host string) ([]net.IPAddr, error) {
 		ips, err := net.DefaultResolver.LookupIPAddr(ctx, host)
 		if err != nil || len(ips) == 0 {
-			return nil, apperror.NewWithCause(502, "EndpointUnavailable", "Не удалось найти S3 API. Проверьте адрес и DNS из контейнера API.", err)
+			return nil, apperror.NewWithCause(502, "EndpointUnavailable", messages.EndpointEndpointUnavailable, err)
 		}
 		if !trusted {
 			for _, ip := range ips {
 				if !PublicIP(ip.IP) {
-					return nil, apperror.New(400, "EndpointNotAllowed", "Внутренний адрес MinIO нужно разрешить через MINIO_ALLOWED_ENDPOINTS сервиса API.")
+					return nil, apperror.New(400, "EndpointNotAllowed", messages.EndpointEndpointNotAllowedEndpoint)
 				}
 			}
 		}

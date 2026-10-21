@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/minio/minio-go/v7"
+
 	searchsvc "minio-web/api/src/services/search"
 )
 

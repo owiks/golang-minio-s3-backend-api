@@ -7,11 +7,12 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 func CreateFolder(ctx context.Context, lock func(context.Context, string) (func(), error), s CreateFolderClient, body CreateFolderRequest) (CreatedFolder, error) {
 	if body.Bucket == "" || len(body.Bucket) > 63 {
-		return CreatedFolder{}, apperror.New(400, "InvalidFolderPath", "Укажите корректный бакет.")
+		return CreatedFolder{}, apperror.New(400, "InvalidFolderPath", messages.FoldersInvalidFolderPath)
 	}
 	key, err := FolderKey(body.Prefix, body.Name)
 	if err != nil {

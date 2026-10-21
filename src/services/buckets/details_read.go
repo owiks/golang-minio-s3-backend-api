@@ -10,6 +10,7 @@ import (
 
 	accesssvc "minio-web/api/src/services/access"
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 func ReadUsage(ctx context.Context, s ReadUsageClient) (UsageReply, error) {
@@ -37,13 +38,13 @@ func ReadDetails(ctx context.Context, s ReadDetailsClient, bucket, rawFields str
 	fields := []string{"policy", "quota", "versioning", "locking", "tags", "lifecycle", "cors", "encryption"}
 	if raw := rawFields; raw != "" {
 		if len(raw) > 128 {
-			return nil, apperror.New(400, "InvalidBucketField", "Выберите доступный раздел настроек.")
+			return nil, apperror.New(400, "InvalidBucketField", messages.BucketsInvalidBucketField)
 		}
 		fields = strings.Split(raw, ",")
 	}
 	for _, field := range fields {
 		if !allowed[field] {
-			return nil, apperror.New(400, "InvalidBucketField", "Выберите доступный раздел настроек.")
+			return nil, apperror.New(400, "InvalidBucketField", messages.BucketsInvalidBucketField)
 		}
 	}
 	result := &BucketDetails{Name: bucket}

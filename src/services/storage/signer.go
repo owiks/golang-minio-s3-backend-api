@@ -5,7 +5,9 @@ import (
 	"strings"
 
 	"github.com/minio/minio-go/v7"
+
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 // NewSigner constructs an official SDK client with a network-disabled request
@@ -14,7 +16,7 @@ import (
 func NewSigner(c Config) (*minio.Client, error) {
 	c.Region = strings.TrimSpace(c.Region)
 	if c.Region == "" {
-		return nil, apperror.New(400, "SigningRegionRequired", "Для подписи запросов нужен регион хранилища.")
+		return nil, apperror.New(400, "SigningRegionRequired", messages.StorageSigningRegionRequired)
 	}
 	return NewS3(c, offlineSigningTransport{})
 }
@@ -22,5 +24,5 @@ func NewSigner(c Config) (*minio.Client, error) {
 type offlineSigningTransport struct{}
 
 func (offlineSigningTransport) RoundTrip(*http.Request) (*http.Response, error) {
-	return nil, apperror.New(502, "SigningNetworkDisabled", "Подпись запроса не должна обращаться к сети. Проверьте регион подключения.")
+	return nil, apperror.New(502, "SigningNetworkDisabled", messages.StorageSigningNetworkDisabled)
 }

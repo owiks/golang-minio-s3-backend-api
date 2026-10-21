@@ -13,6 +13,7 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/result"
 	"minio-web/api/src/services/staging"
 	"minio-web/api/src/services/uploads/source"
@@ -196,7 +197,7 @@ func TestStagingUsesOnlySourcePortAndOwnsResources(t *testing.T) {
 }
 
 func TestSourceFailurePreventsStagingAndWrites(t *testing.T) {
-	failure := apperror.New(502, "SourceUnavailable", "safe source error")
+	failure := apperror.New(502, "SourceUnavailable", messages.Literal("safe source error"))
 	budget := staging.New(4)
 	remote := importSourceFunc(func(context.Context, string) (source.File, error) { return source.File{}, failure })
 	file, size, contentType, err := StageRemote(context.Background(), remote, "https://example.org/file", func(int64, int64) { t.Fatal("failed source reported progress") }, budget)

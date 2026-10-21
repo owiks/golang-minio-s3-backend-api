@@ -11,8 +11,9 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/archives/plan"
-	"minio-web/api/src/services/objects/state"
+	archiveplan "minio-web/api/src/services/archives/plan"
+	"minio-web/api/src/services/messages"
+	objectstate "minio-web/api/src/services/objects/state"
 	"minio-web/api/src/services/result"
 	"minio-web/api/src/services/telemetry"
 )
@@ -26,7 +27,7 @@ type ArchiveRequest struct {
 func availablePlan(store ReadArchiveStore, owner, ticket string) (*archiveplan.ArchivePlan, error) {
 	plan := store.Get(ticket, owner)
 	if plan == nil || !plan.Available(owner, time.Now()) {
-		return nil, apperror.New(404, "ArchiveExpired", "Архив больше недоступен. Подготовьте его заново.")
+		return nil, apperror.New(404, "ArchiveExpired", messages.ArchivesArchiveExpired)
 	}
 	return plan, nil
 }
@@ -115,20 +116,23 @@ func StartDownload(parent context.Context, store ReadArchiveStore, s StartDownlo
 	}
 	return &Download{ctx: ctx, cancel: cancel, plan: plan, items: snapshot.Items, name: snapshot.Name, ticket: ticket, session: s}, nil
 }
-func (d *Download) StreamTo(target io.Writer) error {
+func (d *Download) StreamTo(target io.Writer, manifestView func(Manifest) any) error {
+	if manifestView == nil {
+		return apperror.New(500, "ManifestRendererMissing", messages.InternalError)
+	}
 	d.mu.Lock()
 	if d.finished || d.streamStarted {
 		d.mu.Unlock()
 		if err := d.ctx.Err(); err != nil {
 			return err
 		}
-		return apperror.New(409, "ArchiveStarted", "Скачивание уже запускалось. Для повтора подготовьте архив заново.")
+		return apperror.New(409, "ArchiveStarted", messages.ArchivesArchiveStarted)
 	}
 	d.streamStarted = true
 	d.mu.Unlock()
 	ctx, plan, items, ticket, s := d.ctx, d.plan, d.items, d.ticket, d.session
 	finalized := false
-	setResult := func(i int, state, message string) {
+	setResult := func(i int, state string, message messages.Ref) {
 		if state == "done" {
 			plan.CompleteItem(i)
 		} else {
@@ -168,7 +172,7 @@ func (d *Download) StreamTo(target io.Writer) error {
 		}
 		if objectstate.DeletionRevision(objectstate.DeletionSnapshot{ETag: info.ETag, Size: info.Size, Modified: info.LastModified, Version: info.VersionID}) != objectstate.DeletionRevision(item.Info) {
 			object.Close()
-			setResult(i, "error", "Файл изменился после проверки. Подготовьте новый архив.")
+			setResult(i, "error", messages.ArchivesTheFileChangedAfterVerificationPrepareA)
 			continue
 		}
 		header := &zip.FileHeader{Name: item.Path, Method: zip.Store}
@@ -186,9 +190,9 @@ func (d *Download) StreamTo(target io.Writer) error {
 			return io.ErrUnexpectedEOF
 		}
 		if err != nil || written != item.Size {
-			setResult(i, "error", "Файл не удалось прочитать полностью. Не используйте эту копию.")
+			setResult(i, "error", messages.ArchivesCouldNotReadTheEntireFileDo)
 		} else {
-			setResult(i, "done", "")
+			setResult(i, "done", nil)
 		}
 	}
 	if ctx.Err() != nil {
@@ -207,7 +211,7 @@ func (d *Download) StreamTo(target io.Writer) error {
 	}
 	snapshot := plan.Snapshot(ticket)
 	items = snapshot.Items
-	if err = json.NewEncoder(file).Encode(map[string]any{"bucket": plan.Bucket(), "files": items, "issues": snapshot.Issues}); err != nil {
+	if err = json.NewEncoder(file).Encode(manifestView(Manifest{Bucket: plan.Bucket(), Files: items, Issues: snapshot.Issues})); err != nil {
 		return err
 	}
 	err = zw.Close()
@@ -216,4 +220,11 @@ func (d *Download) StreamTo(target io.Writer) error {
 		return err
 	}
 	return nil
+}
+
+// Manifest is rendered by the caller at delivery time; the plan stores no language.
+type Manifest struct {
+	Bucket string                    `json:"bucket"`
+	Files  []archiveplan.ArchiveItem `json:"files"`
+	Issues map[string]messages.Ref   `json:"issues"`
 }

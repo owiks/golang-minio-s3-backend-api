@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/telemetry"
 )
 
@@ -23,7 +24,7 @@ func (app *State) AcquireMutation(ctx context.Context, s *Session, resource stri
 func (app *State) AcquireTransfer(principal string) (func(), error) {
 	release, ok := app.transfers.Try(principal)
 	if !ok {
-		return nil, apperror.New(429, "TransferLimit", "Достигнут лимит передач. Дождитесь завершения текущих операций и повторите.")
+		return nil, apperror.New(429, "TransferLimit", messages.RuntimeTransferLimit)
 	}
 	return release, nil
 }
@@ -36,17 +37,17 @@ func fingerprint(value string) string {
 func (app *State) AdmitLogin(address string) (func(), time.Duration, error) {
 	key := fingerprint(address)
 	if ok, wait := app.loginAttempts.Allow(key, time.Now()); !ok {
-		return nil, wait, apperror.New(429, "LoginRateLimit", "Слишком много попыток подключения. Подождите и повторите.")
+		return nil, wait, apperror.New(429, "LoginRateLimit", messages.RuntimeLoginRateLimit)
 	}
 	release, ok := app.logins.Try(key)
 	if !ok {
-		return nil, time.Second, apperror.New(429, "TooManyRequests", "Слишком много одновременных подключений. Попробуйте позже.")
+		return nil, time.Second, apperror.New(429, "TooManyRequests", messages.RuntimeTooManyRequests)
 	}
 	return release, 0, nil
 }
 func (app *State) AdmitIdentity(endpoint, actor string) error {
 	if ok, _ := app.loginIdentities.Allow(fingerprint(endpoint+"\x00"+actor), time.Now()); !ok {
-		return apperror.New(429, "LoginRateLimit", "Слишком много попыток подключения с этим ключом. Подождите и повторите.")
+		return apperror.New(429, "LoginRateLimit", messages.RuntimeLoginRateLimitAdmission)
 	}
 	return nil
 }

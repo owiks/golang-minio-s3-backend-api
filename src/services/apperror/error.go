@@ -8,24 +8,25 @@ import (
 	"github.com/minio/madmin-go/v3"
 	"github.com/minio/minio-go/v7"
 
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/upstream"
 )
 
 type Error struct {
-	Status  int    `json:"-"`
-	Code    string `json:"code"`
-	Message string `json:"message"`
+	Status  int          `json:"-"`
+	Code    string       `json:"code"`
+	Message messages.Ref `json:"message"`
 	cause   upstream.Cause
 }
 
 func (e *Error) Error() string { return e.Code }
-func New(status int, code, message string) error {
+func New(status int, code string, message messages.Ref) error {
 	return &Error{Status: status, Code: code, Message: message}
 }
 func (e *Error) DiagnosticCause() upstream.Cause { return e.cause }
 
 // NewWithCause retains only detached diagnostic metadata, never the raw error.
-func NewWithCause(status int, code, message string, err error) error {
+func NewWithCause(status int, code string, message messages.Ref, err error) error {
 	return &Error{Status: status, Code: code, Message: message, cause: diagnosticCause(err)}
 }
 func diagnosticCause(err error) upstream.Cause {
@@ -48,30 +49,30 @@ func Public(err error) (result *Error) {
 	}
 	switch code {
 	case "InvalidAccessKeyId", "SignatureDoesNotMatch":
-		return &Error{Status: 403, Code: code, Message: "Не удалось проверить ключи. Проверьте Access Key, Secret Key, регион и часы устройства."}
+		return &Error{Status: 403, Code: code, Message: messages.ApperrorCouldNotVerifyTheCredentialsCheckThe}
 	case "AccessDenied", "XMinioAdminAccessDenied":
-		return &Error{Status: 403, Code: "AccessDenied", Message: "Недостаточно прав MinIO для этой операции."}
+		return &Error{Status: 403, Code: "AccessDenied", Message: messages.ApperrorInsufficientMinIOPermissionsForThisOperation}
 	case "NoSuchBucket", "NoSuchKey", "NoSuchUpload", "XMinioAdminNoSuchUser", "XMinioAdminNoSuchGroup", "XMinioAdminNoSuchPolicy", "XMinioAdminNoSuchServiceAccount":
-		return &Error{Status: 404, Code: code, Message: "Ресурс больше не существует. Обновите список."}
+		return &Error{Status: 404, Code: code, Message: messages.ApperrorTheResourceNoLongerExistsRefreshThe}
 	case "InvalidBucketState":
-		return &Error{Status: 409, Code: code, Message: "Состояние бакета не позволяет применить эту настройку."}
+		return &Error{Status: 409, Code: code, Message: messages.ApperrorTheBucketStateDoesNotAllowThis}
 	case "BucketNotEmpty":
-		return &Error{Status: 409, Code: code, Message: "Бакет не пуст. Удаление объектов, версий и delete markers в этой операции не выполняется."}
+		return &Error{Status: 409, Code: code, Message: messages.ApperrorTheBucketIsNotEmptyThisOperation}
 	case "BadDigest", "XAmzContentSHA256Mismatch", "ChecksumMismatch":
-		return &Error{Status: 400, Code: "ChecksumMismatch", Message: "Хранилище отклонило данные: контрольная сумма не совпадает. Проверьте состояние загрузки перед повтором."}
+		return &Error{Status: 400, Code: "ChecksumMismatch", Message: messages.ApperrorTheStorageRejectedTheDataBecauseThe}
 	case "InvalidDigest":
-		return &Error{Status: 400, Code: "InvalidChecksum", Message: "Хранилище отклонило формат контрольной суммы. Проверьте алгоритм и кодировку."}
+		return &Error{Status: 400, Code: "InvalidChecksum", Message: messages.ApperrorTheStorageRejectedTheChecksumFormatCheck}
 	case "BucketAlreadyExists", "BucketAlreadyOwnedByYou", "XMinioAdminGroupNotEmpty", "XMinioAdminPolicyInUse":
-		return &Error{Status: 409, Code: code, Message: "Ресурс уже существует или используется. Обновите список и проверьте зависимости."}
+		return &Error{Status: 409, Code: code, Message: messages.ApperrorTheResourceAlreadyExistsOrIsIn}
 	case "InvalidBucketName", "InvalidArgument", "MalformedPolicy", "XMinioAdminInvalidArgument", "XMinioAdminInvalidAccessKey", "XMinioAdminInvalidSecretKey", "EntityTooLarge":
-		return &Error{Status: 400, Code: code, Message: "MinIO отклонил параметры. Проверьте имя, пароль или документ политики."}
+		return &Error{Status: 400, Code: code, Message: messages.ApperrorMinIORejectedTheParametersCheckTheName}
 	case "ExpiredToken", "InvalidToken":
-		return &Error{Status: 403, Code: code, Message: "Токен MinIO недействителен или истёк. Подключитесь заново."}
+		return &Error{Status: 403, Code: code, Message: messages.ApperrorTheMinIOTokenIsInvalidOrExpired}
 	case "NotImplemented", "XMinioAdminNotImplemented":
-		return &Error{Status: 501, Code: code, Message: "Эта операция не поддерживается версией или типом сервера."}
+		return &Error{Status: 501, Code: code, Message: messages.ApperrorThisServerVersionOrTypeDoesNot}
 	}
 	if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
-		return &Error{Status: 504, Code: "Timeout", Message: "S3 API не ответил вовремя. Обновите состояние перед повтором операции."}
+		return &Error{Status: 504, Code: "Timeout", Message: messages.ApperrorTheS3APIDidNotRespondIn}
 	}
-	return &Error{Status: 502, Code: "UpstreamError", Message: "Не удалось выполнить запрос к MinIO. Проверьте адрес, доступ из контейнера API, сертификат и права пользователя."}
+	return &Error{Status: 502, Code: "UpstreamError", Message: messages.ApperrorCouldNotCompleteTheMinIORequestCheck}
 }

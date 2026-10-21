@@ -6,13 +6,14 @@ import (
 	httpcommon "minio-web/api/src/http/api/common"
 	httpvalidation "minio-web/api/src/http/validation"
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	runtimesvc "minio-web/api/src/services/runtime"
 	transferssvc "minio-web/api/src/services/transfers"
 )
 
 func HandleFileTransfer(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
 	if r.Method != "POST" {
-		return apperror.New(405, "MethodNotAllowed", "Метод не поддерживается.")
+		return apperror.New(405, "MethodNotAllowed", messages.HttpMethodNotAllowed)
 	}
 	var body transferssvc.FileTransferRequest
 	if err := httpvalidation.Decode(w, r, &body); err != nil {
@@ -22,6 +23,6 @@ func HandleFileTransfer(app *runtimesvc.State, w http.ResponseWriter, r *http.Re
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }

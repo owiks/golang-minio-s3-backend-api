@@ -11,6 +11,7 @@ import (
 
 	"minio-web/api/src/services/apperror"
 	"minio-web/api/src/services/coordination"
+	"minio-web/api/src/services/messages"
 	objectssvc "minio-web/api/src/services/objects"
 	"minio-web/api/src/services/result"
 )
@@ -22,7 +23,7 @@ type PublicFolderOptions struct {
 func ReadPublicFolder(ctx context.Context, store PublicFolderStore, admission coordination.TransferAdmission, token string, input PublicFolderOptions) (PublicFolderResult, error) {
 	g := store.Get(token)
 	if g == nil {
-		return PublicFolderResult{}, apperror.New(404, "FolderShareExpired", "Ссылка недействительна или истекла.")
+		return PublicFolderResult{}, apperror.New(404, "FolderShareExpired", messages.FoldersFolderShareExpired)
 	}
 	ctx, release, err := g.BeginRead(ctx, admission)
 	if err != nil {
@@ -35,7 +36,7 @@ func ReadPublicFolder(ctx context.Context, store PublicFolderStore, admission co
 	case "list":
 		prefix, cursor := input.Prefix, input.Cursor
 		if !SharePrefix(prefix) || !strings.HasPrefix(prefix, g.Prefix()) || len(cursor) > 8192 {
-			return PublicFolderResult{}, apperror.New(403, "FolderScopeDenied", "Папка недоступна по этой ссылке.")
+			return PublicFolderResult{}, apperror.New(403, "FolderScopeDenied", messages.FoldersFolderScopeDenied)
 		}
 		page, e := ScopedObjectPage(ctx, g.Reader(), g.Bucket(), prefix, cursor, "/", 200)
 		if e != nil {
@@ -62,7 +63,7 @@ func ReadPublicFolder(ctx context.Context, store PublicFolderStore, admission co
 	case "preview", "ticket":
 		key := input.Key
 		if !g.Contains(key) || strings.HasSuffix(key, "/") {
-			return PublicFolderResult{}, apperror.New(403, "FolderScopeDenied", "Файл недоступен по этой ссылке.")
+			return PublicFolderResult{}, apperror.New(403, "FolderScopeDenied", messages.FoldersFolderScopeDeniedPublicUsecase)
 		}
 		info, e := g.Reader().StatObject(ctx, g.Bucket(), key, minio.StatObjectOptions{})
 		if e != nil {
@@ -71,11 +72,11 @@ func ReadPublicFolder(ctx context.Context, store PublicFolderStore, admission co
 		if input.Mode == "ticket" {
 			mode := input.Kind
 			if mode != "download" && mode != "media" {
-				return PublicFolderResult{}, apperror.New(400, "InvalidTicket", "Неверный вид ссылки.")
+				return PublicFolderResult{}, apperror.New(400, "InvalidTicket", messages.FoldersInvalidTicket)
 			}
 			kind, _ := objectssvc.PreviewKind(key)
 			if mode == "media" && kind != "audio" && kind != "video" {
-				return PublicFolderResult{}, apperror.New(415, "UnsupportedPreview", "Формат недоступен для потокового просмотра.")
+				return PublicFolderResult{}, apperror.New(415, "UnsupportedPreview", messages.FoldersUnsupportedPreview)
 			}
 			id, err := store.IssueTicket(g, key, mode)
 			if err != nil {
@@ -89,10 +90,10 @@ func ReadPublicFolder(ctx context.Context, store PublicFolderStore, admission co
 			limit = objectssvc.MaxTextContent
 		}
 		if kind != "text" && kind != "image" && kind != "pdf" {
-			return PublicFolderResult{}, apperror.New(415, "UnsupportedPreview", "Предпросмотр недоступен.")
+			return PublicFolderResult{}, apperror.New(415, "UnsupportedPreview", messages.FoldersUnsupportedPreviewPublicUsecase)
 		}
 		if info.Size > limit {
-			return PublicFolderResult{}, apperror.New(413, "PreviewTooLarge", "Файл превышает лимит предпросмотра.")
+			return PublicFolderResult{}, apperror.New(413, "PreviewTooLarge", messages.FoldersPreviewTooLarge)
 		}
 		opts := minio.GetObjectOptions{}
 		_ = opts.SetMatchETag(info.ETag)
@@ -106,21 +107,21 @@ func ReadPublicFolder(ctx context.Context, store PublicFolderStore, admission co
 			return PublicFolderResult{}, e
 		}
 		if int64(len(data)) > limit || int64(len(data)) != info.Size {
-			return PublicFolderResult{}, apperror.New(409, "ObjectChanged", "Файл изменился. Повторите просмотр.")
+			return PublicFolderResult{}, apperror.New(409, "ObjectChanged", messages.FilesObjectChanged)
 		}
 		if kind == "text" && (!utf8.Valid(data) || strings.ContainsRune(string(data), 0)) {
-			return PublicFolderResult{}, apperror.New(415, "InvalidText", "Файл не является текстом UTF-8.")
+			return PublicFolderResult{}, apperror.New(415, "InvalidText", messages.FoldersInvalidText)
 		}
 		return PublicFolderResult{Preview: &objectssvc.PreviewData{ContentType: contentType, Data: data}}, nil
 
 	}
-	return PublicFolderResult{}, apperror.New(404, "NotFound", "Раздел не найден.")
+	return PublicFolderResult{}, apperror.New(404, "NotFound", messages.FoldersNotFound)
 }
 
 func OpenSharedFile(ctx context.Context, store SharedFileTickets, admission coordination.TransferAdmission, id string, consume bool, rangeHeader string) (*SharedRead, error) {
 	ticket, ok := store.TakeTicket(id, consume)
 	if !ok || time.Now().After(ticket.Expires) {
-		return nil, apperror.New(410, "DownloadExpired", "Ссылка на файл истекла. Нажмите «Скачать» ещё раз.")
+		return nil, apperror.New(410, "DownloadExpired", messages.FoldersDownloadExpired)
 	}
 	g := ticket.Share
 	ctx, release, err := g.BeginRead(ctx, admission)
@@ -136,7 +137,7 @@ func OpenSharedFile(ctx context.Context, store SharedFileTickets, admission coor
 		}
 	}()
 	if !g.Contains(ticket.Key) {
-		return nil, apperror.New(403, "FolderScopeDenied", "Файл недоступен.")
+		return nil, apperror.New(403, "FolderScopeDenied", messages.FoldersFolderScopeDeniedPublicUsecaseOpenSharedFile)
 	}
 	info, err := g.Reader().StatObject(ctx, g.Bucket(), ticket.Key, minio.StatObjectOptions{})
 	if err != nil {

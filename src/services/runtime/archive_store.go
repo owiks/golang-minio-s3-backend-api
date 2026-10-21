@@ -6,7 +6,8 @@ import (
 	"time"
 
 	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/archives/plan"
+	archiveplan "minio-web/api/src/services/archives/plan"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/securetoken"
 )
 
@@ -54,7 +55,7 @@ func (store *ArchiveStore) Put(ctx context.Context, plan *archiveplan.ArchivePla
 		}
 	}
 	if count >= 8 || len(store.plans) >= 128 || total+plan.ItemCount() > 10000 {
-		return "", apperror.New(429, "ArchiveLimit", "Достигнут лимит подготовленных архивов. Уберите завершённые операции и повторите.")
+		return "", apperror.New(429, "ArchiveLimit", messages.RuntimeArchiveLimit)
 	}
 	ticket := securetoken.New()
 	store.plans[ticket] = plan

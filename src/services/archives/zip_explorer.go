@@ -8,42 +8,43 @@ import (
 	"strings"
 
 	"minio-web/api/src/services/archives/zipread"
+	"minio-web/api/src/services/messages"
 	validationsvc "minio-web/api/src/services/validation"
 )
 
 const MaxZIPEntry int64 = 256 * 1024 * 1024
 
 type ZipItem struct {
-	Index      int    `json:"index"`
-	Name       string `json:"name"`
-	Size       uint64 `json:"size"`
-	Compressed uint64 `json:"compressed"`
-	Folder     bool   `json:"folder"`
-	Reason     string `json:"reason,omitempty"`
+	Index      int          `json:"index"`
+	Name       string       `json:"name"`
+	Size       uint64       `json:"size"`
+	Compressed uint64       `json:"compressed"`
+	Folder     bool         `json:"folder"`
+	Reason     messages.Ref `json:"reason,omitempty"`
 }
 
-func ZipEntryReason(f *zip.File) string {
+func ZipEntryReason(f *zip.File) messages.Ref {
 	return zipEntryReason(zipread.Entry{Name: f.Name, Size: f.UncompressedSize64, Mode: f.Mode(), Flags: f.Flags, Method: f.Method})
 }
 
-func zipEntryReason(f zipread.Entry) string {
+func zipEntryReason(f zipread.Entry) messages.Ref {
 	name := strings.TrimSuffix(f.Name, "/")
 	if name == "" || strings.HasPrefix(name, "/") || !validationsvc.ValidFileKey(name) || strings.Contains(name, ":") {
-		return "Небезопасный путь"
+		return messages.ArchivesUnsafePath
 	}
 	if f.Mode&os.ModeSymlink != 0 {
-		return "Символическая ссылка"
+		return messages.ArchivesSymbolicLink
 	}
 	if f.Flags&1 != 0 {
-		return "Архив зашифрован"
+		return messages.ArchivesTheArchiveIsEncrypted
 	}
 	if f.Method != zip.Store && f.Method != zip.Deflate {
-		return "Метод сжатия не поддерживается"
+		return messages.ArchivesTheCompressionMethodIsNotSupported
 	}
 	if f.Size > uint64(MaxZIPEntry) {
-		return "Файл больше 256 МиБ"
+		return messages.ArchivesTheFileExceeds256MiB
 	}
-	return ""
+	return nil
 }
 
 type ContextReader struct {

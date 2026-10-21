@@ -6,6 +6,7 @@ import (
 	"math"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 // Hash reads at most size+1 bytes with a bounded buffer and checks both premature
@@ -29,7 +30,7 @@ func Hash(ctx context.Context, source io.Reader, size int64, spec Spec) (Spec, e
 		return Spec{}, err
 	}
 	if n != size {
-		return Spec{}, apperror.New(400, "IncompleteUpload", "Размер переданного файла не совпадает с ожидаемым. Файл не записан.")
+		return Spec{}, apperror.New(400, "IncompleteUpload", messages.UploadSizeMismatch)
 	}
 	return Value(spec, h.Sum(nil)), nil
 }

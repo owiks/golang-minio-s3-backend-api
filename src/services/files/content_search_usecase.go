@@ -9,6 +9,7 @@ import (
 
 	"minio-web/api/src/services/apperror"
 	folderssvc "minio-web/api/src/services/folders"
+	"minio-web/api/src/services/messages"
 	objectssvc "minio-web/api/src/services/objects"
 	searchsvc "minio-web/api/src/services/search"
 	"minio-web/api/src/services/telemetry"
@@ -16,13 +17,13 @@ import (
 
 func SearchContent(ctx context.Context, s SearchContentClient, body searchsvc.ContentSearchBody) (ContentSearchResult, error) {
 	if body.Bucket == "" || len(body.Bucket) > 63 || len(body.Prefix) > 1024 || len(body.Token) > 8192 || len(body.Query) == 0 || len(body.Query) > 256 || !utf8.ValidString(body.Query) || strings.ContainsAny(body.Query, "\r\n\x00") || len(body.Extensions) > 160 || body.MaxSize < 1 || body.MaxSize > objectssvc.MaxTextContent || body.PageSize < 1 || body.PageSize > 20 {
-		return ContentSearchResult{}, apperror.New(400, "InvalidContentSearch", "Введите текст до 256 байт и корректные ограничения поиска.")
+		return ContentSearchResult{}, apperror.New(400, "InvalidContentSearch", messages.FilesInvalidContentSearch)
 	}
 	extensions := searchsvc.NormalizeExtensions(body.Extensions)
 	for ext := range extensions {
 		kind, _ := objectssvc.PreviewKind("file." + ext)
 		if kind != "text" {
-			return ContentSearchResult{}, apperror.New(400, "InvalidContentExtensions", "Выберите текстовые расширения, например json,yaml,txt,log.")
+			return ContentSearchResult{}, apperror.New(400, "InvalidContentExtensions", messages.FilesInvalidContentExtensions)
 		}
 	}
 	page, err := folderssvc.ScopedObjectPage(ctx, s, body.Bucket, body.Prefix, body.Token, "", body.PageSize)

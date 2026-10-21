@@ -1,0 +1,2394 @@
+[
+  {
+    "id": "http.method_not_allowed",
+    "other": "Метод не поддерживается."
+  },
+  {
+    "id": "http.invalid_permission_queries",
+    "other": "Укажите от 1 до 128 проверок."
+  },
+  {
+    "id": "http.invalid_permission_queries_action_access",
+    "other": "Некорректная проверка действия."
+  },
+  {
+    "id": "http.invalid_permission_queries_action_access_handle_action_access",
+    "other": "Неподдерживаемое действие."
+  },
+  {
+    "id": "http.invalid_object_attributes",
+    "other": "Некорректные параметры страницы частей."
+  },
+  {
+    "id": "http.invalid_object_attributes_object_attributes",
+    "other": "Размер страницы должен быть больше нуля."
+  },
+  {
+    "id": "http.method_not_allowed_bucket_update",
+    "other": "Эта настройка не поддерживается."
+  },
+  {
+    "id": "http.invalid_folder_delete",
+    "other": "Выберите конкретную папку. Удаление всего бакета или отдельных версий этим запросом не выполняется."
+  },
+  {
+    "id": "http.invalid_folder_result",
+    "other": "Не удалось сформировать ответ папки."
+  },
+  {
+    "id": "http.invalid_multipartid",
+    "other": "Некорректный идентификатор загрузки."
+  },
+  {
+    "id": "http.invalid_part_number",
+    "other": "Некорректный номер части."
+  },
+  {
+    "id": "http.invalid_part_size",
+    "other": "Размер тела должен совпадать с X-Upload-Size и планом части."
+  },
+  {
+    "id": "http.invalid_delete",
+    "other": "Выберите один файл. Удаление папок и отдельных версий этим запросом не выполняется."
+  },
+  {
+    "id": "http.invalid_select_query",
+    "other": "S3 Select этим API не поддерживает выбор версии или Range."
+  },
+  {
+    "id": "http.origin_denied",
+    "other": "Запрос должен поступать с адреса этого интерфейса."
+  },
+  {
+    "id": "http.invalid_tier_operation",
+    "other": "Неизвестная операция."
+  },
+  {
+    "id": "http.invalid_upload_size",
+    "other": "Размер файла должен совпадать с телом запроса и не превышать 5 ГиБ."
+  },
+  {
+    "id": "http.origin_denied_upload_actions",
+    "other": "Загрузка разрешена только с этой страницы."
+  },
+  {
+    "id": "http.invalid_upload",
+    "other": "Проверьте размер файла."
+  },
+  {
+    "id": "http.internal_error",
+    "other": "Внутренняя ошибка API."
+  },
+  {
+    "id": "http.session_expired",
+    "other": "Сессия истекла. Отключитесь и подключитесь заново."
+  },
+  {
+    "id": "http.session_expired_session",
+    "other": "Сессия недействительна. Подключитесь заново."
+  },
+  {
+    "id": "http.csrf_denied",
+    "other": "Проверка запроса не пройдена. Обновите страницу и подключитесь заново."
+  },
+  {
+    "id": "http.confirmation_required",
+    "other": "Для удаления введите точное имя ресурса."
+  },
+  {
+    "id": "http.json_required",
+    "other": "Ожидается JSON-запрос."
+  },
+  {
+    "id": "http.invalidjson",
+    "other": "Некорректный JSON или превышен размер запроса."
+  },
+  {
+    "id": "http.invalidjson_response",
+    "other": "Ожидается один JSON-документ."
+  },
+  {
+    "id": "access.access_denied",
+    "other": "Недостаточно прав."
+  },
+  {
+    "id": "apperror.could_not_verify_the_credentials_check_the",
+    "other": "Не удалось проверить ключи. Проверьте Access Key, Secret Key, регион и часы устройства."
+  },
+  {
+    "id": "apperror.insufficient_minio_permissions_for_this_operation",
+    "other": "Недостаточно прав MinIO для этой операции."
+  },
+  {
+    "id": "apperror.the_resource_no_longer_exists_refresh_the",
+    "other": "Ресурс больше не существует. Обновите список."
+  },
+  {
+    "id": "apperror.the_bucket_state_does_not_allow_this",
+    "other": "Состояние бакета не позволяет применить эту настройку."
+  },
+  {
+    "id": "apperror.the_bucket_is_not_empty_this_operation",
+    "other": "Бакет не пуст. Удаление объектов, версий и delete markers в этой операции не выполняется."
+  },
+  {
+    "id": "apperror.the_storage_rejected_the_data_because_the",
+    "other": "Хранилище отклонило данные: контрольная сумма не совпадает. Проверьте состояние загрузки перед повтором."
+  },
+  {
+    "id": "apperror.the_storage_rejected_the_checksum_format_check",
+    "other": "Хранилище отклонило формат контрольной суммы. Проверьте алгоритм и кодировку."
+  },
+  {
+    "id": "apperror.the_resource_already_exists_or_is_in",
+    "other": "Ресурс уже существует или используется. Обновите список и проверьте зависимости."
+  },
+  {
+    "id": "apperror.minio_rejected_the_parameters_check_the_name",
+    "other": "MinIO отклонил параметры. Проверьте имя, пароль или документ политики."
+  },
+  {
+    "id": "apperror.the_minio_token_is_invalid_or_expired",
+    "other": "Токен MinIO недействителен или истёк. Подключитесь заново."
+  },
+  {
+    "id": "apperror.this_server_version_or_type_does_not",
+    "other": "Эта операция не поддерживается версией или типом сервера."
+  },
+  {
+    "id": "apperror.thes3api_did_not_respond_in",
+    "other": "S3 API не ответил вовремя. Обновите состояние перед повтором операции."
+  },
+  {
+    "id": "apperror.could_not_complete_the_minio_request_check",
+    "other": "Не удалось выполнить запрос к MinIO. Проверьте адрес, доступ из контейнера API, сертификат и права пользователя."
+  },
+  {
+    "id": "archives.archive_expired",
+    "other": "Архив больше недоступен. Подготовьте его заново."
+  },
+  {
+    "id": "archives.archive_started",
+    "other": "Скачивание уже запускалось. Для повтора подготовьте архив заново."
+  },
+  {
+    "id": "archives.the_file_changed_after_verification_preparea",
+    "other": "Файл изменился после проверки. Подготовьте новый архив."
+  },
+  {
+    "id": "archives.could_not_read_the_entire_file_do",
+    "other": "Файл не удалось прочитать полностью. Не используйте эту копию."
+  },
+  {
+    "id": "archives.invalid_gzip",
+    "other": "Файл не является корректным GZip."
+  },
+  {
+    "id": "archives.invalid_gzip_gzip_view",
+    "other": "Не удалось распаковать GZip: повреждён поток или контрольная сумма."
+  },
+  {
+    "id": "archives.gzip_text_too_large",
+    "other": "После распаковки файл превышает 8 МиБ."
+  },
+  {
+    "id": "archives.gzip_too_many_lines",
+    "other": "После распаковки файл содержит больше 200 000 строк."
+  },
+  {
+    "id": "archives.notutf8_text",
+    "other": "После распаковки нужен текст UTF-8 без нулевых байтов."
+  },
+  {
+    "id": "archives.not_gzip",
+    "other": "Выберите файл .gz."
+  },
+  {
+    "id": "archives.gzip_too_large",
+    "other": "Для просмотра поддерживаются GZip-файлы до 32 МиБ."
+  },
+  {
+    "id": "archives.object_changed",
+    "other": "Файл изменился. Повторите загрузку."
+  },
+  {
+    "id": "archives.archive_started_model",
+    "other": "Этот архив уже запускался. Для повтора подготовьте новый."
+  },
+  {
+    "id": "archives.invalid_archive_base",
+    "other": "Выберите пути от исходной папки или от корня бакета."
+  },
+  {
+    "id": "archives.archive_running",
+    "other": "Сначала остановите передачу архива."
+  },
+  {
+    "id": "archives.the_transfer_was_not_started",
+    "other": "Передача не запускалась."
+  },
+  {
+    "id": "archives.empty_archive",
+    "other": "Нет доступных файлов для архива."
+  },
+  {
+    "id": "archives.archive_partial_consent",
+    "other": "Подтвердите скачивание только доступных файлов."
+  },
+  {
+    "id": "archives.zip_completion_was_not_confirmed_preparea",
+    "other": "Завершение ZIP не подтверждено. Подготовьте новый архив."
+  },
+  {
+    "id": "archives.the_transfer_was_stopped_thezip_may",
+    "other": "Передача остановлена. ZIP может быть неполным."
+  },
+  {
+    "id": "archives.invalid_archive_name",
+    "other": "Укажите имя ZIP до 180 байт, без слешей, управляющих символов и знаков : * ? \" < > |."
+  },
+  {
+    "id": "archives.invalid_archive_base_paths",
+    "other": "Начало пути должно обозначать целую папку."
+  },
+  {
+    "id": "archives.invalid_archive_base_paths_archive_paths",
+    "other": "Выбранные файлы находятся вне указанной папки."
+  },
+  {
+    "id": "archives.archive_path_conflict",
+    "other": "В архиве совпали пути файлов. Выберите пути от корня бакета."
+  },
+  {
+    "id": "archives.invalid_archive",
+    "other": "Выберите файлы или папки. Максимум 1000 файлов и 10 ГиБ на архив."
+  },
+  {
+    "id": "archives.invalid_archive_prepare_usecase",
+    "other": "Слишком много исключённых файлов."
+  },
+  {
+    "id": "archives.invalid_archive_prepare_usecase_prepare_archive",
+    "other": "Некорректный путь файла."
+  },
+  {
+    "id": "archives.invalid_archive_prepare_usecase_prepare_archived520e6",
+    "other": "Некорректный путь элемента."
+  },
+  {
+    "id": "archives.invalid_archive_prepare_usecase_prepare_archive4aea25",
+    "other": "Пустой путь файла."
+  },
+  {
+    "id": "archives.invalid_archive_prepare_usecase_prepare_archive0ba8af",
+    "other": "Путь папки должен заканчиваться слешем."
+  },
+  {
+    "id": "archives.invalid_archive_prepare_usecase_prepare_archive3edea0",
+    "other": "Неизвестный тип элемента."
+  },
+  {
+    "id": "archives.archive_too_large",
+    "other": "Выбрано больше 1000 файлов. Уменьшите выделение."
+  },
+  {
+    "id": "archives.unsafe_archive_path",
+    "other": "В списке есть небезопасный путь ZIP. Скачайте файл отдельно: {{.Path}}"
+  },
+  {
+    "id": "archives.this_path_cannot_be_safely_stored_in",
+    "other": "Путь небезопасно сохранять в ZIP. Скачайте файл отдельно."
+  },
+  {
+    "id": "archives.archive_too_large_prepare_usecase",
+    "other": "Общий размер превышает 10 ГиБ. Выберите меньше файлов."
+  },
+  {
+    "id": "archives.empty_archive_prepare_usecase",
+    "other": "В выбранной папке нет файлов."
+  },
+  {
+    "id": "archives.unsafe_path",
+    "other": "Небезопасный путь"
+  },
+  {
+    "id": "archives.symbolic_link",
+    "other": "Символическая ссылка"
+  },
+  {
+    "id": "archives.the_archive_is_encrypted",
+    "other": "Архив зашифрован"
+  },
+  {
+    "id": "archives.the_compression_method_is_not_supported",
+    "other": "Метод сжатия не поддерживается"
+  },
+  {
+    "id": "archives.the_file_exceeds256_mib",
+    "other": "Файл больше 256 МиБ"
+  },
+  {
+    "id": "archives.invalid_destination",
+    "other": "Проверьте путь назначения."
+  },
+  {
+    "id": "archives.zip_changed",
+    "other": "Архив изменился. Обновите список перед распаковкой."
+  },
+  {
+    "id": "archives.zip_directory",
+    "other": "Выберите файлы папки."
+  },
+  {
+    "id": "archives.corruptzip_entry",
+    "other": "Файл архива не читается."
+  },
+  {
+    "id": "archives.corruptzip_entry_zip_explorer_usecase",
+    "other": "Размер или контрольная сумма файла не совпали. Файл не записан."
+  },
+  {
+    "id": "archives.zip_closed",
+    "other": "Чтение архива закрыто. Откройте архив заново."
+  },
+  {
+    "id": "archives.invalidzip_entry",
+    "other": "Запись архива не найдена."
+  },
+  {
+    "id": "archives.invalidzip",
+    "other": "Некорректный ZIP."
+  },
+  {
+    "id": "archives.zip_limit",
+    "other": "Поддерживаются обычные ZIP до 10 000 записей, без ZIP64 и разделения на тома."
+  },
+  {
+    "id": "archives.invalidzip_reader",
+    "other": "Некорректный каталог ZIP."
+  },
+  {
+    "id": "archives.zip_limit_reader",
+    "other": "Слишком много записей в ZIP."
+  },
+  {
+    "id": "archives.invalidzip_reader_checkedzip",
+    "other": "Количество записей ZIP не совпало."
+  },
+  {
+    "id": "archives.invalidzip_reader_checkedzipd112ec",
+    "other": "Не найдена структура ZIP."
+  },
+  {
+    "id": "archives.invalidzip_reader_checkedzip9ad98f",
+    "other": "Не удалось прочитать ZIP."
+  },
+  {
+    "id": "archives.zip_limit_reader_load_storedzip",
+    "other": "Просмотр поддерживает ZIP до 256 МиБ."
+  },
+  {
+    "id": "archives.zip_changed_reader",
+    "other": "Архив изменился. Обновите список."
+  },
+  {
+    "id": "batch.invalid_batch",
+    "other": "Проверьте бакет, префикс, тип и параметры задания."
+  },
+  {
+    "id": "batch.confirmation_required",
+    "other": "Для запуска введите точное имя бакета."
+  },
+  {
+    "id": "batch.invalid_batch_parameters",
+    "other": "MinIO вернул параметры задания в неподдерживаемом формате."
+  },
+  {
+    "id": "buckets.could_not_read_principal",
+    "other": "Не удалось прочитать Principal"
+  },
+  {
+    "id": "buckets.invalid_policy_definition",
+    "other": "Не удалось прочитать правила политики."
+  },
+  {
+    "id": "buckets.invalid_bucket_name",
+    "other": "Укажите корректное имя бакета."
+  },
+  {
+    "id": "buckets.could_not_parse_one_of_theiam",
+    "other": "Не удалось разобрать одну из IAM-политик."
+  },
+  {
+    "id": "buckets.showing_assignments_for_the_first1000",
+    "other": "Показаны назначения первых 1000 связанных политик."
+  },
+  {
+    "id": "buckets.iam_policy_assignments_were_only_partially_read",
+    "other": "Назначения IAM-политик прочитаны не полностью. {{.Cause}}"
+  },
+  {
+    "id": "buckets.users_were_only_partially_read",
+    "other": "Пользователи прочитаны не полностью. {{.Cause}}"
+  },
+  {
+    "id": "buckets.groups_were_only_partially_read",
+    "other": "Группы прочитаны не полностью. {{.Cause}}"
+  },
+  {
+    "id": "buckets.checked_the_first500_groups",
+    "other": "Проверены первые 500 групп."
+  },
+  {
+    "id": "buckets.the_group_check_timed_out",
+    "other": "Время проверки групп истекло."
+  },
+  {
+    "id": "buckets.could_not_retrieve_members_and_status_for",
+    "other": "Участники и состояние одной из групп недоступны."
+  },
+  {
+    "id": "buckets.direct",
+    "other": "Напрямую"
+  },
+  {
+    "id": "buckets.group",
+    "other": "Группа {{.Name}}"
+  },
+  {
+    "id": "buckets.",
+    "other": "{{.Source}} (отключена)"
+  },
+  {
+    "id": "buckets.member_of_disabled_groups",
+    "other": "Состоит в отключённых группах: {{.Groups}}"
+  },
+  {
+    "id": "buckets.application_keys_are_unavailable",
+    "other": "Ключи приложений недоступны. {{.Cause}}"
+  },
+  {
+    "id": "buckets.owner",
+    "other": "Владелец {{.Owner}}: {{.Source}}"
+  },
+  {
+    "id": "buckets.the_key_restrictions_could_not_be_read",
+    "other": "Ограничения ключа не прочитаны; доступ не подтверждён."
+  },
+  {
+    "id": "buckets.could_not_read_all_key_restrictions",
+    "other": "Не все ограничения ключей удалось прочитать."
+  },
+  {
+    "id": "buckets.the_key_owner_changed_refresh_the_details",
+    "other": "Владелец ключа изменился; обновите сведения."
+  },
+  {
+    "id": "buckets.a_key_owner_changed_during_the_check",
+    "other": "Владелец одного из ключей изменился во время проверки."
+  },
+  {
+    "id": "buckets.could_not_read_the_restriction_policy_for",
+    "other": "Ограничивающая политика одного из ключей не прочитана."
+  },
+  {
+    "id": "buckets.the_owner_belongs_to_disabled_groups",
+    "other": "Владелец состоит в отключённых группах: {{.Groups}}"
+  },
+  {
+    "id": "buckets.the_owner_user_is_disabled",
+    "other": "Пользователь-владелец отключён."
+  },
+  {
+    "id": "buckets.the_owners_permissions_are_not_listed",
+    "other": "Права владельца не представлены в списке встроенных пользователей; итог не рассчитан."
+  },
+  {
+    "id": "buckets.checked_the_first500_application_keys",
+    "other": "Проверены первые 500 ключей приложений."
+  },
+  {
+    "id": "buckets.the_bucket_policy_could_not_be_read",
+    "other": "Политика самого бакета не прочитана. {{.Cause}}"
+  },
+  {
+    "id": "buckets.the_bucket_policy_has_an_unsupported_format",
+    "other": "Политика самого бакета имеет неподдерживаемый формат."
+  },
+  {
+    "id": "buckets.bucket_policy",
+    "other": "Политика бакета"
+  },
+  {
+    "id": "buckets.principal_is_evaluated_by_minio",
+    "other": "Principal проверяется MinIO"
+  },
+  {
+    "id": "buckets.these_rules_may_allow_anonymous_access_or",
+    "other": "Эти правила могут разрешать анонимный доступ или запрещать действия. Получатели заданы в Principal; документ доступен в разделе «Политика бакета»."
+  },
+  {
+    "id": "buckets.this_setting_contains_parameters_that_the_current",
+    "other": "Настройка содержит параметры, которые текущий SDK не может сохранить без потерь. Доступен только просмотр."
+  },
+  {
+    "id": "buckets.invalidcors",
+    "other": "Проверьте CORS: укажите origins, методы GET/HEAD/PUT/POST/DELETE, корректные заголовки и неотрицательный Max-Age."
+  },
+  {
+    "id": "buckets.bucket_setting_changed",
+    "other": "Настройка изменилась. Загрузите актуальное значение перед сохранением."
+  },
+  {
+    "id": "buckets.cors_rule_not_found",
+    "other": "Правило CORS больше не существует. Обновите список."
+  },
+  {
+    "id": "buckets.invalidcors_bucket_browser_settings_change",
+    "other": "Передайте правило CORS."
+  },
+  {
+    "id": "buckets.invalidcors_bucket_browser_settings_change_change_browser_setting",
+    "other": "В бакете допускается не более 100 правил CORS."
+  },
+  {
+    "id": "buckets.cors_duplicateid",
+    "other": "Правило с таким именем уже существует."
+  },
+  {
+    "id": "buckets.confirmation_required",
+    "other": "Подтвердите удаление правила CORS."
+  },
+  {
+    "id": "buckets.invalid_encryption",
+    "other": "ID ключа: до 1024 символов без управляющих символов."
+  },
+  {
+    "id": "buckets.confirmation_required_bucket_browser_settings_change",
+    "other": "Подтвердите снятие шифрования по умолчанию."
+  },
+  {
+    "id": "buckets.invalid_encryption_bucket_browser_settings_change",
+    "other": "SSE-S3 не принимает ID ключа."
+  },
+  {
+    "id": "buckets.invalid_encryption_bucket_browser_settings_change_change_browser_setting",
+    "other": "Выберите SSE-S3 или SSE-KMS."
+  },
+  {
+    "id": "buckets.kms_unavailable",
+    "other": "MinIO не смог использовать KMS. Проверьте подключение KMS и ID существующего ключа."
+  },
+  {
+    "id": "buckets.invalid_bucket_setting",
+    "other": "MinIO отклонил настройку. Проверьте параметры."
+  },
+  {
+    "id": "buckets.bucket_setting_write_failed",
+    "other": "MinIO не подтвердил изменение. Обновите сведения."
+  },
+  {
+    "id": "buckets.object_tag",
+    "other": "Метка объекта: {{.Key}} = {{.Value}}"
+  },
+  {
+    "id": "buckets.size_greater_than",
+    "other": "Размер больше {{.Count}} байт"
+  },
+  {
+    "id": "buckets.size_less_than",
+    "other": "Размер меньше {{.Count}} байт"
+  },
+  {
+    "id": "buckets.abort_incomplete_uploads_after",
+    "other": "Очистка незавершённых загрузок через {{.Count}} дн."
+  },
+  {
+    "id": "buckets.delete_all_versions_when_the_current_version",
+    "other": "Удаление всех версий при истечении срока текущей версии"
+  },
+  {
+    "id": "buckets.delete_all_versions_after",
+    "other": "Удаление всех версий через {{.Count}} дн."
+  },
+  {
+    "id": "buckets.delete_the_marker_and_its_versions_after",
+    "other": "Удаление маркера вместе с версиями через {{.Count}} дн."
+  },
+  {
+    "id": "buckets.compress_the_current_version",
+    "other": "Сжатие текущей версии"
+  },
+  {
+    "id": "buckets.compress_older_versions",
+    "other": "Сжатие старых версий"
+  },
+  {
+    "id": "buckets.the_configuration_contains_parameters_that_the_current",
+    "other": "В конфигурации есть параметры, которые текущий SDK не может сохранить без потерь. Изменения недоступны; исходные правила сохранены в MinIO."
+  },
+  {
+    "id": "buckets.the_rule_name_must_contain1_to",
+    "other": "Имя правила: от 1 до 255 байт, без управляющих символов."
+  },
+  {
+    "id": "buckets.the_path_must_be_at_most1",
+    "other": "Путь: до 1024 байт, без управляющих символов. Пустой путь означает весь бакет."
+  },
+  {
+    "id": "buckets.periods_and_retained_version_counts_must_be",
+    "other": "Сроки и число сохраняемых версий должны быть целыми числами от 0 до 2 147 483 647."
+  },
+  {
+    "id": "buckets.choose_an_age_in_daysa_date",
+    "other": "Выберите для текущих версий срок в днях, дату или очистку маркеров удаления."
+  },
+  {
+    "id": "buckets.specifya_valid_transition_age_in_days",
+    "other": "Укажите корректный возраст переноса в днях."
+  },
+  {
+    "id": "buckets.a_tier_name_must_contain3_to",
+    "other": "Имя уровня: 3–32 заглавных латинских символа, цифры, _ и -."
+  },
+  {
+    "id": "buckets.specifya_transition_date_or_an_age",
+    "other": "Укажите дату переноса или возраст в днях."
+  },
+  {
+    "id": "buckets.selecta_tier_for_current_versions",
+    "other": "Выберите уровень для переноса текущих версий."
+  },
+  {
+    "id": "buckets.the_transition_age_for_older_versions_must",
+    "other": "Возраст переноса старых версий должен быть больше нуля."
+  },
+  {
+    "id": "buckets.selecta_tier_for_older_versions",
+    "other": "Выберите уровень для старых версий."
+  },
+  {
+    "id": "buckets.specifya_valid_expiration_date_inyyyy",
+    "other": "Укажите корректную дату удаления в формате ГГГГ-ММ-ДД."
+  },
+  {
+    "id": "buckets.add_at_least_one_action_deleting_versions",
+    "other": "Добавьте хотя бы одно действие: удаление версий/маркеров или перенос в уровень хранения."
+  },
+  {
+    "id": "buckets.bucket_setting_changed_bucket_lifecycle_change",
+    "other": "Правила Lifecycle изменились. Загрузите актуальные правила перед сохранением."
+  },
+  {
+    "id": "buckets.lifecycle_rule_not_found",
+    "other": "Правило больше не существует. Обновите список."
+  },
+  {
+    "id": "buckets.invalid_lifecycle_rule",
+    "other": "Передайте параметры правила."
+  },
+  {
+    "id": "buckets.lifecycle_limit",
+    "other": "В бакете допускается не более 1000 правил Lifecycle."
+  },
+  {
+    "id": "buckets.invalid_lifecycle_rule_bucket_lifecycle_change",
+    "other": "Укажите состояние правила."
+  },
+  {
+    "id": "buckets.confirmation_required_bucket_lifecycle_change",
+    "other": "Подтвердите удаление выбранного правила."
+  },
+  {
+    "id": "buckets.method_not_allowed",
+    "other": "Этот способ изменения Lifecycle не поддерживается."
+  },
+  {
+    "id": "buckets.invalid_lifecycle_rule_bucket_lifecycle_change_change_lifecycle",
+    "other": "MinIO отклонил правило Lifecycle. Проверьте сроки, условия и совместимость действий с настройками бакета."
+  },
+  {
+    "id": "buckets.access_denied",
+    "other": "Недостаточно прав MinIO для изменения правил Lifecycle."
+  },
+  {
+    "id": "buckets.lifecycle_write_failed",
+    "other": "MinIO не подтвердил изменение правил. Обновите список."
+  },
+  {
+    "id": "buckets.invalid_retention",
+    "other": "Передайте срок хранения или null для удаления срока по умолчанию."
+  },
+  {
+    "id": "buckets.invalid_retention_bucket_retention",
+    "other": "Выберите GOVERNANCE или COMPLIANCE, целый положительный срок и единицу DAYS или YEARS."
+  },
+  {
+    "id": "buckets.invalid_retention_bucket_retention_parse_retention",
+    "other": "Срок хранения: от 1 до 36500 дней или от 1 до 100 лет."
+  },
+  {
+    "id": "buckets.bucket_setting_changed_bucket_update",
+    "other": "Настройка изменилась после открытия. Ваши правки не записаны. Загрузите актуальное значение перед повторным сохранением."
+  },
+  {
+    "id": "buckets.invalid_tags",
+    "other": "Передайте список не более 50 меток. Для удаления всех меток передайте пустой список."
+  },
+  {
+    "id": "buckets.invalid_tags_bucket_update",
+    "other": "Ключи меток не должны повторяться."
+  },
+  {
+    "id": "buckets.invalid_tags_bucket_update_validate_bucket_tags",
+    "other": "Префикс aws: зарезервирован. Выберите другой ключ метки."
+  },
+  {
+    "id": "buckets.invalid_tags_bucket_update_validate_bucket_tagsb75523",
+    "other": "Проверьте метки: ключ 1–128 символов, значение до 256. Допустимы латинские буквы, цифры, пробелы и символы + - . _ : / @ =."
+  },
+  {
+    "id": "buckets.invalid_bucket_name_catalog_change",
+    "other": "Имя бакета: 3–63 строчных латинских символа, цифры, точки и дефисы; имя не должно быть IP-адресом."
+  },
+  {
+    "id": "buckets.already_exists",
+    "other": "Бакет с таким именем уже существует."
+  },
+  {
+    "id": "buckets.invalid_bucket_field",
+    "other": "Выберите доступный раздел настроек."
+  },
+  {
+    "id": "buckets.invalid_versioning",
+    "other": "Версионирование можно включить или приостановить. Возврат в состояние «не включено» не поддерживается."
+  },
+  {
+    "id": "buckets.invalid_object_lock",
+    "other": "Object Lock можно включить, но нельзя отключить. Для удаления срока по умолчанию передайте defaultRetention: null и enabled: true."
+  },
+  {
+    "id": "buckets.versioning_restricted",
+    "other": "Сервер не разрешает приостановить версионирование этого бакета. При включённом Object Lock оно должно оставаться включённым."
+  },
+  {
+    "id": "buckets.versioning_required",
+    "other": "Сначала включите версионирование бакета, затем включите Object Lock."
+  },
+  {
+    "id": "buckets.object_lock_unavailable",
+    "other": "Сервер не разрешил включить Object Lock для существующего бакета. Если он поддерживает эту настройку только при создании, создайте бакет с Object Lock."
+  },
+  {
+    "id": "buckets.invalid_policy",
+    "other": "Передайте JSON политики или null для удаления."
+  },
+  {
+    "id": "buckets.invalid_policy_settings_change",
+    "other": "Некорректный JSON политики."
+  },
+  {
+    "id": "buckets.invalid_quota",
+    "other": "Задайте целое число байт от 0 до 9 007 199 254 740 991. Ноль снимает ограничение размера."
+  },
+  {
+    "id": "capabilities.invalid_capability",
+    "other": "Неизвестная возможность хранилища."
+  },
+  {
+    "id": "capabilities.invalid_capability_scope",
+    "other": "Некорректная область проверки возможности."
+  },
+  {
+    "id": "capabilities.invalid_capability_scope_report_usecase",
+    "other": "Для файла нужен бакет, для версии — файл."
+  },
+  {
+    "id": "endpoint.invalid_endpoint",
+    "other": "Укажите HTTP(S) адрес S3 API без пути, параметров и встроенного пароля."
+  },
+  {
+    "id": "endpoint.invalid_endpoint_endpoint",
+    "other": "Некорректный адрес S3 API."
+  },
+  {
+    "id": "endpoint.endpoint_not_allowed",
+    "other": "Для HTTP или внутреннего MinIO добавьте адрес в MINIO_ALLOWED_ENDPOINTS сервиса API."
+  },
+  {
+    "id": "endpoint.endpoint_unavailable",
+    "other": "Не удалось найти S3 API. Проверьте адрес и DNS из контейнера API."
+  },
+  {
+    "id": "endpoint.endpoint_not_allowed_endpoint",
+    "other": "Внутренний адрес MinIO нужно разрешить через MINIO_ALLOWED_ENDPOINTS сервиса API."
+  },
+  {
+    "id": "files.invalid_content_search",
+    "other": "Введите текст до 256 байт и корректные ограничения поиска."
+  },
+  {
+    "id": "files.invalid_content_extensions",
+    "other": "Выберите текстовые расширения, например json,yaml,txt,log."
+  },
+  {
+    "id": "files.invalid_usage_scope",
+    "other": "Откройте корректный бакет и папку."
+  },
+  {
+    "id": "files.invalid_usage_cursor",
+    "other": "Курсор относится к другому расчёту."
+  },
+  {
+    "id": "files.usage_versions_unavailable",
+    "other": "Хранилище не вернуло список версий."
+  },
+  {
+    "id": "files.invalid_usage_page",
+    "other": "Хранилище вернуло слишком много записей."
+  },
+  {
+    "id": "files.invalid_usage_page_object_usage_usecase",
+    "other": "Получены записи вне выбранной папки."
+  },
+  {
+    "id": "files.invalid_usage_page_object_usage_usecase_read_object_usage",
+    "other": "Хранилище не вернуло продолжение списка."
+  },
+  {
+    "id": "files.invalid_version",
+    "other": "Выберите конкретную версию файла."
+  },
+  {
+    "id": "files.invalid_protection",
+    "other": "Выберите вид защиты."
+  },
+  {
+    "id": "files.confirmation_required",
+    "other": "Подтвердите изменение выбранной версии."
+  },
+  {
+    "id": "files.invalid_hold",
+    "other": "Выберите ON или OFF."
+  },
+  {
+    "id": "files.invalid_retention",
+    "other": "Выберите режим и дату окончания в будущем."
+  },
+  {
+    "id": "files.object_protected",
+    "other": "MinIO отклонил изменение: проверьте права и действующий срок защиты. Обход GOVERNANCE не используется; срок COMPLIANCE нельзя сократить."
+  },
+  {
+    "id": "files.invalid_listing",
+    "other": "Некорректные параметры списка объектов."
+  },
+  {
+    "id": "files.unsupported_preview",
+    "other": "Для этого формата нет файлового предпросмотра."
+  },
+  {
+    "id": "files.preview_too_large",
+    "other": "Лимит предпросмотра: 1 МБ для текста, 20 МБ для изображений и PDF."
+  },
+  {
+    "id": "files.object_changed",
+    "other": "Файл изменился. Повторите просмотр."
+  },
+  {
+    "id": "files.object_changed_objects_usecase",
+    "other": "Файл изменился или передан не полностью. Повторите просмотр."
+  },
+  {
+    "id": "files.unsupported_media",
+    "other": "Файл не является поддерживаемым аудио или видео."
+  },
+  {
+    "id": "files.invalid_lifetime",
+    "other": "Срок ссылки должен быть от 1 секунды до 7 дней."
+  },
+  {
+    "id": "files.invalid_mode",
+    "other": "Некорректный тип ссылки."
+  },
+  {
+    "id": "folders.invalid_folder_path",
+    "other": "Укажите корректный бакет."
+  },
+  {
+    "id": "folders.invalid_folder_listing",
+    "other": "Не удалось подтвердить полный список папки. Повторите проверку."
+  },
+  {
+    "id": "folders.invalid_folder_listing_folder_delete",
+    "other": "MinIO вернул объект за пределами выбранной папки. Не удалось подтвердить полный список."
+  },
+  {
+    "id": "folders.folder_delete_limit",
+    "other": "В папке больше 5000 объектов. Выберите меньшую вложенную папку."
+  },
+  {
+    "id": "folders.invalid_folder_delete",
+    "other": "Объект не относится к выбранной папке."
+  },
+  {
+    "id": "folders.confirmation_required",
+    "other": "Подтвердите точный путь удаляемой папки."
+  },
+  {
+    "id": "folders.revision_required",
+    "other": "Сначала проверьте объект перед удалением."
+  },
+  {
+    "id": "folders.object_changed",
+    "other": "Объект изменился после проверки и не удалён. Перечитайте содержимое папки перед повтором."
+  },
+  {
+    "id": "folders.folder_not_empty",
+    "other": "Запись папки сохранена: внутри остались объекты. Проверьте ошибки или перечитайте папку."
+  },
+  {
+    "id": "folders.object_delete_denied",
+    "other": "MinIO запретил удаление. Проверьте права, политику бакета и защиту объекта."
+  },
+  {
+    "id": "folders.invalid_range",
+    "other": "Недоступный диапазон файла."
+  },
+  {
+    "id": "folders.invalid_folder_name",
+    "other": "Укажите имя папки без слешей и управляющих символов. Имена «.» и «..» не подходят."
+  },
+  {
+    "id": "folders.invalid_folder_path_folders",
+    "other": "Некорректный путь родительской папки. Откройте папку заново."
+  },
+  {
+    "id": "folders.invalid_folder_path_folders_folder_key",
+    "other": "Путь родительской папки не должен содержать сегменты «.» и «..»."
+  },
+  {
+    "id": "folders.invalid_folder_name_folders",
+    "other": "Имя слишком длинное: полный путь папки должен занимать не больше 1024 байт в UTF-8."
+  },
+  {
+    "id": "folders.folder_exists",
+    "other": "Папка с таким именем уже существует. Выберите другое имя."
+  },
+  {
+    "id": "folders.folder_share_expired",
+    "other": "Ссылка недействительна или истекла."
+  },
+  {
+    "id": "folders.folder_scope_denied",
+    "other": "Папка недоступна по этой ссылке."
+  },
+  {
+    "id": "folders.folder_scope_denied_public_usecase",
+    "other": "Файл недоступен по этой ссылке."
+  },
+  {
+    "id": "folders.invalid_ticket",
+    "other": "Неверный вид ссылки."
+  },
+  {
+    "id": "folders.unsupported_preview",
+    "other": "Формат недоступен для потокового просмотра."
+  },
+  {
+    "id": "folders.unsupported_preview_public_usecase",
+    "other": "Предпросмотр недоступен."
+  },
+  {
+    "id": "folders.preview_too_large",
+    "other": "Файл превышает лимит предпросмотра."
+  },
+  {
+    "id": "folders.invalid_text",
+    "other": "Файл не является текстом UTF-8."
+  },
+  {
+    "id": "folders.not_found",
+    "other": "Раздел не найден."
+  },
+  {
+    "id": "folders.download_expired",
+    "other": "Ссылка на файл истекла. Нажмите «Скачать» ещё раз."
+  },
+  {
+    "id": "folders.folder_scope_denied_public_usecase_open_shared_file",
+    "other": "Файл недоступен."
+  },
+  {
+    "id": "folders.folder_share_expired_model",
+    "other": "Ссылка отозвана или срок действия истёк."
+  },
+  {
+    "id": "folders.shared_read_closed",
+    "other": "Чтение уже запускалось или закрыто. Получите новую ссылку."
+  },
+  {
+    "id": "folders.invalid_folder_share",
+    "other": "Укажите папку и срок действия от минуты до суток."
+  },
+  {
+    "id": "folders.share_permissions_unavailable",
+    "other": "Не удалось проверить права для выдачи ссылки."
+  },
+  {
+    "id": "folders.folder_share_denied",
+    "other": "Нет подтверждённых прав просмотра выбранной папки."
+  },
+  {
+    "id": "iam.minio_did_not_return_action_permissions_in",
+    "other": "MinIO не успел вернуть права на действия. Кнопки изменения скрыты."
+  },
+  {
+    "id": "iam.minio_denied_reading_action_permissions_modification_buttons",
+    "other": "MinIO не разрешил прочитать права на действия. Кнопки изменения скрыты."
+  },
+  {
+    "id": "iam.the_server_does_not_support_checking_action",
+    "other": "Сервер не поддерживает проверку прав на действия. Кнопки изменения скрыты."
+  },
+  {
+    "id": "iam.could_not_retrieve_action_permissions_from_minio",
+    "other": "Не удалось получить права на действия из MinIO. Кнопки изменения скрыты."
+  },
+  {
+    "id": "iam.minio_did_not_return_the_connection_owner",
+    "other": "MinIO не вернул владельца подключения. Кнопки изменения скрыты."
+  },
+  {
+    "id": "iam.could_not_read_theiam_policy_format",
+    "other": "Не удалось прочитать формат IAM-политики. Кнопки изменения скрыты."
+  },
+  {
+    "id": "iam.could_not_confirm_the_key_owner_modification",
+    "other": "Не удалось подтвердить владельца ключа. Кнопки изменения скрыты."
+  },
+  {
+    "id": "iam.minio_reports_that_the_key_is_disabled",
+    "other": "MinIO сообщает, что ключ отключён. Кнопки изменения скрыты."
+  },
+  {
+    "id": "iam.could_not_read_the_key_restrictions_modification",
+    "other": "Не удалось прочитать ограничения ключа. Кнопки изменения скрыты."
+  },
+  {
+    "id": "iam.could_not_read_minios_connection_owner",
+    "other": "Ответ MinIO о владельце подключения не удалось прочитать. Проверьте совместимость сервера и проксирование Admin API. Кнопки изменения скрыты."
+  },
+  {
+    "id": "iam.the_minio_permissions_response_is_too_large",
+    "other": "Ответ MinIO о правах слишком большой. Кнопки изменения скрыты."
+  },
+  {
+    "id": "iam.the_minio_address_or_proxy_does_not",
+    "other": "Адрес MinIO или прокси не обслуживает Admin API проверки прав. Кнопки изменения скрыты."
+  },
+  {
+    "id": "iam.minio_or_its_proxy_returned_an_error",
+    "other": "MinIO или прокси вернул ошибку при проверке прав. Кнопки изменения скрыты."
+  },
+  {
+    "id": "identities.invalid_target",
+    "other": "Выберите одного пользователя, группу или политику."
+  },
+  {
+    "id": "identities.invalid_target_bindings",
+    "other": "Некорректное имя получателя или политики."
+  },
+  {
+    "id": "identities.invalid_binding",
+    "other": "Выберите политику и одного пользователя или группу."
+  },
+  {
+    "id": "identities.invalid_group",
+    "other": "Укажите имя группы и хотя бы одного участника."
+  },
+  {
+    "id": "identities.already_exists",
+    "other": "Группа уже существует. Используйте управление участниками."
+  },
+  {
+    "id": "identities.group_create_acknowledgement_required",
+    "other": "Подтвердите риск одновременного создания: если другой клиент займёт это имя после проверки, MinIO может добавить участников в его группу."
+  },
+  {
+    "id": "identities.invalid_status",
+    "other": "Укажите enabled."
+  },
+  {
+    "id": "identities.group_not_empty",
+    "other": "Сначала удалите участников из группы."
+  },
+  {
+    "id": "identities.the_details_were_not_retrieved_within_the",
+    "other": "Сведения не получены в отведённое время."
+  },
+  {
+    "id": "identities.invalid_policy_definition",
+    "other": "Сервер вернул правило с неизвестным Effect."
+  },
+  {
+    "id": "identities.invalid_policy_name",
+    "other": "Введите корректное имя политики."
+  },
+  {
+    "id": "identities.already_exists_policies",
+    "other": "Политика уже существует. Откройте её для редактирования."
+  },
+  {
+    "id": "identities.policy_create_acknowledgement_required",
+    "other": "Подтвердите риск одновременного создания: если другой клиент займёт это имя после проверки, MinIO может перезаписать его политику, сохранив назначения."
+  },
+  {
+    "id": "identities.policy_changed",
+    "other": "Политика изменилась. Закройте редактор и откройте актуальную версию."
+  },
+  {
+    "id": "identities.policy_in_use",
+    "other": "Сначала отвяжите политику от пользователей и групп."
+  },
+  {
+    "id": "identities.the_assignments_were_not_retrieved_within_the",
+    "other": "Назначения не получены в отведённое время."
+  },
+  {
+    "id": "identities.the_dates_were_not_retrieved_within_the",
+    "other": "Даты не получены в отведённое время."
+  },
+  {
+    "id": "identities.invalid_user",
+    "other": "Имя пользователя: 3–128 символов. Пароль: 8–256 символов."
+  },
+  {
+    "id": "identities.already_exists_users",
+    "other": "Пользователь уже существует. Его пароль не изменён."
+  },
+  {
+    "id": "identities.user_create_acknowledgement_required",
+    "other": "Подтвердите риск одновременного создания: если другой клиент займёт это имя после проверки, MinIO может заменить его пароль и включить пользователя."
+  },
+  {
+    "id": "identities.current_user",
+    "other": "Нельзя отключить пользователя текущего подключения."
+  },
+  {
+    "id": "identities.current_user_users",
+    "other": "Нельзя удалить пользователя текущего подключения."
+  },
+  {
+    "id": "keys.access_key_not_found",
+    "other": "Ключ больше не существует или недоступен этому подключению. Обновите список."
+  },
+  {
+    "id": "keys.unreadable_access_key_policy",
+    "other": "MinIO не вернул политику ключа. Настройки нельзя менять, пока политика не прочитана."
+  },
+  {
+    "id": "keys.invalid_key_name",
+    "other": "Имя ключа: до 32 латинских букв, цифр, дефисов и подчёркиваний. Первый символ — буква."
+  },
+  {
+    "id": "keys.invalid_key_description",
+    "other": "Описание должно занимать не более 256 байт UTF-8."
+  },
+  {
+    "id": "keys.invalid_parent",
+    "other": "Укажите корректного пользователя-владельца."
+  },
+  {
+    "id": "keys.invalid_policy",
+    "other": "Укажите политику или null для наследования прав пользователя."
+  },
+  {
+    "id": "keys.invalid_policy_access_keys",
+    "other": "Statement должен содержать правило или список правил доступа."
+  },
+  {
+    "id": "keys.invalid_policy_access_keys_validate_key_input",
+    "other": "Добавьте хотя бы одно правило. Для полного запрета используйте правило с Effect: Deny."
+  },
+  {
+    "id": "keys.invalid_expiration",
+    "other": "Выберите срок от 15 минут до 365 дней. Для бессрочного ключа выберите «Без срока»."
+  },
+  {
+    "id": "keys.access_key_changed",
+    "other": "Ключ изменился после открытия окна. Ваши правки не записаны. Закройте окно и откройте актуальные настройки."
+  },
+  {
+    "id": "keys.immutable_parent",
+    "other": "Владельца существующего ключа нельзя изменить. Создайте новый ключ у нужного пользователя."
+  },
+  {
+    "id": "keys.empty_key_metadata",
+    "other": "Чтобы изменить имя или описание, укажите новое значение. Очистка этих полей не поддерживается этой операцией MinIO."
+  },
+  {
+    "id": "keys.invalid_scope",
+    "other": "Выберите свои ключи, все ключи или одного пользователя."
+  },
+  {
+    "id": "keys.current_access_key",
+    "other": "Нельзя менять или удалять ключ текущего подключения. Подключитесь с другим ключом."
+  },
+  {
+    "id": "keys.confirmation_required",
+    "other": "Для смены секрета введите Access Key."
+  },
+  {
+    "id": "objects.checksum_started",
+    "other": "Проверка уже запускалась. Подготовьте её заново."
+  },
+  {
+    "id": "objects.checksum_closed",
+    "other": "Проверка закрыта. Подготовьте её заново."
+  },
+  {
+    "id": "objects.checksum_not_prepared",
+    "other": "Расчёт контрольной суммы не подготовлен."
+  },
+  {
+    "id": "objects.invalid_object",
+    "other": "Выберите файл."
+  },
+  {
+    "id": "objects.invalid_expected_checksum",
+    "other": "SHA-256 должен содержать 64 шестнадцатеричных символа."
+  },
+  {
+    "id": "objects.the_storage_did_not_return_checksums_you",
+    "other": "Хранилище не вернуло контрольные суммы. Можно рассчитать SHA-256."
+  },
+  {
+    "id": "objects.incomplete_checksum_read",
+    "other": "Получен неполный файл. Повторите проверку."
+  },
+  {
+    "id": "objects.object_changed",
+    "other": "Файл изменился во время проверки. Запустите её заново."
+  },
+  {
+    "id": "objects.invalid_version",
+    "other": "Укажите корректный идентификатор версии."
+  },
+  {
+    "id": "objects.invalid_object_attributes",
+    "other": "Размер страницы — от 1 до 1000, маркер части — от 0 до 10000."
+  },
+  {
+    "id": "objects.invalid_attributes_snapshot",
+    "other": "Некорректный снимок атрибутов."
+  },
+  {
+    "id": "objects.attributes_snapshot_required",
+    "other": "Для продолжения укажите snapshot предыдущей страницы либо конкретную неизменяемую версию."
+  },
+  {
+    "id": "objects.object_attributes_changed",
+    "other": "Объект изменился между страницами. Начните чтение атрибутов заново."
+  },
+  {
+    "id": "objects.attributes_snapshot_unavailable",
+    "other": "Хранилище не вернуло идентификаторы для безопасного продолжения. Укажите конкретную версию объекта."
+  },
+  {
+    "id": "objects.not_editable",
+    "other": "Редактор доступен для текстовых файлов."
+  },
+  {
+    "id": "objects.text_too_large",
+    "other": "Редактор и таблицы поддерживают файлы до 1 МиБ."
+  },
+  {
+    "id": "objects.encoded_text",
+    "other": "Сжатое содержимое нельзя редактировать как обычный текст."
+  },
+  {
+    "id": "objects.object_changed_object_content_usecase",
+    "other": "Файл изменился. Обновите содержимое."
+  },
+  {
+    "id": "objects.invalid_text",
+    "other": "Для просмотра нужен текст UTF-8 без нулевых байтов."
+  },
+  {
+    "id": "objects.invalid_text_object_content_usecase",
+    "other": "Нужен текст UTF-8 размером до 1 МиБ без нулевых байтов."
+  },
+  {
+    "id": "objects.invalid_document",
+    "other": "Исправьте ошибки JSON перед сохранением."
+  },
+  {
+    "id": "objects.content_changed",
+    "other": "Файл изменился в S3. Черновик сохранён в редакторе; загрузите актуальный файл для сравнения."
+  },
+  {
+    "id": "objects.content_protected",
+    "other": "Не удалось безопасно сохранить свойства или защиту файла. Редактирование недоступно."
+  },
+  {
+    "id": "objects.confirmation_required",
+    "other": "Для удаления подтвердите точный ключ файла."
+  },
+  {
+    "id": "objects.revision_required",
+    "other": "Перед удалением обновите сведения о файле."
+  },
+  {
+    "id": "objects.object_changed_object_delete_usecase",
+    "other": "Файл изменился после открытия окна. Обновите сведения и проверьте файл перед удалением."
+  },
+  {
+    "id": "objects.object_delete_denied",
+    "other": "MinIO запретил удаление. Проверьте право s3:DeleteObject, политику бакета и защиту объекта."
+  },
+  {
+    "id": "objects.tags_are_unavailable_check_permission_to_read",
+    "other": "Метки недоступны. Проверьте право чтения меток."
+  },
+  {
+    "id": "objects.editing_metadata_for_this_encryption_type_is",
+    "other": "Изменение метаданных этого типа шифрования пока не поддерживается."
+  },
+  {
+    "id": "objects.metadata_ofa_protected_object_is_read",
+    "other": "Метаданные защищённого объекта доступны только для просмотра. Метки можно менять при наличии прав."
+  },
+  {
+    "id": "objects.invalid_property_mode",
+    "other": "Выберите способ изменения значений."
+  },
+  {
+    "id": "objects.invalid_object_headers",
+    "other": "Проверьте заголовки: до 2048 байт, без управляющих символов."
+  },
+  {
+    "id": "objects.invalid_object_headers_object_properties",
+    "other": "Укажите корректный Content-Type, например image/png."
+  },
+  {
+    "id": "objects.invalid_object_metadata",
+    "other": "Ключи метаданных: строчные латинские буквы, цифры, дефис и подчёркивание, без x-amz-."
+  },
+  {
+    "id": "objects.invalid_object_metadata_object_properties",
+    "other": "Недопустимый ключ метаданных."
+  },
+  {
+    "id": "objects.invalid_object_metadata_object_properties_validate_property_patch",
+    "other": "Метаданные занимают больше 2 КиБ."
+  },
+  {
+    "id": "objects.invalid_object_tags",
+    "other": "До 10 меток: ключ до 128 символов, значение до 256, без префикса aws:."
+  },
+  {
+    "id": "objects.invalid_object_object_properties_usecase",
+    "other": "Выберите файл, а не папку."
+  },
+  {
+    "id": "objects.object_properties_changed",
+    "other": "Файл или его свойства изменились. Обновите сведения перед сохранением."
+  },
+  {
+    "id": "objects.empty_property_patch",
+    "other": "Выберите свойства для изменения."
+  },
+  {
+    "id": "objects.object_properties_changed_object_property_target",
+    "other": "Файл изменился или удалён. Обновите сведения перед сохранением."
+  },
+  {
+    "id": "objects.object_changed_object_property_target",
+    "other": "Файл изменился или проверенная версия удалена. Обновите содержимое."
+  },
+  {
+    "id": "objects.object_properties_changed_object_property_target_tagged_target",
+    "other": "Запрос изменения меток выполнен, но файл изменился или удалён во время операции. Проверьте результат перед повтором."
+  },
+  {
+    "id": "objects.object_tags_unverified",
+    "other": "Запрос изменения меток выполнен, но состояние файла не удалось проверить. Обновите сведения перед повтором."
+  },
+  {
+    "id": "objects.copy_unsupported",
+    "other": "Хранилище не поддерживает серверное копирование частей."
+  },
+  {
+    "id": "objects.invalid_cursor",
+    "other": "Некорректный курсор версий."
+  },
+  {
+    "id": "objects.invalid_cursor_object_versions",
+    "other": "Курсор относится к другому файлу."
+  },
+  {
+    "id": "objects.version_listing_failed",
+    "other": "MinIO не вернул список версий."
+  },
+  {
+    "id": "objects.version_listing_failed_object_versions",
+    "other": "MinIO вернул некорректное продолжение списка версий. Обновите список."
+  },
+  {
+    "id": "objects.invalid_object_objects",
+    "other": "Укажите корректный бакет и ключ объекта."
+  },
+  {
+    "id": "objects.destination_changed",
+    "other": "Файл назначения изменился. Проверьте его и снова выберите: пропустить или перезаписать."
+  },
+  {
+    "id": "objects.destination_changed_conditional",
+    "other": "Файл изменился во время операции. Проверьте состояние перед повтором."
+  },
+  {
+    "id": "remotesource.source_response",
+    "other": "Источник не вернул файл (ожидается HTTP 200)."
+  },
+  {
+    "id": "remotesource.source_unavailable",
+    "other": "Не удалось получить файл. Проверьте публичную ссылку и доступность источника."
+  },
+  {
+    "id": "remotesource.source_denied",
+    "other": "Недопустимый адрес источника."
+  },
+  {
+    "id": "remotesource.sourcedns",
+    "other": "Не удалось найти источник."
+  },
+  {
+    "id": "remotesource.source_denied_client",
+    "other": "Внутренние и служебные адреса нельзя использовать для импорта."
+  },
+  {
+    "id": "remotesource.too_many_redirects",
+    "other": "Источник вернул слишком много перенаправлений."
+  },
+  {
+    "id": "runtime.account_info_too_large",
+    "other": "Ответ проверки прав превышает допустимый размер."
+  },
+  {
+    "id": "runtime.transfer_limit",
+    "other": "Достигнут лимит передач. Дождитесь завершения текущих операций и повторите."
+  },
+  {
+    "id": "runtime.login_rate_limit",
+    "other": "Слишком много попыток подключения. Подождите и повторите."
+  },
+  {
+    "id": "runtime.too_many_requests",
+    "other": "Слишком много одновременных подключений. Попробуйте позже."
+  },
+  {
+    "id": "runtime.login_rate_limit_admission",
+    "other": "Слишком много попыток подключения с этим ключом. Подождите и повторите."
+  },
+  {
+    "id": "runtime.archive_limit",
+    "other": "Достигнут лимит подготовленных архивов. Уберите завершённые операции и повторите."
+  },
+  {
+    "id": "runtime.capability_busy",
+    "other": "Проверки хранилища заняты. Повторите запрос позже."
+  },
+  {
+    "id": "runtime.invite_limit",
+    "other": "Достигнут лимит активных ссылок. Отзовите ненужные."
+  },
+  {
+    "id": "runtime.invite_exists",
+    "other": "Ссылка уже существует."
+  },
+  {
+    "id": "runtime.invite_not_found",
+    "other": "Ссылка не найдена."
+  },
+  {
+    "id": "runtime.multipart_limit",
+    "other": "Достигнут лимит управляемых загрузок. Завершите или отмените активные загрузки."
+  },
+  {
+    "id": "runtime.multipart_exists",
+    "other": "Загрузка уже существует."
+  },
+  {
+    "id": "runtime.server_closing",
+    "other": "API завершает работу. Повторите запрос позже."
+  },
+  {
+    "id": "runtime.session_expired",
+    "other": "Сессия истекла. Подключитесь заново."
+  },
+  {
+    "id": "runtime.session_limit",
+    "other": "Достигнут лимит активных сессий. Закройте старые подключения или попробуйте позже."
+  },
+  {
+    "id": "runtime.share_limit",
+    "other": "Достигнут лимит ссылок. Отзовите ненужные."
+  },
+  {
+    "id": "runtime.ticket_limit",
+    "other": "Слишком много ссылок на файлы. Повторите позже."
+  },
+  {
+    "id": "runtime.zip_busy",
+    "other": "Сейчас обрабатываются другие архивы. Повторите позже."
+  },
+  {
+    "id": "search.encoded_text",
+    "other": "Сжатый текст пропущен."
+  },
+  {
+    "id": "search.search_file_too_large",
+    "other": "Файл превышает выбранный размер."
+  },
+  {
+    "id": "search.search_object_changed",
+    "other": "Файл изменился во время поиска."
+  },
+  {
+    "id": "search.invalid_object_listing",
+    "other": "S3 вернул некорректный или неполный список объектов. Повторите проверку."
+  },
+  {
+    "id": "search.invalid_search",
+    "other": "Проверьте параметры поиска."
+  },
+  {
+    "id": "search.invalid_search_prepare_file_search",
+    "other": "Размер должен быть целым числом байт от нуля."
+  },
+  {
+    "id": "search.invalid_search_prepare_file_search_file_search",
+    "other": "Максимальный размер меньше минимального."
+  },
+  {
+    "id": "search.invalid_search_prepare_file_search_file_search8edb05",
+    "other": "Укажите дату в формате ГГГГ-ММ-ДД."
+  },
+  {
+    "id": "search.invalid_search_prepare_file_search_file_search448466",
+    "other": "Дата окончания раньше даты начала."
+  },
+  {
+    "id": "selectquery.select_source_too_large",
+    "other": "Для S3 Select выберите объект не больше 256 МиБ."
+  },
+  {
+    "id": "selectquery.select_result_limit",
+    "other": "Результат S3 Select превышает установленный лимит. Уточните запрос."
+  },
+  {
+    "id": "selectquery.select_query_failed",
+    "other": "Хранилище отклонило запрос S3 Select. Проверьте SQL и формат файла; результат неполный."
+  },
+  {
+    "id": "selectquery.select_closed",
+    "other": "Запрос S3 Select уже запущен или закрыт."
+  },
+  {
+    "id": "selectquery.select_result_limit_query_usecase",
+    "other": "Результат S3 Select превысил установленный лимит. Уже полученные данные неполные."
+  },
+  {
+    "id": "selectquery.select_source_changed",
+    "other": "Файл изменился во время S3 Select. Результат неполный; повторите запрос."
+  },
+  {
+    "id": "selectquery.invalid_select_statistics",
+    "other": "Итоговые сведения S3 Select не соответствуют полученному результату. Результат неполный."
+  },
+  {
+    "id": "selectquery.invalid_select_query",
+    "other": "Укажите SQL до 16 КиБ, один формат CSV/JSON, допустимую сериализацию и ограничения выполнения."
+  },
+  {
+    "id": "server.minio_history_is_unavailable",
+    "other": "История MinIO недоступна."
+  },
+  {
+    "id": "server.server_config_changed",
+    "other": "Настройки изменились. Обновите данные перед сохранением."
+  },
+  {
+    "id": "server.invalid_config_history",
+    "other": "Некорректная запись истории."
+  },
+  {
+    "id": "server.invalid_config_values",
+    "other": "Нет доступных изменений для применения."
+  },
+  {
+    "id": "server.config_environment_override",
+    "other": "Параметр задан через ENV. Измените его в конфигурации запуска MinIO."
+  },
+  {
+    "id": "server.invalid_config_value",
+    "other": "Некорректное значение параметра {{.Name}}."
+  },
+  {
+    "id": "server.invalid_config_key",
+    "other": "Параметр отсутствует или недоступен для редактирования."
+  },
+  {
+    "id": "server.invalid_diagnostic",
+    "other": "Выберите журнал или трассировку, 1–10 секунд и 1–200 строк."
+  },
+  {
+    "id": "server.minio_ended_the_trace_before_collection_finished",
+    "other": "MinIO завершил трассировку до окончания сбора."
+  },
+  {
+    "id": "server.minio_could_not_open_the_server_log",
+    "other": "MinIO не смог открыть журнал сервера."
+  },
+  {
+    "id": "server.not_implemented",
+    "other": "Диагностика не поддерживается версией или типом сервера."
+  },
+  {
+    "id": "server.invalid_pool_operation",
+    "other": "Неизвестная операция пула."
+  },
+  {
+    "id": "server.invalid_pool_operation_pool_change",
+    "other": "Выберите операцию пула."
+  },
+  {
+    "id": "server.confirmation_required",
+    "other": "Введите текст подтверждения операции."
+  },
+  {
+    "id": "server.pools_changed",
+    "other": "Состояние пулов изменилось. Обновите данные и повторите действие."
+  },
+  {
+    "id": "server.pool_not_found",
+    "other": "Пул больше не существует."
+  },
+  {
+    "id": "server.pools_not_ready",
+    "other": "Нужны минимум два пула и подтверждённое отсутствие перераспределения."
+  },
+  {
+    "id": "server.pool_busy",
+    "other": "Другой пул выводится или уже выведен. Завершите изменение топологии."
+  },
+  {
+    "id": "server.pool_busy_pool_change",
+    "other": "Пул нельзя вывести в текущем состоянии."
+  },
+  {
+    "id": "server.rebalance_inactive",
+    "other": "Нет подтверждённого активного перераспределения."
+  },
+  {
+    "id": "server.decommission_inactive",
+    "other": "Пул сейчас не выводится."
+  },
+  {
+    "id": "server.concurrent_requests0_means_automatic",
+    "other": "Одновременные запросы (0 — автоматически)"
+  },
+  {
+    "id": "server.cluster_response_timeout",
+    "other": "Ожидание ответа кластера"
+  },
+  {
+    "id": "server.remote_storage_timeout",
+    "other": "Ожидание удалённого хранилища"
+  },
+  {
+    "id": "server.replication_priority",
+    "other": "Приоритет репликации"
+  },
+  {
+    "id": "server.replication_workers",
+    "other": "Обработчики репликации"
+  },
+  {
+    "id": "server.large_object_workers",
+    "other": "Обработчики крупных объектов"
+  },
+  {
+    "id": "server.storage_tier_transition_workers",
+    "other": "Обработчики переноса между уровнями"
+  },
+  {
+    "id": "server.incomplete_upload_cleanup_interval",
+    "other": "Интервал очистки прерванных загрузок"
+  },
+  {
+    "id": "server.incomplete_upload_expiration_age",
+    "other": "Возраст прерванных загрузок для очистки"
+  },
+  {
+    "id": "server.deleted_object_background_cleanup_interval",
+    "other": "Интервал фоновой очистки удалений"
+  },
+  {
+    "id": "server.scanner_speed",
+    "other": "Скорость сканера"
+  },
+  {
+    "id": "server.object_version_count_threshold",
+    "other": "Порог числа версий объекта"
+  },
+  {
+    "id": "server.folder_count_threshold",
+    "other": "Порог числа папок"
+  },
+  {
+    "id": "server.bit_rot_scanning",
+    "other": "Проверка повреждений"
+  },
+  {
+    "id": "server.healing_pause",
+    "other": "Пауза восстановления"
+  },
+  {
+    "id": "server.io_operation_threshold",
+    "other": "Порог операций ввода-вывода"
+  },
+  {
+    "id": "server.drive_workers_empty_means_automatic",
+    "other": "Обработчики диска (пусто — автоматически)"
+  },
+  {
+    "id": "server.invalid_subsystem",
+    "other": "Выберите API, сканер или восстановление."
+  },
+  {
+    "id": "server.server_feature_unavailable",
+    "other": "Этот раздел недоступен в текущей конфигурации MinIO."
+  },
+  {
+    "id": "server.server_operation_failed",
+    "other": "MinIO отклонил операцию. Обновите состояние и проверьте настройки сервера."
+  },
+  {
+    "id": "server.permission_unknown",
+    "other": "Не удалось подтвердить права на изменение сервера."
+  },
+  {
+    "id": "server.access_denied",
+    "other": "Нет подтверждённого права на это действие."
+  },
+  {
+    "id": "server.config_too_large",
+    "other": "Ответ конфигурации превышает лимит."
+  },
+  {
+    "id": "server.invalid_server_config",
+    "other": "Не удалось прочитать конфигурацию MinIO."
+  },
+  {
+    "id": "server.object_statistics_are_unavailable_scanner_data_or",
+    "other": "Статистика объектов недоступна: нет данных сканера или прав на её чтение."
+  },
+  {
+    "id": "server.invalid_metrics",
+    "other": "MinIO вернул некорректные метрики."
+  },
+  {
+    "id": "server.pool_management_is_only_available_ina",
+    "other": "Управление пулами доступно только в поддерживаемой распределённой конфигурации MinIO."
+  },
+  {
+    "id": "server.could_not_check_rebalancing_changes_are_blocked",
+    "other": "Не удалось проверить перераспределение. Изменения заблокированы."
+  },
+  {
+    "id": "server.unknown_pool_health",
+    "other": "Нет актуальных сведений о состоянии узлов."
+  },
+  {
+    "id": "server.unhealthy_pools",
+    "other": "Операция недоступна: не все узлы доступны."
+  },
+  {
+    "id": "server.unhealthy_pools_server_pools",
+    "other": "Операция недоступна: проверьте доступность и восстановление дисков."
+  },
+  {
+    "id": "server.unknown_pool_health_server_pools",
+    "other": "Не удалось подтвердить диски выбранного пула."
+  },
+  {
+    "id": "sessions.invalid_credentials",
+    "other": "Введите корректные Access Key, Secret Key и регион."
+  },
+  {
+    "id": "staging.temporary_storage_full",
+    "other": "Не хватает бюджета временного хранилища. Дождитесь завершения операций и повторите."
+  },
+  {
+    "id": "storage.admin_response_too_large",
+    "other": "Ответ MinIO Admin API превышает допустимый размер."
+  },
+  {
+    "id": "storage.conditional_delete_unavailable",
+    "other": "Сервер не подтвердил поддержку условного удаления. Копия создана, исходник сохранён."
+  },
+  {
+    "id": "storage.invalid_deletion_condition",
+    "other": "Не удалось получить условие безопасного удаления. Исходник сохранён."
+  },
+  {
+    "id": "storage.delete_uncertain",
+    "other": "Результат удаления не подтверждён. Проверьте исходник перед повтором."
+  },
+  {
+    "id": "storage.source_changed",
+    "other": "Исходник изменился во время перемещения и не удалён."
+  },
+  {
+    "id": "storage.access_denied",
+    "other": "Копия создана, MinIO запретил удаление исходника."
+  },
+  {
+    "id": "storage.conditional_delete_unavailable_conditional",
+    "other": "Сервер отклонил условное удаление. Исходник сохранён."
+  },
+  {
+    "id": "storage.delete_uncertain_conditional",
+    "other": "Сервер не подтвердил удаление. Проверьте исходник перед повтором."
+  },
+  {
+    "id": "storage.conditional_upload_conflict",
+    "other": "Хранилище не получило согласованные условия записи. Проверьте состояние перед повтором операции."
+  },
+  {
+    "id": "storage.lifecycle_too_large",
+    "other": "Конфигурация Lifecycle превышает 4 МиБ. Изменения не выполнялись."
+  },
+  {
+    "id": "storage.copy_unconfirmed",
+    "other": "Хранилище не подтвердило создание multipart-загрузки."
+  },
+  {
+    "id": "storage.invalid_copy_part_size",
+    "other": "Некорректный размер части копирования."
+  },
+  {
+    "id": "storage.object_too_large",
+    "other": "Размер объекта превышает поддерживаемый лимит копирования."
+  },
+  {
+    "id": "storage.source_changed_copy",
+    "other": "Исходный файл изменился во время копирования. Обновите сведения перед повтором."
+  },
+  {
+    "id": "storage.copy_part_unconfirmed",
+    "other": "Хранилище не подтвердило копирование части файла."
+  },
+  {
+    "id": "storage.copy_unconfirmed_copy",
+    "other": "Хранилище не подтвердило завершение копирования."
+  },
+  {
+    "id": "storage.source_changed_copy_source_error",
+    "other": "Исходный файл изменился или удалён. Обновите сведения перед повтором."
+  },
+  {
+    "id": "storage.diagnostic_record_too_large",
+    "other": "Запись диагностики MinIO превышает 1 МиБ. Сбор остановлен."
+  },
+  {
+    "id": "storage.invalid_diagnostic_record",
+    "other": "MinIO вернул некорректную запись диагностики. Сбор остановлен."
+  },
+  {
+    "id": "storage.access_denied_diagnostic_probe",
+    "other": "Раздел недоступен."
+  },
+  {
+    "id": "storage.probe_unavailable",
+    "other": "Не удалось проверить раздел."
+  },
+  {
+    "id": "storage.metrics_too_large",
+    "other": "Ответ метрик превышает 2 МиБ."
+  },
+  {
+    "id": "storage.direct_upload_signing_unavailable",
+    "other": "Не удалось подписать обязательные условия передачи части."
+  },
+  {
+    "id": "storage.invalid_multipart_part",
+    "other": "Некорректные параметры подписи части загрузки."
+  },
+  {
+    "id": "storage.invalid_object_attributes",
+    "other": "Некорректная страница частей объекта."
+  },
+  {
+    "id": "storage.no_such_version",
+    "other": "Указанная версия объекта не существует."
+  },
+  {
+    "id": "storage.object_attributes_unsupported",
+    "other": "Хранилище не поддерживает расширенные атрибуты объектов."
+  },
+  {
+    "id": "storage.invalid_object_attributes_response",
+    "other": "Хранилище вернуло некорректные атрибуты объекта. Обновите сведения перед повтором запроса."
+  },
+  {
+    "id": "storage.s3_response_too_large",
+    "other": "Ответ метаданных S3 превышает допустимый размер. Обновите состояние перед повтором операции."
+  },
+  {
+    "id": "storage.invalids3_listing_response",
+    "other": "S3 вернул некорректный список. Обновите состояние перед повтором операции."
+  },
+  {
+    "id": "storage.s3_write_unconfirmed",
+    "other": "Хранилище вернуло неожиданный ответ записи. Проверьте состояние файла перед повтором операции."
+  },
+  {
+    "id": "storage.select_upstream_limit",
+    "other": "Поток S3 Select превысил допустимые границы. Результат неполный."
+  },
+  {
+    "id": "storage.invalid_select_event",
+    "other": "S3 Select вернул повреждённое или незавершённое событие. Результат неполный."
+  },
+  {
+    "id": "storage.access_denied_select_response",
+    "other": "Недостаточно прав MinIO для S3 Select."
+  },
+  {
+    "id": "storage.not_implemented",
+    "other": "S3 Select не поддерживается хранилищем."
+  },
+  {
+    "id": "storage.select_stream_failed",
+    "other": "Хранилище прервало S3 Select. Результат неполный."
+  },
+  {
+    "id": "storage.signing_region_required",
+    "other": "Для подписи запросов нужен регион хранилища."
+  },
+  {
+    "id": "storage.signing_network_disabled",
+    "other": "Подпись запроса не должна обращаться к сети. Проверьте регион подключения."
+  },
+  {
+    "id": "tiers.tier_operation_failed",
+    "other": "MinIO отклонил операцию уровня. Проверьте доступность удалённого бакета, права ключей и отсутствие данных/правил при удалении. Обновите список перед повтором."
+  },
+  {
+    "id": "tiers.tier_usage_unknown",
+    "other": "Для проверки использования уровня нужно право s3:ListAllMyBuckets и чтение Lifecycle всех бакетов."
+  },
+  {
+    "id": "tiers.tier_usage_unknown_tiers",
+    "other": "Не удалось проверить Lifecycle всех бакетов. Уровень не удалён."
+  },
+  {
+    "id": "tiers.tier_usage_unknown_tiers_unused_tier",
+    "other": "Не удалось полностью прочитать Lifecycle. Уровень не удалён."
+  },
+  {
+    "id": "tiers.tier_in_use",
+    "other": "Уровень указан в правиле Lifecycle. Сначала измените или удалите это правило."
+  },
+  {
+    "id": "tiers.invalid_tier_name",
+    "other": "Имя уровня: 3–32 символа, заглавные латинские буквы, цифры, _ и -. Начните с буквы."
+  },
+  {
+    "id": "tiers.tier_permission_unknown",
+    "other": "Не удалось подтвердить права на уровни хранения."
+  },
+  {
+    "id": "tiers.access_denied",
+    "other": "Нет права admin:SetTier."
+  },
+  {
+    "id": "tiers.tier_not_found",
+    "other": "Уровень больше не существует."
+  },
+  {
+    "id": "tiers.tier_exists",
+    "other": "Уровень с таким именем уже существует."
+  },
+  {
+    "id": "tiers.invalid_tier_type",
+    "other": "Выберите S3 или MinIO."
+  },
+  {
+    "id": "tiers.invalid_tier_target",
+    "other": "Проверьте удалённый бакет, префикс, регион и класс хранения."
+  },
+  {
+    "id": "tiers.tier_endpoint_not_allowed",
+    "other": "Разрешите точный удалённый адрес в MINIO_ALLOWED_ENDPOINTS сервиса API. Адрес должен быть доступен с узлов MinIO."
+  },
+  {
+    "id": "tiers.tier_same_server",
+    "other": "Используйте отдельное удалённое хранилище, не текущий MinIO."
+  },
+  {
+    "id": "tiers.tier_changed",
+    "other": "Настройки уровня изменились. Обновите список."
+  },
+  {
+    "id": "tiers.tier_confirmation",
+    "other": "Введите имя уровня для подтверждения."
+  },
+  {
+    "id": "tiers.invalid_tier_credentials",
+    "other": "Введите Access Key и Secret Key удалённого хранилища (Secret Key от 8 символов)."
+  },
+  {
+    "id": "tiers.tier_credentials_unsupported",
+    "other": "Замена ключей доступна только для S3/MinIO с обычными ключами доступа."
+  },
+  {
+    "id": "transfers.invalid_transfer",
+    "other": "Укажите исходный файл, бакет и корректный путь назначения."
+  },
+  {
+    "id": "transfers.same_destination",
+    "other": "Исходный путь и назначение совпадают."
+  },
+  {
+    "id": "transfers.source_changed",
+    "other": "Исходный файл изменился. Обновите сведения перед повтором."
+  },
+  {
+    "id": "transfers.transfer_too_large",
+    "other": "За одну операцию можно скопировать файл размером до 5 ГиБ."
+  },
+  {
+    "id": "transfers.the_copy_was_created",
+    "other": "Копия создана."
+  },
+  {
+    "id": "transfers.the_folder_marker_was_copied_and_the",
+    "other": "Запись папки скопирована, исходная папка сохранена: внутри остались объекты или их наличие не удалось проверить."
+  },
+  {
+    "id": "transfers.the_copy_was_created_but_its_state",
+    "other": "Копия создана, но её состояние не удалось подтвердить. Исходник не удалялся."
+  },
+  {
+    "id": "transfers.the_destination_changed_after_copying_the_source",
+    "other": "Назначение изменилось после копирования. Исходник не удалялся."
+  },
+  {
+    "id": "transfers.the_copy_was_created_but_the_source",
+    "other": "Копия создана, но состояние исходника не удалось проверить. Запрос удаления не отправлялся."
+  },
+  {
+    "id": "transfers.the_source_file_changed_after_copying_and",
+    "other": "Исходный файл изменился после копирования и не удалён."
+  },
+  {
+    "id": "transfers.object_delete_denied",
+    "other": "Копия создана, MinIO запретил удаление исходника. Проверьте права и защиту файла."
+  },
+  {
+    "id": "transfers.delete_uncertain",
+    "other": "Копия создана, результат удаления исходника не подтверждён. Проверьте обе стороны перед повтором."
+  },
+  {
+    "id": "transfers.the_copy_was_created_and_source_deletion",
+    "other": "Копия создана, удаление исходника подтверждено."
+  },
+  {
+    "id": "transfers.the_copy_was_created_but_the_source_file_transfer",
+    "other": "Копия создана, но исходный путь после удаления существует. Проверьте его перед повтором."
+  },
+  {
+    "id": "transfers.the_copy_was_created_but_the_source_file_transfer_transfer",
+    "other": "Копия создана, но отсутствие исходника проверить не удалось. Проверьте результат перед повтором."
+  },
+  {
+    "id": "transfers.invalid_transfer_prepare_usecase",
+    "other": "Некорректный ключ объекта для переноса."
+  },
+  {
+    "id": "uploads.invalid_upload_size",
+    "other": "Размер файла не должен превышать 5 ГиБ."
+  },
+  {
+    "id": "uploads.checksum_staging_unavailable",
+    "other": "Временное хранилище для проверки контрольной суммы недоступно."
+  },
+  {
+    "id": "uploads.size_mismatch",
+    "other": "Размер переданного файла не совпадает с ожидаемым. Файл не записан."
+  },
+  {
+    "id": "uploads.interrupted",
+    "other": "Передача файла прервалась. Файл не записан."
+  },
+  {
+    "id": "uploads.invalid_key",
+    "other": "Некорректный путь назначения."
+  },
+  {
+    "id": "uploads.import_not_prepared",
+    "other": "Подготовьте импорт перед запуском."
+  },
+  {
+    "id": "uploads.invalid_upload_parts_response",
+    "other": "S3 вернул некорректный список частей. Обновите сведения перед повтором операции."
+  },
+  {
+    "id": "uploads.parts_limit",
+    "other": "Не удалось получить полный список частей. Обновите сведения."
+  },
+  {
+    "id": "uploads.invalid_upload_listing",
+    "other": "Выберите загрузку для проверки частей."
+  },
+  {
+    "id": "uploads.invalid_abort",
+    "other": "Выберите загрузку и введите ОТМЕНИТЬ для подтверждения."
+  },
+  {
+    "id": "uploads.upload_changed",
+    "other": "Список частей изменился. Возможно, загрузка продолжается. Обновите список перед отменой."
+  },
+  {
+    "id": "uploads.could_not_confirm_the_abort_check_the",
+    "other": "Не удалось подтвердить отмену. Проверьте результат перед повтором."
+  },
+  {
+    "id": "uploads.the_abort_was_confirmed_the_completed_object",
+    "other": "Отмена подтверждена. Готовый объект не удалялся."
+  },
+  {
+    "id": "uploads.the_upload_is_still_available_check_its",
+    "other": "Загрузка ещё доступна. Проверьте части перед повторной отменой."
+  },
+  {
+    "id": "uploads.invalid_upload_listing_incomplete_uploads_usecase",
+    "other": "Выберите бакет и проверьте начало пути."
+  },
+  {
+    "id": "uploads.invalid_upload_cursor",
+    "other": "MinIO не обновил позицию списка. Повторите запрос."
+  },
+  {
+    "id": "uploads.invalid_checksum",
+    "other": "Проверьте алгоритм, тип и значение контрольной суммы в base64."
+  },
+  {
+    "id": "uploads.unsupported_checksum_mode",
+    "other": "Этот способ загрузки не поддерживает выбранный режим контрольной суммы."
+  },
+  {
+    "id": "uploads.unsupported_checksum_algorithm",
+    "other": "Поддерживаются MD5, SHA1, SHA256, CRC32 и CRC32C."
+  },
+  {
+    "id": "uploads.checksum_mismatch",
+    "other": "Контрольная сумма переданного файла не совпадает с ожидаемой. Файл не записан."
+  },
+  {
+    "id": "uploads.invite_limit",
+    "other": "Лимит файлов исчерпан или ссылка отозвана."
+  },
+  {
+    "id": "uploads.invalid_invite",
+    "other": "Проверьте папку, срок (до суток), размер (до 1 ГиБ) и количество файлов (до 100)."
+  },
+  {
+    "id": "uploads.invite_denied",
+    "other": "Нет подтверждённого права записи во всю выбранную папку."
+  },
+  {
+    "id": "uploads.missing_upload_parts",
+    "other": "Передайте все части перед завершением загрузки."
+  },
+  {
+    "id": "uploads.thesha256composite_checksum_of_the_parts",
+    "other": "SHA256 COMPOSITE частей не совпадает с ожидаемой."
+  },
+  {
+    "id": "uploads.invalid_complete_response",
+    "other": "Некорректный ответ хранилища."
+  },
+  {
+    "id": "uploads.multipart_not_found",
+    "other": "Загрузка не найдена в текущей сессии."
+  },
+  {
+    "id": "uploads.multipart_state_conflict",
+    "other": "Действие недоступно в текущем состоянии загрузки. Получите её состояние."
+  },
+  {
+    "id": "uploads.access_denied",
+    "other": "Нет прав на запись в это назначение."
+  },
+  {
+    "id": "uploads.conditional_completion_unverified",
+    "other": "Условное завершение multipart не подтверждено для этого подключения. Администратор должен проверить сервер и явно разрешить его в конфигурации API."
+  },
+  {
+    "id": "uploads.invalid_bucket_or_file_path",
+    "other": "Некорректный бакет или путь файла."
+  },
+  {
+    "id": "uploads.the_file_size_must_be_between0",
+    "other": "Размер файла должен быть от 0 до 5 ГиБ."
+  },
+  {
+    "id": "uploads.invalid_content_type",
+    "other": "Некорректный тип содержимого."
+  },
+  {
+    "id": "uploads.up_to32_metadata_entries_are_allowed",
+    "other": "Допускается до 32 метаданных."
+  },
+  {
+    "id": "uploads.invalid_file_metadata",
+    "other": "Некорректные метаданные файла."
+  },
+  {
+    "id": "uploads.metadata_must_not_exceed8_kib",
+    "other": "Размер метаданных не должен превышать 8 КиБ."
+  },
+  {
+    "id": "uploads.unsupported_checksum_mode_create",
+    "other": "Для управляемой загрузки доступна SHA256 COMPOSITE с количеством частей плана."
+  },
+  {
+    "id": "uploads.multipart_expired",
+    "other": "Срок загрузки истёк. Создайте новую загрузку."
+  },
+  {
+    "id": "uploads.unsupported_checksum_mode_parts",
+    "other": "Часть требует SHA256 FULL_OBJECT в base64."
+  },
+  {
+    "id": "uploads.uploaded_part_size_mismatch",
+    "other": "Размер принятой S3 части не соответствует плану. Отмените загрузку и создайте новую."
+  },
+  {
+    "id": "uploads.part_checksum_unavailable",
+    "other": "Хранилище не подтвердило SHA256 части. Завершение запрещено."
+  },
+  {
+    "id": "uploads.part_changed",
+    "other": "Содержимое части не соответствует управляемой загрузке."
+  },
+  {
+    "id": "uploads.invalid_multipart_parts",
+    "other": "Хранилище вернуло некорректный список частей."
+  },
+  {
+    "id": "uploads.the_part_number_and_exact_size_must",
+    "other": "Номер и точный размер части должны соответствовать плану загрузки."
+  },
+  {
+    "id": "uploads.part_content_conflict",
+    "other": "Номер части уже закреплён за другим содержимым. Создайте новую загрузку."
+  },
+  {
+    "id": "uploads.the_storage_rejected_the_partsha256_does",
+    "other": "Хранилище отклонило часть: SHA256 не совпадает с переданным содержимым."
+  },
+  {
+    "id": "uploads.the_part_was_only_partially_uploaded_retrieve",
+    "other": "Часть передана не полностью. Получите состояние перед повтором."
+  },
+  {
+    "id": "uploads.the_uploaded_partssha256_checksum_does",
+    "other": "SHA256 переданной части не совпадает с ожидаемой."
+  },
+  {
+    "id": "uploads.part_content_conflict_parts",
+    "other": "Часть уже закреплена за другим SHA256."
+  },
+  {
+    "id": "uploads.multipart_expired_parts",
+    "other": "Срок загрузки истёк."
+  },
+  {
+    "id": "uploads.invalid_upload",
+    "other": "Проверьте имя файла и ограничение размера."
+  },
+  {
+    "id": "uploads.upload_exists",
+    "other": "Файл с таким именем уже существует. Переименуйте его и повторите загрузку."
+  },
+  {
+    "id": "uploads.invalid_sourceurl",
+    "other": "Укажите публичный HTTPS-адрес без логина и пароля, с портом 443."
+  },
+  {
+    "id": "uploads.import_too_large",
+    "other": "Импорт поддерживает файлы до 1 ГиБ."
+  },
+  {
+    "id": "uploads.incomplete_source",
+    "other": "Источник прервал передачу. Файл не записан."
+  },
+  {
+    "id": "uploads.incomplete_source_stage_remote",
+    "other": "Источник вернул неполный файл."
+  },
+  {
+    "id": "uploads.invite_permissions_unavailable",
+    "other": "Не удалось проверить права для создания ссылки."
+  },
+  {
+    "id": "uploads.incomplete_upload",
+    "other": "Файл передан не полностью. Проверьте состояние перед повтором."
+  },
+  {
+    "id": "uploads.checksum_mismatch_write_usecase",
+    "other": "Хранилище отклонило контрольную сумму. Проверьте состояние файла перед повтором."
+  },
+  {
+    "id": "validation.invalid_members",
+    "other": "Выберите от 1 до 100 участников."
+  },
+  {
+    "id": "validation.invalid_members_management",
+    "other": "Участники должны иметь корректные, неповторяющиеся имена."
+  },
+  {
+    "id": "validation.invalid_policy",
+    "other": "Политика не должна превышать 20 КиБ."
+  },
+  {
+    "id": "validation.invalid_policy_objects",
+    "other": "Укажите JSON политики с Version 2012-10-17 и Statement."
+  },
+  {
+    "id": "common.combined",
+    "other": "{{.First}} {{.Second}}"
+  },
+  {
+    "id": "http.management_unsupported",
+    "other": "Операция управления не поддерживается."
+  },
+  {
+    "id": "http.route_not_found",
+    "other": "Маршрут API не найден."
+  },
+  {
+    "id": "http.resource_name_invalid",
+    "other": "Имя должно содержать 1–128 символов без пробелов по краям, запятых и слешей."
+  },
+  {
+    "id": "http.stopping",
+    "other": "API завершает работу"
+  }
+]

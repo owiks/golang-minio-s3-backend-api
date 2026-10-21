@@ -7,6 +7,7 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 // A concrete version fixes object identity, not its mutable tags. The null
@@ -35,13 +36,13 @@ func verifyPropertyTarget(ctx context.Context, s propertyTargetReader, bucket, k
 }
 
 func propertyTargetChanged() error {
-	return apperror.New(409, "ObjectPropertiesChanged", "Файл изменился или удалён. Обновите сведения перед сохранением.")
+	return apperror.New(409, "ObjectPropertiesChanged", messages.ObjectsObjectPropertiesChangedObjectPropertyTarget)
 }
 
 func propertyContentReadError(err error) error {
 	switch minio.ToErrorResponse(err).Code {
 	case "NoSuchVersion", "NoSuchKey", "PreconditionFailed", "ConditionalRequestConflict":
-		return apperror.New(409, "ObjectChanged", "Файл изменился или проверенная версия удалена. Обновите содержимое.")
+		return apperror.New(409, "ObjectChanged", messages.ObjectsObjectChangedObjectPropertyTarget)
 	}
 	return err
 }
@@ -52,7 +53,7 @@ func verifyTaggedTarget(ctx context.Context, s propertyTargetReader, bucket, key
 		return err
 	}
 	if apperror.Public(err).Code == "ObjectPropertiesChanged" {
-		return apperror.New(409, "ObjectPropertiesChanged", "Запрос изменения меток выполнен, но файл изменился или удалён во время операции. Проверьте результат перед повтором.")
+		return apperror.New(409, "ObjectPropertiesChanged", messages.ObjectsObjectPropertiesChangedObjectPropertyTargetTaggedTarget)
 	}
-	return apperror.New(502, "ObjectTagsUnverified", "Запрос изменения меток выполнен, но состояние файла не удалось проверить. Обновите сведения перед повтором.")
+	return apperror.New(502, "ObjectTagsUnverified", messages.ObjectsObjectTagsUnverified)
 }

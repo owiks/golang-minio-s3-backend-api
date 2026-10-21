@@ -1,11 +1,12 @@
 package controllers
 
 import (
+	"net/http"
+
 	httpcommon "minio-web/api/src/http/api/common"
 	httpvalidation "minio-web/api/src/http/validation"
 	"minio-web/api/src/services/identities"
 	runtimesvc "minio-web/api/src/services/runtime"
-	"net/http"
 )
 
 func HandleListPolicies(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -13,7 +14,7 @@ func HandleListPolicies(app *runtimesvc.State, w http.ResponseWriter, r *http.Re
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleGetPolicy(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, name string) error {
@@ -21,7 +22,7 @@ func HandleGetPolicy(app *runtimesvc.State, w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleCreatePolicy(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -32,7 +33,7 @@ func HandleCreatePolicy(app *runtimesvc.State, w http.ResponseWriter, r *http.Re
 	if err := identities.CreatePolicy(r.Context(), runtimesvc.NewClients(s), identities.CreatePolicyCommand{Name: b.Name, Document: b.Document, AcknowledgeNonAtomicCreate: b.AcknowledgeNonAtomicCreate}); err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, httpcommon.Success{OK: true})
+	httpcommon.WriteJSON(w, r, 200, httpcommon.Success{OK: true})
 	return nil
 }
 func HandleUpdatePolicy(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, name string) error {
@@ -43,7 +44,7 @@ func HandleUpdatePolicy(app *runtimesvc.State, w http.ResponseWriter, r *http.Re
 	if err := identities.UpdatePolicy(r.Context(), runtimesvc.NewClients(s), name, identities.UpdatePolicyCommand{Document: b.Document, Revision: b.Revision}); err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, httpcommon.Success{OK: true})
+	httpcommon.WriteJSON(w, r, 200, httpcommon.Success{OK: true})
 	return nil
 }
 func HandleDeletePolicy(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, name string) error {
@@ -53,6 +54,6 @@ func HandleDeletePolicy(app *runtimesvc.State, w http.ResponseWriter, r *http.Re
 	if err := identities.DeletePolicy(r.Context(), runtimesvc.NewClients(s), name); err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, httpcommon.Success{OK: true})
+	httpcommon.WriteJSON(w, r, 200, httpcommon.Success{OK: true})
 	return nil
 }

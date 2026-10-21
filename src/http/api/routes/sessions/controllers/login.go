@@ -9,6 +9,7 @@ import (
 	"minio-web/api/src/http/middleware"
 	httpvalidation "minio-web/api/src/http/validation"
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	runtimesvc "minio-web/api/src/services/runtime"
 	sessionssvc "minio-web/api/src/services/sessions"
 )
@@ -16,7 +17,7 @@ import (
 func HandleLogin(app *runtimesvc.State, w http.ResponseWriter, r *http.Request) error {
 	cfg := app.Config()
 	if !httpcommon.SameOrigin(r, cfg.Origin) {
-		return apperror.New(403, "OriginDenied", "Запрос должен поступать с адреса этого интерфейса.")
+		return apperror.New(403, "OriginDenied", messages.HttpOriginDenied)
 	}
 	release, retryAfter, err := app.AdmitLogin(middleware.ClientAddress(r, cfg.TrustedProxies))
 	if err != nil {
@@ -36,6 +37,6 @@ func HandleLogin(app *runtimesvc.State, w http.ResponseWriter, r *http.Request) 
 		return err
 	}
 	http.SetCookie(w, httpcommon.SessionCookie(s, r, false))
-	httpcommon.WriteJSON(w, 201, value)
+	httpcommon.WriteJSON(w, r, 201, value)
 	return nil
 }

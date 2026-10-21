@@ -12,6 +12,7 @@ import (
 	"github.com/minio/madmin-go/v3"
 
 	apihttp "minio-web/api/src/http/api"
+	"minio-web/api/src/http/presentation"
 	identitiessvc "minio-web/api/src/services/identities"
 	runtimesvc "minio-web/api/src/services/runtime"
 	"minio-web/api/src/services/securetoken"
@@ -76,9 +77,9 @@ func TestIAMSummariesIntegration(t *testing.T) {
 	root.call("POST", "admin/policies", map[string]any{"acknowledgeNonAtomicCreate": true, "name": policy, "document": doc}, 200)
 	root.call("POST", "admin/bindings", map[string]any{"group": group, "policy": policy}, 200)
 	root.call("POST", "admin/bindings", map[string]any{"user": user, "policy": policy}, 200)
-	getGroups := func(c *apiClient) identitiessvc.GroupSummary {
+	getGroups := func(c *apiClient) presentation.GroupSummary {
 		t.Helper()
-		var rows []identitiessvc.GroupSummary
+		var rows []presentation.GroupSummary
 		raw := c.call("GET", "admin/group-summaries", nil, 200)
 		if json.Unmarshal(raw, &rows) != nil {
 			t.Fatal(string(raw))
@@ -89,11 +90,11 @@ func TestIAMSummariesIntegration(t *testing.T) {
 			}
 		}
 		t.Fatal("missing group")
-		return identitiessvc.GroupSummary{}
+		return presentation.GroupSummary{}
 	}
-	getPolicy := func(c *apiClient) identitiessvc.PolicySummary {
+	getPolicy := func(c *apiClient) presentation.PolicySummary {
 		t.Helper()
-		var rows []identitiessvc.PolicySummary
+		var rows []presentation.PolicySummary
 		raw := c.call("GET", "admin/policy-summaries", nil, 200)
 		if json.Unmarshal(raw, &rows) != nil {
 			t.Fatal(string(raw))
@@ -104,7 +105,7 @@ func TestIAMSummariesIntegration(t *testing.T) {
 			}
 		}
 		t.Fatal("missing policy")
-		return identitiessvc.PolicySummary{}
+		return presentation.PolicySummary{}
 	}
 	var bindings madmin.PolicyEntitiesResult
 	if json.Unmarshal(root.call("GET", "admin/bindings?policy="+policy, nil, 200), &bindings) != nil || len(bindings.PolicyMappings) != 1 || bindings.PolicyMappings[0].Policy != policy || !reflect.DeepEqual(bindings.PolicyMappings[0].Users, []string{user}) || !reflect.DeepEqual(bindings.PolicyMappings[0].Groups, []string{group}) {

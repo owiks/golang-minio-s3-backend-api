@@ -9,6 +9,7 @@ import (
 	"github.com/minio/madmin-go/v3"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 func EditKey(ctx context.Context, s ChangeKeyClient, name string, input KeyInput) error {
@@ -21,7 +22,7 @@ func EditKey(ctx context.Context, s ChangeKeyClient, name string, input KeyInput
 		return err
 	}
 	if input.Parent != "" {
-		return apperror.New(400, "ImmutableParent", "Владельца существующего ключа нельзя изменить. Создайте новый ключ у нужного пользователя.")
+		return apperror.New(400, "ImmutableParent", messages.KeysImmutableParent)
 	}
 	policy := input.Policy
 	if bytes.Equal(bytes.TrimSpace(policy), []byte("null")) {
@@ -47,7 +48,7 @@ func EditKey(ctx context.Context, s ChangeKeyClient, name string, input KeyInput
 		return err
 	}
 	if input.Name == "" && current.Name != "" || input.Description == "" && current.Description != "" {
-		return apperror.New(400, "EmptyKeyMetadata", "Чтобы изменить имя или описание, укажите новое значение. Очистка этих полей не поддерживается этой операцией MinIO.")
+		return apperror.New(400, "EmptyKeyMetadata", messages.KeysEmptyKeyMetadata)
 	}
 	return s.UpdateServiceAccount(ctx, name, opts)
 }

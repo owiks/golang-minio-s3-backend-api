@@ -15,6 +15,7 @@ import (
 
 	"github.com/minio/madmin-go/v3"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+
 	apihttp "minio-web/api/src/http/api"
 	"minio-web/api/src/http/api/common"
 	"minio-web/api/src/services/apperror"
@@ -44,14 +45,14 @@ func TestPolicyAndGroupCreateConsentHTTP(t *testing.T) {
 							if kind == "policies" {
 								_, _ = w.Write([]byte(`{"Version":"2012-10-17","Statement":[]}`))
 							} else {
-								common.WriteJSON(w, 200, map[string]any{"name": "fixture", "status": "disabled", "members": []string{"external"}})
+								common.WriteJSON(w, r, 200, map[string]any{"name": "fixture", "status": "disabled", "members": []string{"external"}})
 							}
 						} else {
 							code := "XMinioAdminNoSuchPolicy"
 							if kind == "groups" {
 								code = "XMinioAdminNoSuchGroup"
 							}
-							common.WriteJSON(w, 404, map[string]string{"Code": code})
+							common.WriteJSON(w, r, 404, map[string]string{"Code": code})
 						}
 						return
 					}

@@ -8,7 +8,9 @@ import (
 	"testing"
 
 	"github.com/minio/minio-go/v7"
+
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/tests/testmessage"
 )
 
 func TestSDKListsRejectWrongRootAndMalformedDocuments(t *testing.T) {
@@ -28,7 +30,7 @@ func TestSDKListsRejectWrongRootAndMalformedDocuments(t *testing.T) {
 				if err == nil || apperror.Public(err).Code != "InvalidS3ListingResponse" || calls != 1 || body.closed != 1 {
 					t.Fatalf("invalid listing accepted/retried: %v calls=%d closes=%d", err, calls, body.closed)
 				}
-				if strings.Contains(apperror.Public(err).Message, "PRIVATE") {
+				if strings.Contains(testmessage.Russian(apperror.Public(err).Message), "PRIVATE") {
 					t.Fatal("upstream details exposed")
 				}
 			})

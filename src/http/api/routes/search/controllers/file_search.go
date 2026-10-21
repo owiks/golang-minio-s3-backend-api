@@ -5,13 +5,14 @@ import (
 
 	httpcommon "minio-web/api/src/http/api/common"
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	runtimesvc "minio-web/api/src/services/runtime"
 	searchsvc "minio-web/api/src/services/search"
 )
 
 func HandleFileSearch(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
 	if r.Method != "GET" {
-		return apperror.New(405, "MethodNotAllowed", "Метод не поддерживается.")
+		return apperror.New(405, "MethodNotAllowed", messages.HttpMethodNotAllowed)
 	}
 	q := r.URL.Query()
 	value, err := searchsvc.SearchFiles(r.Context(), runtimesvc.NewClients(s), searchsvc.FileSearchInput{
@@ -23,6 +24,6 @@ func HandleFileSearch(app *runtimesvc.State, w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }

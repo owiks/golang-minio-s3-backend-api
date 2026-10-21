@@ -6,7 +6,8 @@ import (
 	"time"
 
 	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/objects/state"
+	"minio-web/api/src/services/messages"
+	objectstate "minio-web/api/src/services/objects/state"
 )
 
 // Config is detached preparation data; New copies its slices and maps.
@@ -14,7 +15,7 @@ type Config struct {
 	SessionID, Bucket, Name, Base, RelativeBase string
 	Created                                     time.Time
 	Items                                       []ArchiveItem
-	Issues                                      map[string]string
+	Issues                                      map[string]messages.Ref
 	AllowPartial                                bool
 }
 type ArchivePlan struct {
@@ -23,7 +24,7 @@ type ArchivePlan struct {
 	created                                     time.Time
 	started, finished, cancelled, allowPartial  bool
 	items                                       []ArchiveItem
-	issues                                      map[string]string
+	issues                                      map[string]messages.Ref
 	cancel                                      context.CancelFunc
 	outcome, code                               string
 }
@@ -31,8 +32,8 @@ type ArchivePlan struct {
 func New(c Config) *ArchivePlan {
 	return &ArchivePlan{sessionID: c.SessionID, bucket: c.Bucket, name: c.Name, base: c.Base, relativeBase: c.RelativeBase, created: c.Created, items: append([]ArchiveItem{}, c.Items...), issues: copyIssues(c.Issues), allowPartial: c.AllowPartial}
 }
-func copyIssues(in map[string]string) map[string]string {
-	out := map[string]string{}
+func copyIssues(in map[string]messages.Ref) map[string]messages.Ref {
+	out := map[string]messages.Ref{}
 	for k, v := range in {
 		out[k] = v
 	}
@@ -66,14 +67,14 @@ func (p *ArchivePlan) Configure(ticket, name, base string, allow bool) (ArchiveS
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.started || p.finished {
-		return ArchiveSnapshot{}, apperror.New(409, "ArchiveStarted", "Этот архив уже запускался. Для повтора подготовьте новый.")
+		return ArchiveSnapshot{}, apperror.New(409, "ArchiveStarted", messages.ArchivesArchiveStartedModel)
 	}
 	name, err := ArchiveFilename(name)
 	if err != nil {
 		return ArchiveSnapshot{}, err
 	}
 	if base != "" && base != p.relativeBase {
-		return ArchiveSnapshot{}, apperror.New(400, "InvalidArchiveBase", "Выберите пути от исходной папки или от корня бакета.")
+		return ArchiveSnapshot{}, apperror.New(400, "InvalidArchiveBase", messages.ArchivesInvalidArchiveBase)
 	}
 	paths, err := ArchivePaths(p.items, base)
 	if err != nil {
@@ -89,7 +90,7 @@ func (p *ArchivePlan) PrepareForget() error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.started && !p.finished {
-		return apperror.New(409, "ArchiveRunning", "Сначала остановите передачу архива.")
+		return apperror.New(409, "ArchiveRunning", messages.ArchivesArchiveRunning)
 	}
 	if !p.started {
 		p.cancelled, p.finished = true, true
@@ -111,7 +112,7 @@ func (p *ArchivePlan) Cancel(ticket string) ArchiveSnapshot {
 		for i := range p.items {
 			if p.items[i].State == "pending" {
 				p.items[i].State = "cancelled"
-				p.items[i].Message = "Передача не запускалась."
+				p.items[i].Message = messages.ArchivesTheTransferWasNotStarted
 			}
 		}
 	}
@@ -131,7 +132,7 @@ func (p *ArchivePlan) BeginDownload(parent context.Context) (context.Context, Ar
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.started || p.cancelled || p.finished {
-		return nil, ArchiveSnapshot{}, nil, apperror.New(409, "ArchiveStarted", "Скачивание уже запускалось. Для повтора подготовьте архив заново.")
+		return nil, ArchiveSnapshot{}, nil, apperror.New(409, "ArchiveStarted", messages.ArchivesArchiveStarted)
 	}
 	count := 0
 	partial := len(p.issues) > 0
@@ -143,16 +144,16 @@ func (p *ArchivePlan) BeginDownload(parent context.Context) (context.Context, Ar
 		}
 	}
 	if count == 0 {
-		return nil, ArchiveSnapshot{}, nil, apperror.New(400, "EmptyArchive", "Нет доступных файлов для архива.")
+		return nil, ArchiveSnapshot{}, nil, apperror.New(400, "EmptyArchive", messages.ArchivesEmptyArchive)
 	}
 	if partial && !p.allowPartial {
-		return nil, ArchiveSnapshot{}, nil, apperror.New(409, "ArchivePartialConsent", "Подтвердите скачивание только доступных файлов.")
+		return nil, ArchiveSnapshot{}, nil, apperror.New(409, "ArchivePartialConsent", messages.ArchivesArchivePartialConsent)
 	}
 	ctx, cancel := context.WithCancel(parent)
 	p.cancel, p.started = cancel, true
 	return ctx, p.snapshotLocked(""), cancel, nil
 }
-func (p *ArchivePlan) FailItem(i int, message string) {
+func (p *ArchivePlan) FailItem(i int, message messages.Ref) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.started && !p.finished && i >= 0 && i < len(p.items) {
@@ -165,7 +166,7 @@ func (p *ArchivePlan) CompleteItem(i int) {
 	defer p.mu.Unlock()
 	if p.started && !p.finished && i >= 0 && i < len(p.items) {
 		p.items[i].State = "done"
-		p.items[i].Message = ""
+		p.items[i].Message = nil
 	}
 }
 func (p *ArchivePlan) AddSent(i int, n int64) {
@@ -206,10 +207,10 @@ func (p *ArchivePlan) Finish(ctxErr error, finalized bool) (string, string) {
 		item := &p.items[i]
 		if item.State == "pending" || !finalized && item.State == "done" {
 			item.State = "error"
-			item.Message = "Завершение ZIP не подтверждено. Подготовьте новый архив."
+			item.Message = messages.ArchivesZIPCompletionWasNotConfirmedPrepareA
 			if p.cancelled {
 				item.State = "cancelled"
-				item.Message = "Передача остановлена. ZIP может быть неполным."
+				item.Message = messages.ArchivesTheTransferWasStoppedTheZIPMay
 			}
 		}
 	}
@@ -222,21 +223,21 @@ type ArchiveItem struct {
 	Size    int64                        `json:"size"`
 	Sent    int64                        `json:"sent"`
 	State   string                       `json:"state"`
-	Message string                       `json:"message,omitempty"`
+	Message messages.Ref                 `json:"message,omitempty"`
 	Info    objectstate.DeletionSnapshot `json:"-"`
 }
 type ArchiveSnapshot struct {
-	Ticket       string            `json:"ticket"`
-	Name         string            `json:"name"`
-	Base         string            `json:"base"`
-	RelativeBase string            `json:"relativeBase"`
-	Count        int               `json:"count"`
-	Size         int64             `json:"size"`
-	Sent         int64             `json:"sent"`
-	Started      bool              `json:"started"`
-	Finished     bool              `json:"finished"`
-	Cancelled    bool              `json:"cancelled"`
-	Items        []ArchiveItem     `json:"items"`
-	Issues       map[string]string `json:"issues"`
-	ExpiresAt    time.Time         `json:"expiresAt"`
+	Ticket       string                  `json:"ticket"`
+	Name         string                  `json:"name"`
+	Base         string                  `json:"base"`
+	RelativeBase string                  `json:"relativeBase"`
+	Count        int                     `json:"count"`
+	Size         int64                   `json:"size"`
+	Sent         int64                   `json:"sent"`
+	Started      bool                    `json:"started"`
+	Finished     bool                    `json:"finished"`
+	Cancelled    bool                    `json:"cancelled"`
+	Items        []ArchiveItem           `json:"items"`
+	Issues       map[string]messages.Ref `json:"issues"`
+	ExpiresAt    time.Time               `json:"expiresAt"`
 }

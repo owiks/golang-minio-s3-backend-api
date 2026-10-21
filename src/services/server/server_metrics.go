@@ -12,6 +12,7 @@ import (
 	"github.com/prometheus/common/expfmt"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 type ApiMetric struct {
@@ -157,7 +158,7 @@ func ReadLiveMetrics(ctx context.Context, s ReadLiveMetricsClient) (LiveMetrics,
 	var parser expfmt.TextParser
 	families, e := parser.TextToMetricFamilies(bytes.NewReader(raw))
 	if e != nil {
-		return LiveMetrics{}, apperror.New(502, "InvalidMetrics", "MinIO вернул некорректные метрики.")
+		return LiveMetrics{}, apperror.New(502, "InvalidMetrics", messages.ServerInvalidMetrics)
 	}
 	return LiveMetricRows(families), nil
 }

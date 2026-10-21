@@ -7,6 +7,7 @@ import (
 	"github.com/minio/madmin-go/v3"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/validation"
 )
 
@@ -56,10 +57,10 @@ func GetGroup(ctx context.Context, admin GroupAdmin, name string) (GroupDetails,
 }
 func CreateGroup(ctx context.Context, admin GroupAdmin, b CreateGroupRequest) error {
 	if !validation.ValidName(b.Name) || len(b.Members) == 0 {
-		return apperror.New(400, "InvalidGroup", "Укажите имя группы и хотя бы одного участника.")
+		return apperror.New(400, "InvalidGroup", messages.IdentitiesInvalidGroup)
 	}
 	if _, err := admin.GetGroupDescription(ctx, b.Name); err == nil {
-		return apperror.New(409, "AlreadyExists", "Группа уже существует. Используйте управление участниками.")
+		return apperror.New(409, "AlreadyExists", messages.IdentitiesAlreadyExists)
 	} else if !Missing(err, "XMinioAdminNoSuchGroup") {
 		return err
 	}
@@ -67,7 +68,7 @@ func CreateGroup(ctx context.Context, admin GroupAdmin, b CreateGroupRequest) er
 		return err
 	}
 	if !b.AcknowledgeNonAtomicCreate {
-		return apperror.New(400, "GroupCreateAcknowledgementRequired", "Подтвердите риск одновременного создания: если другой клиент займёт это имя после проверки, MinIO может добавить участников в его группу.")
+		return apperror.New(400, "GroupCreateAcknowledgementRequired", messages.IdentitiesGroupCreateAcknowledgementRequired)
 	}
 	return admin.UpdateGroupMembers(ctx, madmin.GroupAddRemove{Group: b.Name, Members: b.Members, Status: madmin.GroupEnabled})
 }
@@ -82,7 +83,7 @@ func UpdateGroupMembers(ctx context.Context, admin GroupAdmin, name string, b Gr
 }
 func SetGroupStatus(ctx context.Context, admin GroupAdmin, name string, b StatusRequest) error {
 	if b.Enabled == nil {
-		return apperror.New(400, "InvalidStatus", "Укажите enabled.")
+		return apperror.New(400, "InvalidStatus", messages.IdentitiesInvalidStatus)
 	}
 	status := madmin.GroupDisabled
 	if *b.Enabled {
@@ -96,7 +97,7 @@ func DeleteGroup(ctx context.Context, admin GroupAdmin, name string) error {
 		return err
 	}
 	if len(group.Members) > 0 {
-		return apperror.New(409, "GroupNotEmpty", "Сначала удалите участников из группы.")
+		return apperror.New(409, "GroupNotEmpty", messages.IdentitiesGroupNotEmpty)
 	}
 	return admin.UpdateGroupMembers(ctx, madmin.GroupAddRemove{Group: name, IsRemove: true})
 }

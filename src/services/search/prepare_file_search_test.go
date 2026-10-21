@@ -11,7 +11,9 @@ import (
 	"time"
 
 	"github.com/minio/minio-go/v7"
+
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/tests/testmessage"
 )
 
 func TestInvalidSearchIsRejectedBeforeStorage(t *testing.T) {
@@ -47,7 +49,7 @@ func TestInvalidSearchIsRejectedBeforeStorage(t *testing.T) {
 				t.Fatal("invalid input accepted")
 			}
 			public := apperror.Public(err)
-			if public.Status != 400 || public.Code != "InvalidSearch" || public.Message != tc.message {
+			if public.Status != 400 || public.Code != "InvalidSearch" || testmessage.Russian(public.Message) != tc.message {
 				t.Fatal("validation contract changed", public)
 			}
 		})

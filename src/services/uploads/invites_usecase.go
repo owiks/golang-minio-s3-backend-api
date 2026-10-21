@@ -6,9 +6,10 @@ import (
 	"time"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/result"
 	"minio-web/api/src/services/securetoken"
-	"minio-web/api/src/services/uploads/invite"
+	uploadinvite "minio-web/api/src/services/uploads/invite"
 	validationsvc "minio-web/api/src/services/validation"
 )
 
@@ -25,7 +26,7 @@ func RevokeUploadInvite(ctx context.Context, store UploadInviteRevoker, owner st
 
 func CreateUploadInvite(ctx context.Context, store UploadInvitePublisher, s CreateUploadInviteClient, body UploadInvitesRequest) (uploadinvite.View, error) {
 	if body.Bucket == "" || len(body.Bucket) > 63 || len(body.Prefix) > 900 || body.Prefix != "" && !strings.HasSuffix(body.Prefix, "/") || !validationsvc.ValidFileKey(body.Prefix+"invite-file") || body.ExpiresIn < 60 || body.ExpiresIn > 86400 || body.MaxSize < 1 || body.MaxSize > MaxRemoteSize || body.MaxFiles < 1 || body.MaxFiles > 100 {
-		return uploadinvite.View{}, apperror.New(400, "InvalidInvite", "Проверьте папку, срок (до суток), размер (до 1 ГиБ) и количество файлов (до 100).")
+		return uploadinvite.View{}, apperror.New(400, "InvalidInvite", messages.UploadsInvalidInvite)
 	}
 	// UI permission hints are not authoritative; verify the native scope before
 	// delegating it. Every recipient PUT is additionally authorized by S3 itself.
@@ -34,7 +35,7 @@ func CreateUploadInvite(ctx context.Context, store UploadInvitePublisher, s Crea
 		return uploadinvite.View{}, err
 	}
 	if !allowed {
-		return uploadinvite.View{}, apperror.New(403, "InviteDenied", "Нет подтверждённого права записи во всю выбранную папку.")
+		return uploadinvite.View{}, apperror.New(403, "InviteDenied", messages.UploadsInviteDenied)
 	}
 	g := uploadinvite.New(uploadinvite.Config{Owner: s.SessionID(), Token: securetoken.New(), Bucket: body.Bucket, Prefix: body.Prefix, Expires: time.Now().Add(time.Duration(body.ExpiresIn) * time.Second), MaxSize: body.MaxSize, MaxFiles: body.MaxFiles, Writer: s})
 	if err := store.Add(g); err != nil {

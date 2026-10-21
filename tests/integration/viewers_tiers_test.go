@@ -17,6 +17,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/lifecycle"
 
 	apihttp "minio-web/api/src/http/api"
+	"minio-web/api/src/http/presentation"
 	archivessvc "minio-web/api/src/services/archives"
 	bucketssvc "minio-web/api/src/services/buckets"
 	runtimesvc "minio-web/api/src/services/runtime"
@@ -161,7 +162,9 @@ func TestTiersNativeIntegration(t *testing.T) {
 	body["revision"] = "stale"
 	c.call("DELETE", "admin/tiers", body, 409)
 	body["revision"] = v.Revision
-	var field struct{ Value bucketssvc.LifecycleSnapshot }
+	var field struct {
+		Value presentation.LifecycleSnapshot
+	}
 	json.Unmarshal(c.call("GET", "admin/buckets/"+source+"/lifecycle", nil, 200), &field)
 	rule := bucketssvc.LifecycleInput{ID: "transition", Enabled: false, Tiering: &bucketssvc.LifecycleTiering{Current: name, Days: 30}}
 	c.call("POST", "admin/buckets/"+source+"/lifecycle", map[string]any{"revision": field.Value.Revision, "rule": rule}, 200)

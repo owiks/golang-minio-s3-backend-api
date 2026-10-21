@@ -1,12 +1,13 @@
 package controllers
 
 import (
+	"net/http"
+
 	httpcommon "minio-web/api/src/http/api/common"
 	httpvalidation "minio-web/api/src/http/validation"
 	bucketssvc "minio-web/api/src/services/buckets"
 	filessvc "minio-web/api/src/services/files"
 	runtimesvc "minio-web/api/src/services/runtime"
-	"net/http"
 )
 
 func HandleListBuckets(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -14,7 +15,7 @@ func HandleListBuckets(app *runtimesvc.State, w http.ResponseWriter, r *http.Req
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 
@@ -26,7 +27,7 @@ func HandleCreateBucket(app *runtimesvc.State, w http.ResponseWriter, r *http.Re
 	if err := bucketssvc.CreateBucket(r.Context(), app.MutationLocker(s), runtimesvc.NewClients(s), body); err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, httpcommon.Success{OK: true})
+	httpcommon.WriteJSON(w, r, 200, httpcommon.Success{OK: true})
 	return nil
 }
 func HandleDeleteBucket(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, name string) error {
@@ -36,7 +37,7 @@ func HandleDeleteBucket(app *runtimesvc.State, w http.ResponseWriter, r *http.Re
 	if err := bucketssvc.DeleteBucket(r.Context(), runtimesvc.NewClients(s), name); err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, httpcommon.Success{OK: true})
+	httpcommon.WriteJSON(w, r, 200, httpcommon.Success{OK: true})
 	return nil
 }
 func HandleReadBucketLifecycle(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, bucket string) error {
@@ -44,7 +45,7 @@ func HandleReadBucketLifecycle(app *runtimesvc.State, w http.ResponseWriter, r *
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, bucketssvc.LifecycleField(value, nil))
+	httpcommon.WriteJSON(w, r, 200, bucketssvc.LifecycleField(value, nil))
 	return nil
 }
 func HandleChangeBucketLifecycle(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, bucket, operation string) error {
@@ -56,7 +57,7 @@ func HandleChangeBucketLifecycle(app *runtimesvc.State, w http.ResponseWriter, r
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleReadBucketBrowserSetting(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, bucket, kind string) error {
@@ -64,7 +65,7 @@ func HandleReadBucketBrowserSetting(app *runtimesvc.State, w http.ResponseWriter
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, bucketssvc.BrowserSettingField(value, nil))
+	httpcommon.WriteJSON(w, r, 200, bucketssvc.BrowserSettingField(value, nil))
 	return nil
 }
 func HandleChangeBucketBrowserSetting(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, bucket, kind, operation string) error {
@@ -76,6 +77,6 @@ func HandleChangeBucketBrowserSetting(app *runtimesvc.State, w http.ResponseWrit
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }

@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/minio/minio-go/v7"
+
+	"minio-web/api/tests/testmessage"
 )
 
 func TestNativeChecksumErrorsRemainSpecificAndSanitized(t *testing.T) {
@@ -17,7 +19,7 @@ func TestNativeChecksumErrorsRemainSpecificAndSanitized(t *testing.T) {
 		t.Run(tc.native, func(t *testing.T) {
 			upstream := minio.ErrorResponse{Code: tc.native, StatusCode: 400, Message: "private-object-and-credentials"}
 			got := Public(upstream)
-			if got.Status != 400 || got.Code != tc.public || strings.Contains(got.Message, upstream.Message) {
+			if got.Status != 400 || got.Code != tc.public || strings.Contains(testmessage.Russian(got.Message), upstream.Message) {
 				t.Fatalf("unsafe checksum classification: %+v", got)
 			}
 		})

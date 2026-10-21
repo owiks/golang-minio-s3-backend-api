@@ -6,7 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"minio-web/api/tests/testsession"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -21,12 +20,15 @@ import (
 	settings "minio-web/api/src/config"
 	apihttp "minio-web/api/src/http/api"
 	uploadscontroller "minio-web/api/src/http/api/routes/uploads/controllers"
+	"minio-web/api/src/http/presentation"
 	"minio-web/api/src/services/apperror"
 	archivessvc "minio-web/api/src/services/archives"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/remotesource"
 	runtimesvc "minio-web/api/src/services/runtime"
-	"minio-web/api/src/services/uploads/invite"
+	uploadinvite "minio-web/api/src/services/uploads/invite"
 	"minio-web/api/src/services/uploads/source"
+	"minio-web/api/tests/testsession"
 )
 
 func TestRemoteURLSecurity(t *testing.T) {
@@ -56,11 +58,11 @@ func (f remoteTestSource) Open(ctx context.Context, raw string) (source.File, er
 
 func TestZIPEntrySafety(t *testing.T) {
 	for _, name := range []string{"../secret.txt", "/absolute.txt", "a/../../b", "a\\b", "C:/x"} {
-		if archivessvc.ZipEntryReason(&zip.File{FileHeader: zip.FileHeader{Name: name}}) == "" {
+		if messages.Empty(archivessvc.ZipEntryReason(&zip.File{FileHeader: zip.FileHeader{Name: name}})) {
 			t.Fatal(name)
 		}
 	}
-	if reason := archivessvc.ZipEntryReason(&zip.File{FileHeader: zip.FileHeader{Name: "folder/Файл + %.txt"}}); reason != "" {
+	if reason := archivessvc.ZipEntryReason(&zip.File{FileHeader: zip.FileHeader{Name: "folder/Файл + %.txt"}}); !messages.Empty(reason) {
 		t.Fatal(reason)
 	}
 }
@@ -116,7 +118,7 @@ func TestStoredZIPIntegration(t *testing.T) {
 	route := "objects/zip?" + url.Values{"bucket": {bucket}, "key": {"archive.zip"}}.Encode()
 	var listing struct {
 		Revision string
-		Items    []archivessvc.ZipItem
+		Items    []presentation.ZipItem
 	}
 	json.Unmarshal(c.call("GET", route, nil, 200), &listing)
 	if len(listing.Items) != 2 || listing.Items[1].Reason == "" {

@@ -12,6 +12,7 @@ import (
 	"github.com/minio/madmin-go/v3"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/revision"
 )
 
@@ -37,13 +38,13 @@ type RebalanceRow struct {
 type PoolsView struct {
 	CheckedAt      time.Time          `json:"checkedAt"`
 	Supported      bool               `json:"supported"`
-	Reason         string             `json:"reason,omitempty"`
+	Reason         messages.Ref       `json:"reason,omitempty"`
 	Pools          []PoolOperationRow `json:"pools"`
 	RebalanceID    string             `json:"rebalanceId"`
 	Rebalancing    bool               `json:"rebalancing"`
 	RebalanceKnown bool               `json:"rebalanceKnown"`
 	Rebalance      []RebalanceRow     `json:"rebalance"`
-	RebalanceError string             `json:"rebalanceError,omitempty"`
+	RebalanceError messages.Ref       `json:"rebalanceError,omitempty"`
 	Revision       string             `json:"revision"`
 }
 
@@ -64,7 +65,7 @@ func ReadPools(ctx context.Context, s ReadPoolsClient) (PoolsView, []madmin.Pool
 				return v, nil, probe
 			}
 			v.Supported = false
-			v.Reason = "Управление пулами доступно только в поддерживаемой распределённой конфигурации MinIO."
+			v.Reason = messages.ServerPoolManagementIsOnlyAvailableInA
 			return v, nil, nil
 		}
 		return v, nil, ServerOperationError(e)
@@ -95,7 +96,7 @@ func ReadPools(ctx context.Context, s ReadPoolsClient) (PoolsView, []madmin.Pool
 		code = native.Code
 	}
 	if e != nil && code != "XMinioAdminRebalanceNotStarted" && code != "XMinioRebalanceNotStarted" {
-		v.RebalanceError = "Не удалось проверить перераспределение. Изменения заблокированы."
+		v.RebalanceError = messages.ServerCouldNotCheckRebalancingChangesAreBlocked
 	} else {
 		v.RebalanceKnown = true
 		v.RebalanceID = status.ID
@@ -128,16 +129,16 @@ func ReadPools(ctx context.Context, s ReadPoolsClient) (PoolsView, []madmin.Pool
 }
 func PoolHealth(info madmin.InfoMessage, target int) error {
 	if len(info.Servers) == 0 {
-		return apperror.New(409, "UnknownPoolHealth", "Нет актуальных сведений о состоянии узлов.")
+		return apperror.New(409, "UnknownPoolHealth", messages.ServerUnknownPoolHealth)
 	}
 	hasTarget := false
 	for _, n := range info.Servers {
 		if n.State != "online" && n.State != "ok" {
-			return apperror.New(409, "UnhealthyPools", "Операция недоступна: не все узлы доступны.")
+			return apperror.New(409, "UnhealthyPools", messages.ServerUnhealthyPools)
 		}
 		for _, d := range n.Disks {
 			if d.State != "ok" && d.State != "online" || d.Healing {
-				return apperror.New(409, "UnhealthyPools", "Операция недоступна: проверьте доступность и восстановление дисков.")
+				return apperror.New(409, "UnhealthyPools", messages.ServerUnhealthyPoolsServerPools)
 			}
 			if d.PoolIndex+1 == target {
 				hasTarget = true
@@ -145,7 +146,7 @@ func PoolHealth(info madmin.InfoMessage, target int) error {
 		}
 	}
 	if target > 0 && !hasTarget {
-		return apperror.New(409, "UnknownPoolHealth", "Не удалось подтвердить диски выбранного пула.")
+		return apperror.New(409, "UnknownPoolHealth", messages.ServerUnknownPoolHealthServerPools)
 	}
 	return nil
 }

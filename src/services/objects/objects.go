@@ -10,6 +10,7 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 type BucketRow struct {
@@ -88,7 +89,7 @@ func PreviewKind(key string) (string, string) {
 }
 func ObjectParams(b, k string) (string, string, error) {
 	if b == "" || k == "" || len(b) > 63 || len(k) > 1024 {
-		return "", "", apperror.New(400, "InvalidObject", "Укажите корректный бакет и ключ объекта.")
+		return "", "", apperror.New(400, "InvalidObject", messages.ObjectsInvalidObjectObjects)
 	}
 	return b, k, nil
 }

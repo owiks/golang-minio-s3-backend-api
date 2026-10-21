@@ -14,6 +14,7 @@ import (
 
 	httpcommon "minio-web/api/src/http/api/common"
 	servercontroller "minio-web/api/src/http/api/routes/server/controllers"
+	"minio-web/api/src/http/presentation"
 	"minio-web/api/src/services/apperror"
 	runtimesvc "minio-web/api/src/services/runtime"
 	serversvc "minio-web/api/src/services/server"
@@ -32,7 +33,7 @@ func TestAdminResponseBoundsProtectConfigReadsAndRestoreBeforeWrite(t *testing.T
 				s := actionCheckSession(t, func(w http.ResponseWriter, r *http.Request) {
 					switch {
 					case strings.HasSuffix(r.URL.Path, "/accountinfo"):
-						httpcommon.WriteJSON(w, 200, map[string]any{"AccountName": "fixture-user", "Policy": actionCheckPolicy})
+						httpcommon.WriteJSON(w, r, 200, map[string]any{"AccountName": "fixture-user", "Policy": actionCheckPolicy})
 					case strings.HasSuffix(r.URL.Path, "/get-config-kv"):
 						configReads.Add(1)
 						if oversized.Load() && source == "configuration" {
@@ -49,7 +50,7 @@ func TestAdminResponseBoundsProtectConfigReadsAndRestoreBeforeWrite(t *testing.T
 						_, _ = w.Write(bytes.Repeat([]byte("x"), 5<<20))
 					default:
 						writes.Add(1)
-						httpcommon.WriteJSON(w, 200, map[string]bool{"ok": true})
+						httpcommon.WriteJSON(w, r, 200, map[string]bool{"ok": true})
 					}
 				})
 				current, err := serversvc.ReadServerConfig(context.Background(), runtimesvc.NewClients(s), "api")
@@ -70,7 +71,7 @@ func TestAdminResponseBoundsProtectConfigReadsAndRestoreBeforeWrite(t *testing.T
 					err = servercontroller.HandleSaveServerConfig(app, w, r, s)
 				}
 				if source == "history" && method == "GET" {
-					var view serversvc.ServerConfigView
+					var view presentation.ServerConfigView
 					if err != nil || json.Unmarshal(w.Body.Bytes(), &view) != nil || view.HistoryError == "" || len(view.History) != 0 {
 						t.Fatal("optional history error hid current config or accepted history", err)
 					}

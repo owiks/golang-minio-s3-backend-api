@@ -8,6 +8,7 @@ import (
 	"github.com/minio/madmin-go/v3"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	validationsvc "minio-web/api/src/services/validation"
 )
 
@@ -27,7 +28,7 @@ type UpdateBucketTagsRequest struct {
 func PolicyChange(ctx context.Context, s PolicyChangeClient, bucket string, body UpdateBucketPolicyRequest) (DetailField, error) {
 	var value PolicyDocument
 	if len(body.Document) == 0 {
-		return DetailField{}, apperror.New(400, "InvalidPolicy", "Передайте JSON политики или null для удаления.")
+		return DetailField{}, apperror.New(400, "InvalidPolicy", messages.BucketsInvalidPolicy)
 	}
 	if !bytes.Equal(bytes.TrimSpace(body.Document), []byte("null")) {
 		if err := validationsvc.ValidateDocument(body.Document); err != nil {
@@ -36,7 +37,7 @@ func PolicyChange(ctx context.Context, s PolicyChangeClient, bucket string, body
 		var err error
 		value, err = decodePolicyDocument(body.Document)
 		if err != nil {
-			return DetailField{}, apperror.New(400, "InvalidPolicy", "Некорректный JSON политики.")
+			return DetailField{}, apperror.New(400, "InvalidPolicy", messages.BucketsInvalidPolicySettingsChange)
 		}
 	}
 	current, err := ReadPolicy(ctx, s, bucket)
@@ -56,7 +57,7 @@ func PolicyChange(ctx context.Context, s PolicyChangeClient, bucket string, body
 }
 func QuotaChange(ctx context.Context, s QuotaChangeClient, bucket string, body UpdateBucketQuotaRequest) (DetailField, error) {
 	if body.Size == nil || *body.Size > 9007199254740991 {
-		return DetailField{}, apperror.New(400, "InvalidQuota", "Задайте целое число байт от 0 до 9 007 199 254 740 991. Ноль снимает ограничение размера.")
+		return DetailField{}, apperror.New(400, "InvalidQuota", messages.BucketsInvalidQuota)
 	}
 	size := *body.Size
 	current, err := ReadQuota(ctx, s, bucket)

@@ -14,6 +14,7 @@ import (
 	"sync/atomic"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 const (
@@ -54,10 +55,10 @@ func selectResponse(ctx context.Context, method string, u *url.URL, response *ht
 }
 
 func selectBoundError() error {
-	return apperror.New(502, "SelectUpstreamLimit", "Поток S3 Select превысил допустимые границы. Результат неполный.")
+	return apperror.New(502, "SelectUpstreamLimit", messages.StorageSelectUpstreamLimit)
 }
 func invalidSelectEvent() error {
-	return apperror.New(502, "InvalidSelectEvent", "S3 Select вернул повреждённое или незавершённое событие. Результат неполный.")
+	return apperror.New(502, "InvalidSelectEvent", messages.StorageInvalidSelectEvent)
 }
 
 // Each event is validated and bounded before the SDK decoder can allocate from
@@ -154,13 +155,13 @@ func (b *selectBody) frame() ([]byte, error) {
 		}
 		switch code {
 		case "AccessDenied":
-			return nil, apperror.New(403, "AccessDenied", "Недостаточно прав MinIO для S3 Select.")
+			return nil, apperror.New(403, "AccessDenied", messages.StorageAccessDeniedSelectResponse)
 		case "NotImplemented", "UnsupportedOperation":
-			return nil, apperror.New(501, "NotImplemented", "S3 Select не поддерживается хранилищем.")
+			return nil, apperror.New(501, "NotImplemented", messages.StorageNotImplemented)
 		case "InternalError", "ServiceUnavailable", "SlowDown":
-			return nil, apperror.New(502, "SelectStreamFailed", "Хранилище прервало S3 Select. Результат неполный.")
+			return nil, apperror.New(502, "SelectStreamFailed", messages.StorageSelectStreamFailed)
 		default:
-			return nil, apperror.New(400, "SelectQueryFailed", "Хранилище отклонило запрос S3 Select. Проверьте SQL и формат файла; результат неполный.")
+			return nil, apperror.New(400, "SelectQueryFailed", messages.SelectquerySelectQueryFailed)
 		}
 	}
 	if h[":message-type"] != "event" {

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 func Confirmation(w http.ResponseWriter, r *http.Request, name string) error {
@@ -12,7 +13,7 @@ func Confirmation(w http.ResponseWriter, r *http.Request, name string) error {
 		return err
 	}
 	if b.Confirmation != name {
-		return apperror.New(400, "ConfirmationRequired", "Для удаления введите точное имя ресурса.")
+		return apperror.New(400, "ConfirmationRequired", messages.HttpConfirmationRequired)
 	}
 	return nil
 }

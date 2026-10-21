@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/tests/testmessage"
 )
 
 type countedBody struct {
@@ -72,7 +73,7 @@ func TestOpenRejectsInvalidInputAndHidesTransportErrors(t *testing.T) {
 		}
 	}
 	_, err := client.Open(context.Background(), "https://example.org/a?token=sensitive")
-	if err == nil || apperror.Public(err).Code != "SourceUnavailable" || strings.Contains(apperror.Public(err).Message, "SECRET") || strings.Contains(apperror.Public(err).Message, "sensitive") || calls != 1 {
+	if err == nil || apperror.Public(err).Code != "SourceUnavailable" || strings.Contains(testmessage.Russian(apperror.Public(err).Message), "SECRET") || strings.Contains(testmessage.Russian(apperror.Public(err).Message), "sensitive") || calls != 1 {
 		t.Fatal("transport failure leaked or retried")
 	}
 }

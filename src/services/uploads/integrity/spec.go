@@ -16,6 +16,7 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 const (
@@ -36,11 +37,11 @@ type Spec struct {
 }
 
 func invalid() error {
-	return apperror.New(400, "InvalidChecksum", "Проверьте алгоритм, тип и значение контрольной суммы в base64.")
+	return apperror.New(400, "InvalidChecksum", messages.UploadsInvalidChecksum)
 }
 
 func UnsupportedMode() error {
-	return apperror.New(400, "UnsupportedChecksumMode", "Этот способ загрузки не поддерживает выбранный режим контрольной суммы.")
+	return apperror.New(400, "UnsupportedChecksumMode", messages.UploadsUnsupportedChecksumMode)
 }
 
 // Normalize validates an explicitly supplied value before any body is consumed
@@ -102,7 +103,7 @@ func NewHasher(algorithm string) (hash.Hash, error) {
 	case "CRC32C":
 		return crc32.New(crc32.MakeTable(crc32.Castagnoli)), nil
 	default:
-		return nil, apperror.New(400, "UnsupportedChecksumAlgorithm", "Поддерживаются MD5, SHA1, SHA256, CRC32 и CRC32C.")
+		return nil, apperror.New(400, "UnsupportedChecksumAlgorithm", messages.UploadsUnsupportedChecksumAlgorithm)
 	}
 }
 
@@ -144,7 +145,7 @@ func Verify(spec Spec, computed []byte) error {
 	}
 	value, err := base64.StdEncoding.DecodeString(spec.Value)
 	if err != nil || subtle.ConstantTimeCompare(value, computed) != 1 {
-		return apperror.New(400, "ChecksumMismatch", "Контрольная сумма переданного файла не совпадает с ожидаемой. Файл не записан.")
+		return apperror.New(400, "ChecksumMismatch", messages.UploadsChecksumMismatch)
 	}
 	return nil
 }
@@ -156,7 +157,7 @@ func Compare(expected, actual Spec) error {
 		return UnsupportedMode()
 	}
 	if subtle.ConstantTimeCompare([]byte(expected.Value), []byte(actual.Value)) != 1 {
-		return apperror.New(400, "ChecksumMismatch", "Контрольная сумма переданного файла не совпадает с ожидаемой. Файл не записан.")
+		return apperror.New(400, "ChecksumMismatch", messages.UploadsChecksumMismatch)
 	}
 	return nil
 }

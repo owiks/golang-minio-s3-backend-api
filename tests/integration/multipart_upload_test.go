@@ -15,7 +15,7 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/config"
-	"minio-web/api/src/services/objects/write"
+	objectwrite "minio-web/api/src/services/objects/write"
 	"minio-web/api/src/services/uploads/integrity"
 	"minio-web/api/src/services/uploads/multipart"
 )

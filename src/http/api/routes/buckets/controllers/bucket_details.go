@@ -13,7 +13,7 @@ func HandleBucketUsage(app *runtimesvc.State, w http.ResponseWriter, r *http.Req
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleBucketDetails(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, bucket string) error {
@@ -21,6 +21,6 @@ func HandleBucketDetails(app *runtimesvc.State, w http.ResponseWriter, r *http.R
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }

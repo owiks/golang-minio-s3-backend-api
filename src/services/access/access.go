@@ -11,6 +11,7 @@ import (
 
 	"minio-web/api/src/services/apperror"
 	"minio-web/api/src/services/iam"
+	"minio-web/api/src/services/messages"
 	objectssvc "minio-web/api/src/services/objects"
 	serversvc "minio-web/api/src/services/server"
 )
@@ -182,7 +183,7 @@ func DiscoverAccess(ctx context.Context, s DiscoverAccessClient) ([]objectssvc.B
 			if failure != nil {
 				return failure
 			}
-			return apperror.New(403, "AccessDenied", "Недостаточно прав.")
+			return apperror.New(403, "AccessDenied", messages.AccessAccessDenied)
 		}},
 	}
 	results := make([]error, len(probes))

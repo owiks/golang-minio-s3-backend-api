@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/upstream"
 )
 
@@ -186,7 +187,7 @@ func TestDiagnosticsAreBoundedSanitizedAndSeparateFromPublicErrors(t *testing.T)
 
 func TestMappedSDKCausesAndLocalValidation(t *testing.T) {
 	ctx, trace := Start(context.Background(), "PUT static-route")
-	Error(ctx, apperror.New(400, "InvalidName", "safe"))
+	Error(ctx, apperror.New(400, "InvalidName", messages.Literal("safe")))
 	if trace.UpstreamSnapshot().Failures != 0 {
 		t.Fatal("local validation attributed to upstream")
 	}

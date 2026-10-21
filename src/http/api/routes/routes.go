@@ -31,6 +31,9 @@ type Response struct {
 	Model     any
 	Variants  []any
 	Binary    bool
+	// Localized marks other formats that contain API messages (ZIP manifests).
+	// JSON and NDJSON language headers are documented automatically.
+	Localized bool
 }
 
 type Operation struct {

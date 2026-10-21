@@ -13,6 +13,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
 	apihttp "minio-web/api/src/http/api"
+	"minio-web/api/src/http/presentation"
 	bucketssvc "minio-web/api/src/services/buckets"
 	runtimesvc "minio-web/api/src/services/runtime"
 	"minio-web/api/src/services/securetoken"
@@ -84,9 +85,9 @@ func TestBucketAccessIntegration(t *testing.T) {
 	}
 	json.Unmarshal(root.call("POST", "admin/access-keys", map[string]any{"parent": user, "name": "test-access", "policy": doc}, 200), &pair)
 	key = pair.AccessKey
-	read := func(client *apiClient) bucketssvc.BucketAccessReport {
+	read := func(client *apiClient) presentation.BucketAccessReport {
 		t.Helper()
-		var report bucketssvc.BucketAccessReport
+		var report presentation.BucketAccessReport
 		raw := client.call("GET", "admin/buckets/"+bucket+"/access", nil, 200)
 		if json.Unmarshal(raw, &report) != nil {
 			t.Fatal(string(raw))
@@ -96,7 +97,7 @@ func TestBucketAccessIntegration(t *testing.T) {
 		}
 		return report
 	}
-	find := func(report bucketssvc.BucketAccessReport, kind, name string) bucketssvc.BucketAccessRow {
+	find := func(report presentation.BucketAccessReport, kind, name string) presentation.BucketAccessRow {
 		t.Helper()
 		for _, row := range report.Rows {
 			if row.Kind == kind && row.Name == name {
@@ -104,7 +105,7 @@ func TestBucketAccessIntegration(t *testing.T) {
 			}
 		}
 		t.Fatalf("missing %s %s: %+v", kind, name, report)
-		return bucketssvc.BucketAccessRow{}
+		return presentation.BucketAccessRow{}
 	}
 	report := read(root)
 	if !report.Complete {
@@ -114,7 +115,7 @@ func TestBucketAccessIntegration(t *testing.T) {
 		t.Fatal("direct/group grants missing")
 	}
 	row := find(report, "access-key", key)
-	if row.RestrictionState != "restricted" || len(row.Restrictions) != 2 || len(row.Grants) == 0 || !strings.HasPrefix(row.Grants[0].Source, "Владелец "+user+":") {
+	if row.RestrictionState != "restricted" || len(row.Restrictions) != 2 || len(row.Grants) == 0 || !strings.HasPrefix(row.Grants[0].Source, "Owner "+user+":") {
 		t.Fatalf("key restrictions missing %+v", row)
 	}
 	root.call("PUT", "admin/groups/"+group+"/status", map[string]any{"enabled": false}, 200)
@@ -124,7 +125,7 @@ func TestBucketAccessIntegration(t *testing.T) {
 	}
 	hasInactive := false
 	for _, grant := range find(report, "user", user).Grants {
-		hasInactive = hasInactive || strings.Contains(grant.Source, "отключена")
+		hasInactive = hasInactive || strings.Contains(grant.Source, "disabled")
 	}
 	if !hasInactive {
 		t.Fatal("inactive source not labeled")

@@ -10,6 +10,7 @@ import (
 )
 
 type Config struct {
+	Language                     string
 	Listen                       string
 	Origin                       string
 	Endpoints                    endpoint.Policy

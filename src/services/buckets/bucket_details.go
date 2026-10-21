@@ -7,6 +7,7 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 type UsageRow struct {
@@ -35,10 +36,10 @@ func UsageRows(info madmin.DataUsageInfo, names []minio.BucketInfo) UsageReply {
 }
 
 type DetailField struct {
-	Value     any    `json:"value,omitempty"`
-	Error     string `json:"error,omitempty"`
-	Revision  string `json:"revision,omitempty"`
-	ErrorCode string `json:"errorCode,omitempty"`
+	Value     any          `json:"value,omitempty"`
+	Error     messages.Ref `json:"error,omitempty"`
+	Revision  string       `json:"revision,omitempty"`
+	ErrorCode string       `json:"errorCode,omitempty"`
 }
 
 func Detail(value any, err error) DetailField {

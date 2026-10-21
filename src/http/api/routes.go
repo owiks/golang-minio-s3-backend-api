@@ -10,6 +10,8 @@ import (
 	"minio-web/api/src/http/middleware"
 	"minio-web/api/src/http/requestctx"
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/localization"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/mutation"
 	runtimesvc "minio-web/api/src/services/runtime"
 	"minio-web/api/src/services/telemetry"
@@ -17,6 +19,7 @@ import (
 )
 
 func ServeHTTP(app *runtimesvc.State, w http.ResponseWriter, r *http.Request) {
+	r = middleware.LocalizeRequest(r, app.Config().Language, localization.Default())
 	serveOperation(app, w, r, registry.Match(r.Method, r.URL.Path))
 }
 func serveOperation(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, match routes.Match) {
@@ -30,7 +33,7 @@ func serveOperation(app *runtimesvc.State, w http.ResponseWriter, r *http.Reques
 	w.Header().Set("Referrer-Policy", "no-referrer")
 	if err := executeOperation(app, w, r, match); err != nil {
 		telemetry.Error(r.Context(), err)
-		httperrors.Respond(w, err)
+		httperrors.Respond(w, r, err)
 	}
 }
 func executeOperation(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, match routes.Match) error {
@@ -48,7 +51,7 @@ func executeOperation(app *runtimesvc.State, w http.ResponseWriter, r *http.Requ
 			}
 		}
 		if id == "" {
-			return apperror.New(404, "NotFound", "Маршрут API не найден.")
+			return apperror.New(404, "NotFound", messages.RouteNotFound)
 		}
 		var err error
 		s, err = middleware.Authenticate(app, r, id)
@@ -58,16 +61,16 @@ func executeOperation(app *runtimesvc.State, w http.ResponseWriter, r *http.Requ
 		telemetry.Identify(r.Context(), s.ActorName(), s.InternalHost())
 	}
 	if !match.Found {
-		return apperror.New(404, "NotFound", "Маршрут API не найден.")
+		return apperror.New(404, "NotFound", messages.RouteNotFound)
 	}
 	if !match.MethodAllowed {
 		w.Header().Set("Allow", strings.Join(match.Allow, ", "))
-		return apperror.New(405, "MethodNotAllowed", "Метод не поддерживается.")
+		return apperror.New(405, "MethodNotAllowed", messages.HttpMethodNotAllowed)
 	}
 	// The former management dispatcher validated these before any SDK call.
 	for _, parameter := range []string{"name", "id"} {
 		if name := match.Params[parameter]; name != "" && !validationsvc.ValidName(name) {
-			return apperror.New(400, "InvalidName", "Имя должно содержать 1–128 символов без пробелов по краям, запятых и слешей.")
+			return apperror.New(400, "InvalidName", messages.ResourceNameInvalid)
 		}
 	}
 	if s != nil && long {

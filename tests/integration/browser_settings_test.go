@@ -14,6 +14,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/sse"
 
 	apihttp "minio-web/api/src/http/api"
+	"minio-web/api/src/http/presentation"
 	bucketssvc "minio-web/api/src/services/buckets"
 	runtimesvc "minio-web/api/src/services/runtime"
 	"minio-web/api/src/services/securetoken"
@@ -35,12 +36,12 @@ func TestBrowserSettingsIntegration(t *testing.T) {
 	client, _ := minio.New("127.0.0.1:19000", &minio.Options{Creds: credentials.NewStaticV4("minio-web-test", "minio-web-test-secret", ""), Region: "us-east-1"})
 	defer client.RemoveBucket(context.Background(), bucket)
 
-	get := func(kind string) (bucketssvc.BrowserSetting, string) {
+	get := func(kind string) (presentation.BrowserSetting, string) {
 		t.Helper()
 		raw := root.call("GET", "admin/buckets/"+bucket+"/"+kind, nil, 200)
 		var f struct {
-			Value    bucketssvc.BrowserSetting `json:"value"`
-			Revision string                    `json:"revision"`
+			Value    presentation.BrowserSetting `json:"value"`
+			Revision string                      `json:"revision"`
 		}
 		if json.Unmarshal(raw, &f) != nil || !f.Value.Writable || f.Revision == "" {
 			t.Fatal(string(raw))

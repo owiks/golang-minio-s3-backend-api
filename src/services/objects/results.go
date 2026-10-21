@@ -1,6 +1,10 @@
 package objects
 
-import "time"
+import (
+	"time"
+
+	"minio-web/api/src/services/messages"
+)
 
 type ObjectPage struct {
 	Entries   []Entry `json:"entries"`
@@ -12,10 +16,10 @@ type DeletionInfo struct {
 	Modified time.Time `json:"modified"`
 }
 type Content struct {
-	Text     string `json:"text"`
-	Revision string `json:"revision"`
-	Writable bool   `json:"writable"`
-	Reason   string `json:"reason"`
+	Text     string       `json:"text"`
+	Revision string       `json:"revision"`
+	Writable bool         `json:"writable"`
+	Reason   messages.Ref `json:"reason"`
 }
 type PropertiesUpdated struct {
 	OK                bool `json:"ok"`

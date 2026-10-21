@@ -15,6 +15,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/tags"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 type tagVersionClient struct {
@@ -160,7 +161,7 @@ func TestPinnedTagPermissionsAndMissingVersionNeverFallBack(t *testing.T) {
 			c := newTagVersionClient("v1")
 			c.readErr = minio.ErrorResponse{Code: code}
 			before := tagSnapshot(t, c)
-			if before.TagsError == "" || before.Version != "v1" {
+			if messages.Empty(before.TagsError) || before.Version != "v1" {
 				t.Fatal("unavailable tags hidden", before)
 			}
 			_, err := UpdateProperties(context.Background(), c, "bucket", "file.txt", ObjectPropertiesRequest{Revision: before.Revision, Tags: map[string]string{"bad": "write"}})

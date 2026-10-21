@@ -5,7 +5,8 @@ import (
 	"time"
 
 	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/folders/share"
+	foldershare "minio-web/api/src/services/folders/share"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/securetoken"
 )
 
@@ -46,10 +47,10 @@ func (store *FolderShareStore) Add(g *foldershare.FolderShare) error {
 	}
 	store.reapLocked(time.Now())
 	if len(store.links) >= 256 {
-		return apperror.New(429, "ShareLimit", "Достигнут лимит ссылок. Отзовите ненужные.")
+		return apperror.New(429, "ShareLimit", messages.RuntimeShareLimit)
 	}
 	if _, exists := store.links[g.Token()]; exists {
-		return apperror.New(409, "ShareExists", "Ссылка уже существует.")
+		return apperror.New(409, "ShareExists", messages.RuntimeInviteExists)
 	}
 	store.links[g.Token()] = g
 	return nil
@@ -59,7 +60,7 @@ func (store *FolderShareStore) Revoke(owner, token string) error {
 	defer store.mu.Unlock()
 	g := store.links[token]
 	if g == nil || g.Owner() != owner {
-		return apperror.New(404, "ShareNotFound", "Ссылка не найдена.")
+		return apperror.New(404, "ShareNotFound", messages.RuntimeInviteNotFound)
 	}
 	delete(store.links, token)
 	for id, t := range store.tickets {
@@ -77,7 +78,7 @@ func (store *FolderShareStore) IssueTicket(g *foldershare.FolderShare, key, kind
 		return "", closingError()
 	}
 	if store.links[g.Token()] != g {
-		return "", apperror.New(410, "FolderShareExpired", "Ссылка отозвана или срок действия истёк.")
+		return "", apperror.New(410, "FolderShareExpired", messages.FoldersFolderShareExpiredModel)
 	}
 	ticket, err := g.FileTicket(key, kind, time.Now())
 	if err != nil {
@@ -89,7 +90,7 @@ func (store *FolderShareStore) IssueTicket(g *foldershare.FolderShare, key, kind
 		}
 	}
 	if len(store.tickets) >= 512 {
-		return "", apperror.New(429, "TicketLimit", "Слишком много ссылок на файлы. Повторите позже.")
+		return "", apperror.New(429, "TicketLimit", messages.RuntimeTicketLimit)
 	}
 	id := securetoken.New()
 	store.tickets[id] = ticket

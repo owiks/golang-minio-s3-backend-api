@@ -11,6 +11,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/s3utils"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/telemetry"
 )
 
@@ -51,7 +52,7 @@ func CopyConditional(ctx context.Context, client CopyClient, body CopyRequest, s
 		return minio.UploadInfo{}, true, err
 	}
 	if id == "" {
-		return minio.UploadInfo{}, true, apperror.New(502, "CopyUnconfirmed", "Хранилище не подтвердило создание multipart-загрузки.")
+		return minio.UploadInfo{}, true, apperror.New(502, "CopyUnconfirmed", messages.StorageCopyUnconfirmed)
 	}
 	committed := false
 	aborted := false
@@ -77,19 +78,19 @@ func CopyConditional(ctx context.Context, client CopyClient, body CopyRequest, s
 	headers := map[string]string{"x-amz-copy-source": src, "x-amz-copy-source-if-match": `"` + source.ETag + `"`}
 	parts := []minio.CompletePart{}
 	if partSize < 5*1024*1024 {
-		return minio.UploadInfo{}, true, apperror.New(500, "InvalidCopyPartSize", "Некорректный размер части копирования.")
+		return minio.UploadInfo{}, true, apperror.New(500, "InvalidCopyPartSize", messages.StorageInvalidCopyPartSize)
 	}
 	if needed := (source.Size + 9998) / 9999; needed > partSize {
 		partSize = (needed + 1024*1024 - 1) / (1024 * 1024) * (1024 * 1024)
 	}
 	if partSize > 5*1024*1024*1024 {
-		return minio.UploadInfo{}, true, apperror.New(400, "ObjectTooLarge", "Размер объекта превышает поддерживаемый лимит копирования.")
+		return minio.UploadInfo{}, true, apperror.New(400, "ObjectTooLarge", messages.StorageObjectTooLarge)
 	}
 	for offset := int64(0); offset < source.Size; offset += partSize {
 		part, err := core.CopyObjectPart(ctx, body.SourceBucket, body.SourceKey, body.DestinationBucket, body.DestinationKey, id, len(parts)+1, offset, min(partSize, source.Size-offset), headers)
 		if err != nil {
 			if code := minio.ToErrorResponse(err).Code; code == "PreconditionFailed" || code == "ConditionalRequestConflict" {
-				return minio.UploadInfo{}, true, apperror.New(409, "SourceChanged", "Исходный файл изменился во время копирования. Обновите сведения перед повтором.")
+				return minio.UploadInfo{}, true, apperror.New(409, "SourceChanged", messages.StorageSourceChangedCopy)
 			}
 			if unsupportedCopy(err) && abort() == nil {
 				return minio.UploadInfo{}, false, nil
@@ -97,7 +98,7 @@ func CopyConditional(ctx context.Context, client CopyClient, body CopyRequest, s
 			return minio.UploadInfo{}, true, err
 		}
 		if part.ETag == "" {
-			return minio.UploadInfo{}, true, apperror.New(502, "CopyPartUnconfirmed", "Хранилище не подтвердило копирование части файла.")
+			return minio.UploadInfo{}, true, apperror.New(502, "CopyPartUnconfirmed", messages.StorageCopyPartUnconfirmed)
 		}
 		parts = append(parts, part)
 	}
@@ -106,7 +107,7 @@ func CopyConditional(ctx context.Context, client CopyClient, body CopyRequest, s
 		return minio.UploadInfo{}, true, err
 	}
 	if result.ETag == "" {
-		return minio.UploadInfo{}, true, apperror.New(502, "CopyUnconfirmed", "Хранилище не подтвердило завершение копирования.")
+		return minio.UploadInfo{}, true, apperror.New(502, "CopyUnconfirmed", messages.StorageCopyUnconfirmedCopy)
 	}
 	committed = true
 	return result, true, nil
@@ -122,7 +123,7 @@ func unsupportedCopy(err error) bool {
 func copySourceError(err error) error {
 	switch minio.ToErrorResponse(err).Code {
 	case "NoSuchKey", "NoSuchVersion", "PreconditionFailed", "ConditionalRequestConflict":
-		return apperror.New(409, "SourceChanged", "Исходный файл изменился или удалён. Обновите сведения перед повтором.")
+		return apperror.New(409, "SourceChanged", messages.StorageSourceChangedCopySourceError)
 	}
 	return err
 }

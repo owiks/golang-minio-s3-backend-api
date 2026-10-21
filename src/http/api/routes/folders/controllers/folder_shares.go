@@ -13,13 +13,14 @@ import (
 	"minio-web/api/src/http/stream"
 	"minio-web/api/src/services/apperror"
 	folderssvc "minio-web/api/src/services/folders"
+	"minio-web/api/src/services/messages"
 	runtimesvc "minio-web/api/src/services/runtime"
 	"minio-web/api/src/services/telemetry"
 )
 
 func HandlePublicFolder(app *runtimesvc.State, w http.ResponseWriter, r *http.Request) error {
 	if r.Method != "GET" {
-		return apperror.New(405, "MethodNotAllowed", "Метод не поддерживается.")
+		return apperror.New(405, "MethodNotAllowed", messages.HttpMethodNotAllowed)
 	}
 	q := r.URL.Query()
 	value, err := folderssvc.ReadPublicFolder(r.Context(), app.Shares, app, strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer "), folderssvc.PublicFolderOptions{Mode: q.Get("mode"), Prefix: q.Get("prefix"), Cursor: q.Get("cursor"), Key: q.Get("key"), Kind: q.Get("kind")})
@@ -34,13 +35,13 @@ func HandlePublicFolder(app *runtimesvc.State, w http.ResponseWriter, r *http.Re
 	}
 	switch {
 	case value.Info != nil:
-		httpcommon.WriteJSON(w, 200, value.Info)
+		httpcommon.WriteJSON(w, r, 200, value.Info)
 	case value.Page != nil:
-		httpcommon.WriteJSON(w, 200, value.Page)
+		httpcommon.WriteJSON(w, r, 200, value.Page)
 	case value.Link != nil:
-		httpcommon.WriteJSON(w, 200, value.Link)
+		httpcommon.WriteJSON(w, r, 200, value.Link)
 	default:
-		return apperror.New(500, "InvalidFolderResult", "Не удалось сформировать ответ папки.")
+		return apperror.New(500, "InvalidFolderResult", messages.HttpInvalidFolderResult)
 	}
 	return nil
 }

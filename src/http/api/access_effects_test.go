@@ -17,6 +17,7 @@ import (
 	"minio-web/api/src/http/api/common"
 	"minio-web/api/src/http/api/routes"
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/runtime"
 	"minio-web/api/src/services/storage"
 	"minio-web/api/tests/testsession"
@@ -57,7 +58,7 @@ func TestAccessRevisionSurvivesPartialFailureCancellationAndPanic(t *testing.T) 
 			}
 			match := routes.Match{Found: true, MethodAllowed: true, Params: map[string]string{"sessionID": s.SessionID()}, Operation: routes.Operation{Method: "POST", Mutation: routes.IAMLock, InvalidatesAccess: scenario != "non IAM", Handler: func(_ *runtime.State, _ http.ResponseWriter, r *http.Request, _ *runtime.Session, _ string) error {
 				if err := client.AddUser(r.Context(), "fixture-user", "fixture-secret"); err != nil {
-					return apperror.NewWithCause(502, "SafeMappedError", "safe", err)
+					return apperror.NewWithCause(502, "SafeMappedError", messages.Literal("safe"), err)
 				}
 				if scenario == "panic after commit" {
 					panic("test failure after commit")
@@ -65,7 +66,7 @@ func TestAccessRevisionSurvivesPartialFailureCancellationAndPanic(t *testing.T) 
 				if scenario == "partial commit" {
 					return client.SetUserStatus(r.Context(), "fixture-user", madmin.AccountDisabled)
 				}
-				return apperror.New(409, "LaterDomainFailure", "safe")
+				return apperror.New(409, "LaterDomainFailure", messages.Literal("safe"))
 			}}}
 			previous := app.AccessRevision(s)
 			r := httptest.NewRequest("POST", "http://ui.example/api/sessions/"+s.SessionID()+"/admin/users", nil).WithContext(ctx)

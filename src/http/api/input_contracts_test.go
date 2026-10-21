@@ -111,6 +111,7 @@ func TestInputsAreSpecificToEachAction(t *testing.T) {
 			}
 			slices.Sort(query)
 			slices.Sort(headers)
+			tc.headers = append([]string{"Accept-Language"}, tc.headers...)
 			if !slices.Equal(query, tc.query) || !slices.Equal(headers, tc.headers) || (operation.RequestBody != nil) != tc.body {
 				t.Fatalf("mixed action inputs: query=%v headers=%v body=%t", query, headers, operation.RequestBody != nil)
 			}

@@ -21,10 +21,11 @@ import (
 
 	settings "minio-web/api/src/config"
 	apihttp "minio-web/api/src/http/api"
+	"minio-web/api/src/http/presentation"
 	httpvalidation "minio-web/api/src/http/validation"
-	"minio-web/api/src/services/archives/plan"
+	archiveplan "minio-web/api/src/services/archives/plan"
 	objectssvc "minio-web/api/src/services/objects"
-	"minio-web/api/src/services/objects/write"
+	objectwrite "minio-web/api/src/services/objects/write"
 	runtimesvc "minio-web/api/src/services/runtime"
 	"minio-web/api/src/services/securetoken"
 	uploadssvc "minio-web/api/src/services/uploads"
@@ -242,7 +243,7 @@ func TestArchiveIntegration(t *testing.T) {
 		t.Fatal("one file plus manifest expected", len(archive.File))
 	}
 	var manifest struct {
-		Files []archiveplan.ArchiveItem `json:"files"`
+		Files []presentation.ArchiveItem `json:"files"`
 	}
 	for _, file := range archive.File {
 		reader, e := file.Open()
@@ -264,8 +265,8 @@ func TestArchiveIntegration(t *testing.T) {
 	}
 	c.call("GET", "objects/archive/"+plan.Ticket, nil, 409)
 	var status struct {
-		Finished bool                      `json:"finished"`
-		Items    []archiveplan.ArchiveItem `json:"items"`
+		Finished bool                       `json:"finished"`
+		Items    []presentation.ArchiveItem `json:"items"`
 	}
 	_ = json.Unmarshal(c.call("GET", "objects/archive-status/"+plan.Ticket, nil, 200), &status)
 	if !status.Finished || len(status.Items) != 2 {

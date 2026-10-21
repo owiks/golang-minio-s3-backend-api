@@ -13,6 +13,6 @@ func HandleBatchParameters(app *runtimesvc.State, w http.ResponseWriter, r *http
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }

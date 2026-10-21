@@ -46,14 +46,38 @@ func Build(catalog []routes.APIRoute) openapi.Document {
 			}
 			applyResponses(&documented, op)
 			for _, response := range documented.Responses {
-				if value, ok := response.(map[string]any); ok && value["headers"] == nil {
-					value["headers"] = map[string]any{"X-Request-ID": map[string]any{"schema": map[string]string{"type": "string"}}}
+				if value, ok := response.(map[string]any); ok {
+					headers := responseHeaders(value)
+					if headers["X-Request-ID"] == nil {
+						headers["X-Request-ID"] = map[string]any{"schema": map[string]string{"type": "string"}}
+					}
+					content, _ := value["content"].(map[string]any)
+					_, json := content["application/json"]
+					_, ndjson := content["application/x-ndjson"]
+					if json || ndjson {
+						localizedResponseHeaders(value)
+					}
 				}
 			}
 			d.Paths[path][strings.ToLower(op.Method)] = documented
 		}
 	}
 	return d
+}
+
+func responseHeaders(response map[string]any) map[string]any {
+	headers, ok := response["headers"].(map[string]any)
+	if !ok {
+		headers = map[string]any{}
+		response["headers"] = headers
+	}
+	return headers
+}
+
+func localizedResponseHeaders(response map[string]any) {
+	headers := responseHeaders(response)
+	headers["Content-Language"] = map[string]any{"schema": map[string]any{"type": "string", "enum": []string{"en", "ru"}}, "description": "Язык сообщений API; не меняет содержимое файлов."}
+	headers["Vary"] = map[string]any{"schema": map[string]string{"type": "string"}, "description": "В режиме auto содержит Accept-Language."}
 }
 
 func add(d *openapi.Document, path, tag, method, summary string, public bool) {
@@ -66,6 +90,7 @@ func add(d *openapi.Document, path, tag, method, summary string, public bool) {
 		security = append(security, requirements)
 	}
 	op := openapi.Operation{OperationID: strings.ToLower(method) + "_" + strings.NewReplacer("/", "_", "{", "", "}", "", "-", "_").Replace(strings.Trim(path, "/")), Tags: []string{tag}, Summary: summary, Security: security, Responses: map[string]any{}}
+	op.Parameters = append(op.Parameters, openapi.Parameter{Name: "Accept-Language", In: "header", Description: "Язык сообщений в режиме API_LANGUAGE=auto: en или ru, включая региональные варианты и приоритеты q. Без подходящего значения — en.", Schema: openapi.Schema{"type": "string"}})
 	if !public && method != "GET" {
 		op.Parameters = append(op.Parameters, openapi.Parameter{Name: "Origin", In: "header", Required: true, Description: "Адрес интерфейса; должен пройти проверку SameOrigin.", Schema: openapi.Schema{"type": "string"}})
 	}
@@ -140,6 +165,9 @@ func applyResponses(documented *openapi.Operation, op routes.Operation) {
 			current["content"] = content
 		}
 		content[response.MediaType] = map[string]any{"schema": schema}
+		if response.Localized {
+			localizedResponseHeaders(current)
+		}
 		if response.MediaType == "application/x-ndjson" {
 			documented.Description += " Поток NDJSON: каждая строка содержит прогресс, результат или ошибку операции."
 		}

@@ -2,7 +2,6 @@ package server_test
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
@@ -14,7 +13,7 @@ import (
 
 	"minio-web/api/src/services/apperror"
 	"minio-web/api/src/services/iam"
-	"minio-web/api/src/services/revision"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/server"
 )
 
@@ -80,15 +79,13 @@ func newConfigClient(t *testing.T) *configClient {
 }
 func configRevision(t *testing.T, raw, sub string) string {
 	t.Helper()
-	fields, err := server.ConfigFields(raw, sub)
+	client := newConfigClient(t)
+	client.raw = raw
+	view, err := server.ReadServerConfig(client.ctx, client, sub)
 	if err != nil {
 		t.Fatal(err)
 	}
-	data, err := json.Marshal(fields)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return revision.Of(data)
+	return view.Revision
 }
 func assertConfigError(t *testing.T, err error, status int, code string) {
 	t.Helper()
@@ -386,7 +383,7 @@ func TestLoadConfigHistoryFailureIsOptional(t *testing.T) {
 	f.policy = nil // GET depends only on the reader port, not ConfigUpdate.
 	f.historyErr = errors.New("history denied")
 	view, err := server.LoadConfig(f.ctx, f, "api")
-	if err != nil || view.Revision == "" || len(view.Fields) != 3 || view.HistoryError == "" || view.History == nil || !reflect.DeepEqual(f.calls, []string{"read:api", "history"}) {
+	if err != nil || view.Revision == "" || len(view.Fields) != 3 || messages.Empty(view.HistoryError) || view.History == nil || !reflect.DeepEqual(f.calls, []string{"read:api", "history"}) {
 		t.Fatalf("optional history broke read: %+v calls=%v err=%v", view, f.calls, err)
 	}
 }

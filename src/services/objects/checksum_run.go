@@ -8,6 +8,7 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/result"
 )
 
@@ -79,11 +80,11 @@ func (c *ChecksumRun) Stream(ctx context.Context, emit func(result.StreamEvent[C
 	var err error
 	switch {
 	case c.started:
-		err = apperror.New(409, "ChecksumStarted", "Проверка уже запускалась. Подготовьте её заново.")
+		err = apperror.New(409, "ChecksumStarted", messages.ObjectsChecksumStarted)
 	case c.closed:
-		err = apperror.New(409, "ChecksumClosed", "Проверка закрыта. Подготовьте её заново.")
+		err = apperror.New(409, "ChecksumClosed", messages.ObjectsChecksumClosed)
 	case !c.calculate:
-		err = apperror.New(409, "ChecksumNotPrepared", "Расчёт контрольной суммы не подготовлен.")
+		err = apperror.New(409, "ChecksumNotPrepared", messages.ObjectsChecksumNotPrepared)
 	default:
 		c.started = true
 	}

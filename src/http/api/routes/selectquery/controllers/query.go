@@ -8,6 +8,7 @@ import (
 	"minio-web/api/src/http/stream"
 	"minio-web/api/src/http/validation"
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/result"
 	"minio-web/api/src/services/runtime"
 	"minio-web/api/src/services/selectquery"
@@ -15,7 +16,7 @@ import (
 
 func HandleSelectObject(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session) error {
 	if r.URL.Query().Has("versionId") || r.URL.Query().Has("version") || r.Header.Get("Range") != "" {
-		return apperror.New(400, "InvalidSelectQuery", "S3 Select этим API не поддерживает выбор версии или Range.")
+		return apperror.New(400, "InvalidSelectQuery", messages.HttpInvalidSelectQuery)
 	}
 	var body selectquery.Request
 	if err := validation.DecodeLimit(w, r, &body, selectquery.MaxRequestBytes); err != nil {

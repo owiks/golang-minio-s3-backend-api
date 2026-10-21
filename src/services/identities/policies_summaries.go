@@ -8,6 +8,7 @@ import (
 	"github.com/minio/madmin-go/v3"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 func PolicySummaries(ctx context.Context, s PolicySummariesClient) ([]PolicySummary, error) {
@@ -26,8 +27,8 @@ func PolicySummaries(ctx context.Context, s PolicySummariesClient) ([]PolicySumm
 	defer cancel()
 	for i, name := range names {
 		rows[i].Name = name
-		rows[i].AssignmentsError = "Назначения не получены в отведённое время."
-		rows[i].DatesError = "Даты не получены в отведённое время."
+		rows[i].AssignmentsError = messages.IdentitiesTheAssignmentsWereNotRetrievedWithinThe
+		rows[i].DatesError = messages.IdentitiesTheDatesWereNotRetrievedWithinThe
 		value, err := SummarizePolicy(policies[name])
 		rows[i].Definition = value
 		if err != nil {
@@ -55,7 +56,7 @@ func PolicySummaries(ctx context.Context, s PolicySummariesClient) ([]PolicySumm
 			}
 			assignment.Users = SortedUnique(assignment.Users)
 			assignment.Groups = SortedUnique(assignment.Groups)
-			rows[i].AssignmentsError = ""
+			rows[i].AssignmentsError = nil
 			rows[i].Assignments = assignment
 		}
 	}
@@ -65,7 +66,7 @@ func PolicySummaries(ctx context.Context, s PolicySummariesClient) ([]PolicySumm
 			rows[i].DatesError = apperror.Public(err).Message
 			return
 		}
-		rows[i].DatesError = ""
+		rows[i].DatesError = nil
 		rows[i].CreatedAt = KnownTime(info.CreateDate)
 		rows[i].UpdatedAt = KnownTime(info.UpdateDate)
 	})

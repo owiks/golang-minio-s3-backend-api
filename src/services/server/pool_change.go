@@ -7,6 +7,7 @@ import (
 	"github.com/minio/madmin-go/v3"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 type PoolChangeRequest struct {
@@ -53,14 +54,14 @@ func (b PoolChangeRequest) Command() (PoolCommand, error) {
 	case "cancel":
 		return CancelDecommissionCommand{b.Pool, b.Revision, b.Confirmation}, nil
 	}
-	return nil, apperror.New(400, "InvalidPoolOperation", "Неизвестная операция пула.")
+	return nil, apperror.New(400, "InvalidPoolOperation", messages.ServerInvalidPoolOperation)
 }
 
 func ChangePools(ctx context.Context, s ChangePoolsClient, command PoolCommand) error {
 	switch command.(type) {
 	case StartRebalanceCommand, StopRebalanceCommand, DecommissionPoolCommand, CancelDecommissionCommand:
 	default:
-		return apperror.New(400, "InvalidPoolOperation", "Выберите операцию пула.")
+		return apperror.New(400, "InvalidPoolOperation", messages.ServerInvalidPoolOperationPoolChange)
 	}
 	operation, pool, revision, confirmation := command.poolChange()
 	b := PoolChangeRequest{Operation: operation, Pool: pool, Revision: revision, Confirmation: confirmation}
@@ -78,10 +79,10 @@ func ChangePools(ctx context.Context, s ChangePoolsClient, command PoolCommand) 
 		permission = "admin:Decommission"
 		phrase = fmt.Sprintf("ОТМЕНИТЬ ПУЛ %d", b.Pool)
 	default:
-		return apperror.New(400, "InvalidPoolOperation", "Неизвестная операция пула.")
+		return apperror.New(400, "InvalidPoolOperation", messages.ServerInvalidPoolOperation)
 	}
 	if b.Confirmation != phrase {
-		return apperror.New(400, "ConfirmationRequired", "Введите текст подтверждения операции.")
+		return apperror.New(400, "ConfirmationRequired", messages.ServerConfirmationRequired)
 	}
 	if e := RequireServerAction(ctx, s, permission); e != nil {
 		return e
@@ -94,7 +95,7 @@ func ChangePools(ctx context.Context, s ChangePoolsClient, command PoolCommand) 
 		return apperror.New(501, "ServerFeatureUnavailable", v.Reason)
 	}
 	if b.Revision != v.Revision {
-		return apperror.New(409, "PoolsChanged", "Состояние пулов изменилось. Обновите данные и повторите действие.")
+		return apperror.New(409, "PoolsChanged", messages.ServerPoolsChanged)
 	}
 	var target *madmin.PoolStatus
 	var current PoolOperationRow
@@ -110,16 +111,16 @@ func ChangePools(ctx context.Context, s ChangePoolsClient, command PoolCommand) 
 	}
 	if b.Operation == "decommission" || b.Operation == "cancel" {
 		if target == nil {
-			return apperror.New(404, "PoolNotFound", "Пул больше не существует.")
+			return apperror.New(404, "PoolNotFound", messages.ServerPoolNotFound)
 		}
 	}
 	if b.Operation == "start" || b.Operation == "decommission" {
 		if len(v.Pools) < 2 || !v.RebalanceKnown || v.Rebalancing {
-			return apperror.New(409, "PoolsNotReady", "Нужны минимум два пула и подтверждённое отсутствие перераспределения.")
+			return apperror.New(409, "PoolsNotReady", messages.ServerPoolsNotReady)
 		}
 		for _, p := range v.Pools {
 			if Draining(p) || p.State == "complete" {
-				return apperror.New(409, "PoolBusy", "Другой пул выводится или уже выведен. Завершите изменение топологии.")
+				return apperror.New(409, "PoolBusy", messages.ServerPoolBusy)
 			}
 		}
 		info, infoErr := s.ServerInfo(ctx, madmin.WithDriveMetrics(true))
@@ -131,7 +132,7 @@ func ChangePools(ctx context.Context, s ChangePoolsClient, command PoolCommand) 
 		}
 		if b.Operation == "decommission" {
 			if current.State != "active" && current.State != "canceled" && current.State != "failed" {
-				return apperror.New(409, "PoolBusy", "Пул нельзя вывести в текущем состоянии.")
+				return apperror.New(409, "PoolBusy", messages.ServerPoolBusyPoolChange)
 			}
 			// MinIO validates available destination space and erasure-set placement.
 			// Do not turn physical filesystem totals into a fictitious usable capacity.
@@ -141,12 +142,12 @@ func ChangePools(ctx context.Context, s ChangePoolsClient, command PoolCommand) 
 		}
 	} else if b.Operation == "stop" {
 		if !v.RebalanceKnown || !v.Rebalancing {
-			return apperror.New(409, "RebalanceInactive", "Нет подтверждённого активного перераспределения.")
+			return apperror.New(409, "RebalanceInactive", messages.ServerRebalanceInactive)
 		}
 		e = s.RebalanceStop(ctx)
 	} else {
 		if !Draining(current) {
-			return apperror.New(409, "DecommissionInactive", "Пул сейчас не выводится.")
+			return apperror.New(409, "DecommissionInactive", messages.ServerDecommissionInactive)
 		}
 		e = s.CancelDecommissionPool(ctx, target.CmdLine)
 	}

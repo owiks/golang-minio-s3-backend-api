@@ -18,8 +18,8 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/archives/plan"
-	"minio-web/api/src/services/objects/state"
+	archiveplan "minio-web/api/src/services/archives/plan"
+	objectstate "minio-web/api/src/services/objects/state"
 	"minio-web/api/src/services/telemetry"
 )
 
@@ -74,7 +74,7 @@ func TestDownloadCloseBeforeStreamFinishesAndAllowsForget(t *testing.T) {
 	calls.Wait()
 	assertCancelledDownload(t, download, plan, trace)
 	var output bytes.Buffer
-	if err := download.StreamTo(&output); !errors.Is(err, context.Canceled) || output.Len() != 0 || source.calls.Load() != 0 {
+	if err := download.StreamTo(&output, testManifest); !errors.Is(err, context.Canceled) || output.Len() != 0 || source.calls.Load() != 0 {
 		t.Fatal("closed download started streaming", err, output.Len(), source.calls.Load())
 	}
 	store := &archiveForgetter{archiveLookup: &archiveLookup{plan: plan}}
@@ -106,7 +106,7 @@ func TestDownloadRejectsConcurrentStreamsAndClosesActiveRead(t *testing.T) {
 	}}
 	download, plan, trace := startTestDownload(t, context.Background(), source, []archiveplan.ArchiveItem{pendingArchiveItem()})
 	done := make(chan error, 1)
-	go func() { done <- download.StreamTo(io.Discard) }()
+	go func() { done <- download.StreamTo(io.Discard, testManifest) }()
 	select {
 	case <-entered:
 	case <-time.After(3 * time.Second):
@@ -115,7 +115,7 @@ func TestDownloadRejectsConcurrentStreamsAndClosesActiveRead(t *testing.T) {
 	var attempts sync.WaitGroup
 	for range 16 {
 		attempts.Go(func() {
-			if err := download.StreamTo(io.Discard); apperror.Public(err).Code != "ArchiveStarted" {
+			if err := download.StreamTo(io.Discard, testManifest); apperror.Public(err).Code != "ArchiveStarted" {
 				t.Error("duplicate consumer was not rejected", err)
 			}
 		})
@@ -147,7 +147,7 @@ func TestDownloadParentCancellationFinishesPlan(t *testing.T) {
 				cancel()
 			}
 			done := make(chan error, 1)
-			go func() { done <- download.StreamTo(io.Discard) }()
+			go func() { done <- download.StreamTo(io.Discard, testManifest) }()
 			if !beforeStream {
 				select {
 				case <-entered:
@@ -203,7 +203,7 @@ func TestDownloadCloseDoesNotFinalizeWhileStreamOwnsWriter(t *testing.T) {
 	var release sync.Once
 	defer release.Do(func() { close(target.release) })
 	done := make(chan error, 1)
-	go func() { done <- download.StreamTo(target) }()
+	go func() { done <- download.StreamTo(target, testManifest) }()
 	select {
 	case <-target.entered:
 	case <-time.After(3 * time.Second):
@@ -242,7 +242,7 @@ func TestDownloadClosePreservesCompletedOutcome(t *testing.T) {
 			if kind == "write failure" {
 				target = failedArchiveTarget{}
 			}
-			err := download.StreamTo(target)
+			err := download.StreamTo(target, testManifest)
 			wantState, wantResult, wantCode := "done", "success", ""
 			if kind == "partial" {
 				wantState, wantResult, wantCode = "error", "partial", "ArchivePartial"
@@ -275,7 +275,7 @@ func TestDownloadClosePreservesCompletedOutcome(t *testing.T) {
 				}
 			}
 			var duplicate bytes.Buffer
-			if err := download.StreamTo(&duplicate); err == nil || duplicate.Len() != 0 || source.calls.Load() != 1 {
+			if err := download.StreamTo(&duplicate, testManifest); err == nil || duplicate.Len() != 0 || source.calls.Load() != 1 {
 				t.Fatal("completed download streamed again", err, duplicate.Len(), source.calls.Load())
 			}
 		})
@@ -309,7 +309,7 @@ func TestDownloadCloseInterruptsS3Body(t *testing.T) {
 	item.Info = objectstate.DeletionSnapshot{ETag: "etag", Size: item.Size, Modified: modified}
 	download, plan, trace := startTestDownload(t, context.Background(), source, []archiveplan.ArchiveItem{item})
 	done := make(chan error, 1)
-	go func() { done <- download.StreamTo(io.Discard) }()
+	go func() { done <- download.StreamTo(io.Discard, testManifest) }()
 	select {
 	case <-entered:
 	case <-time.After(3 * time.Second):
@@ -337,7 +337,7 @@ func TestDownloadCloseRacesWithStreamStart(t *testing.T) {
 		var attempts sync.WaitGroup
 		for range 8 {
 			attempts.Go(func() { <-start; download.Close() })
-			attempts.Go(func() { <-start; _ = download.StreamTo(io.Discard) })
+			attempts.Go(func() { <-start; _ = download.StreamTo(io.Discard, testManifest) })
 		}
 		close(start)
 		attempts.Wait()

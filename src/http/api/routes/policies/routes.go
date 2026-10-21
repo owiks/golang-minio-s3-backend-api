@@ -10,6 +10,7 @@ import (
 	httpvalidation "minio-web/api/src/http/validation"
 	"minio-web/api/src/services/apperror"
 	"minio-web/api/src/services/identities"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/runtime"
 )
 
@@ -24,7 +25,7 @@ func GetRoutes() []routes.APIRoute {
 					Controller: "HandlePolicySummaries",
 					Response:   []identities.PolicySummary{}, Handler: func(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session, rest string) error {
 						if r.Method != "GET" {
-							return apperror.New(405, "MethodNotAllowed", "Операция управления не поддерживается.")
+							return apperror.New(405, "MethodNotAllowed", messages.ManagementUnsupported)
 						}
 						return controllers.HandlePolicySummaries(app, w, r, s)
 					}},

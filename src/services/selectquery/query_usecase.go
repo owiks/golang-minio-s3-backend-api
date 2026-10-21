@@ -10,8 +10,10 @@ import (
 	"time"
 
 	"github.com/minio/minio-go/v7"
+
 	"minio-web/api/src/services/apperror"
 	"minio-web/api/src/services/capabilities"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/objects"
 	"minio-web/api/src/services/result"
 	"minio-web/api/src/services/storage"
@@ -44,7 +46,7 @@ func Prepare(parent context.Context, client Client, observer capabilities.Observ
 		return nil, err
 	}
 	if strings.HasSuffix(key, "/") {
-		return nil, apperror.New(400, "InvalidObject", "Выберите файл.")
+		return nil, apperror.New(400, "InvalidObject", messages.ObjectsInvalidObject)
 	}
 	options, request, err := validate(request)
 	if err != nil {
@@ -66,7 +68,7 @@ func Prepare(parent context.Context, client Client, observer capabilities.Observ
 		return nil, err
 	}
 	if info.Size < 0 || info.Size > MaxSourceBytes {
-		return nil, apperror.New(400, "SelectSourceTooLarge", "Для S3 Select выберите объект не больше 256 МиБ.")
+		return nil, apperror.New(400, "SelectSourceTooLarge", messages.SelectquerySelectSourceTooLarge)
 	}
 	run.info = info
 	run.reader, err = client.OpenSelect(ctx, bucket, key, options)
@@ -81,7 +83,7 @@ func Prepare(parent context.Context, client Client, observer capabilities.Observ
 		return nil, selectError(readErr)
 	}
 	if int64(n) > request.MaxResultBytes {
-		return nil, apperror.New(413, "SelectResultLimit", "Результат S3 Select превышает установленный лимит. Уточните запрос.")
+		return nil, apperror.New(413, "SelectResultLimit", messages.SelectquerySelectResultLimit)
 	}
 	run.first, run.firstErr = buffer[:n], readErr
 	prepared = true
@@ -115,11 +117,11 @@ func selectError(err error) error {
 	native := minio.ToErrorResponse(err)
 	code := native.Code
 	if native.StatusCode == 400 {
-		return apperror.New(400, "SelectQueryFailed", "Хранилище отклонило запрос S3 Select. Проверьте SQL и формат файла; результат неполный.")
+		return apperror.New(400, "SelectQueryFailed", messages.SelectquerySelectQueryFailed)
 	}
 	switch code {
 	case "InvalidExpression", "ParseExpectedTokenType", "ParseUnexpectedToken", "ParseInvalidToken", "LexerInvalidChar", "InvalidDataSource", "InvalidCompressionFormat", "InvalidFileHeaderInfo", "InvalidJsonType", "InvalidRequestParameter", "CSVParsingError", "JSONParsingError", "InvalidTextEncoding", "OverMaxRecordSize", "UnsupportedSqlOperation":
-		return apperror.New(400, "SelectQueryFailed", "Хранилище отклонило запрос S3 Select. Проверьте SQL и формат файла; результат неполный.")
+		return apperror.New(400, "SelectQueryFailed", messages.SelectquerySelectQueryFailed)
 	default:
 		return apperror.Public(err)
 	}
@@ -129,7 +131,7 @@ func (r *Run) Stream(parent context.Context, emit func(result.StreamEvent[Result
 	r.mu.Lock()
 	if r.started || r.closed || r.ctx == nil || r.reader == nil || r.client == nil {
 		r.mu.Unlock()
-		return apperror.New(409, "SelectClosed", "Запрос S3 Select уже запущен или закрыт.")
+		return apperror.New(409, "SelectClosed", messages.SelectquerySelectClosed)
 	}
 	r.started = true
 	r.mu.Unlock()
@@ -150,7 +152,7 @@ func (r *Run) Stream(parent context.Context, emit func(result.StreamEvent[Result
 		}
 		if len(data) > 0 {
 			if count+int64(len(data)) > r.maxResultBytes {
-				return apperror.New(413, "SelectResultLimit", "Результат S3 Select превысил установленный лимит. Уже полученные данные неполные.")
+				return apperror.New(413, "SelectResultLimit", messages.SelectquerySelectResultLimitQueryUsecase)
 			}
 			count += int64(len(data))
 			if !emit(result.StreamEvent[Result]{Data: &result.ByteChunk{Encoding: "base64", Bytes: base64.StdEncoding.EncodeToString(data)}}) {
@@ -175,12 +177,12 @@ func (r *Run) Stream(parent context.Context, emit func(result.StreamEvent[Result
 		return err
 	}
 	if current.Size != r.info.Size || current.ETag != r.info.ETag || current.VersionID != r.info.VersionID || !current.LastModified.Equal(r.info.LastModified) {
-		return apperror.New(409, "SelectSourceChanged", "Файл изменился во время S3 Select. Результат неполный; повторите запрос.")
+		return apperror.New(409, "SelectSourceChanged", messages.SelectquerySelectSourceChanged)
 	}
 	value := Result{Complete: true, Bytes: count}
 	if stats := r.reader.FinalStats(); stats != nil {
 		if stats.BytesReturned != count || stats.BytesScanned < 0 || stats.BytesProcessed < 0 {
-			err := apperror.New(502, "InvalidSelectStatistics", "Итоговые сведения S3 Select не соответствуют полученному результату. Результат неполный.")
+			err := apperror.New(502, "InvalidSelectStatistics", messages.SelectqueryInvalidSelectStatistics)
 			r.observe(err)
 			return err
 		}

@@ -1,11 +1,12 @@
 package controllers
 
 import (
+	"net/http"
+
 	httpcommon "minio-web/api/src/http/api/common"
 	httpvalidation "minio-web/api/src/http/validation"
 	keyssvc "minio-web/api/src/services/keys"
 	runtimesvc "minio-web/api/src/services/runtime"
-	"net/http"
 )
 
 func HandleListKeys(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, temporary bool) error {
@@ -13,7 +14,7 @@ func HandleListKeys(app *runtimesvc.State, w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleGetKey(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, name string, temporary bool) error {
@@ -21,7 +22,7 @@ func HandleGetKey(app *runtimesvc.State, w http.ResponseWriter, r *http.Request,
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleCreateKey(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -33,7 +34,7 @@ func HandleCreateKey(app *runtimesvc.State, w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleEditKey(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, name string) error {
@@ -47,7 +48,7 @@ func HandleEditKey(app *runtimesvc.State, w http.ResponseWriter, r *http.Request
 	if err := keyssvc.EditKey(r.Context(), runtimesvc.NewClients(s), name, b); err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, httpcommon.Success{OK: true})
+	httpcommon.WriteJSON(w, r, 200, httpcommon.Success{OK: true})
 	return nil
 }
 func HandleSetKeyStatus(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, name string) error {
@@ -61,7 +62,7 @@ func HandleSetKeyStatus(app *runtimesvc.State, w http.ResponseWriter, r *http.Re
 	if err := keyssvc.SetKeyStatus(r.Context(), runtimesvc.NewClients(s), name, b); err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, httpcommon.Success{OK: true})
+	httpcommon.WriteJSON(w, r, 200, httpcommon.Success{OK: true})
 	return nil
 }
 func HandleRotateKeySecret(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, name string) error {
@@ -76,7 +77,7 @@ func HandleRotateKeySecret(app *runtimesvc.State, w http.ResponseWriter, r *http
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleDeleteKey(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, name string) error {
@@ -89,6 +90,6 @@ func HandleDeleteKey(app *runtimesvc.State, w http.ResponseWriter, r *http.Reque
 	if err := keyssvc.DeleteKey(r.Context(), runtimesvc.NewClients(s), name); err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, httpcommon.Success{OK: true})
+	httpcommon.WriteJSON(w, r, 200, httpcommon.Success{OK: true})
 	return nil
 }

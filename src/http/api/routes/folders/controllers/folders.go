@@ -7,12 +7,13 @@ import (
 	httpvalidation "minio-web/api/src/http/validation"
 	"minio-web/api/src/services/apperror"
 	folderssvc "minio-web/api/src/services/folders"
+	"minio-web/api/src/services/messages"
 	runtimesvc "minio-web/api/src/services/runtime"
 )
 
 func HandleCreateFolder(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
 	if r.Method != "POST" {
-		return apperror.New(405, "MethodNotAllowed", "Метод не поддерживается.")
+		return apperror.New(405, "MethodNotAllowed", messages.HttpMethodNotAllowed)
 	}
 
 	var body folderssvc.CreateFolderRequest
@@ -23,6 +24,6 @@ func HandleCreateFolder(app *runtimesvc.State, w http.ResponseWriter, r *http.Re
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 201, value)
+	httpcommon.WriteJSON(w, r, 201, value)
 	return nil
 }

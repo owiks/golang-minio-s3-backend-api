@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 func keyForChange(ctx context.Context, s ServiceKeyReader, name, expected string) (AccessKeyDetails, error) {
@@ -12,7 +13,7 @@ func keyForChange(ctx context.Context, s ServiceKeyReader, name, expected string
 		return AccessKeyDetails{}, err
 	}
 	if expected == "" || current.Revision != expected {
-		return AccessKeyDetails{}, apperror.New(409, "AccessKeyChanged", "Ключ изменился после открытия окна. Ваши правки не записаны. Закройте окно и откройте актуальные настройки.")
+		return AccessKeyDetails{}, apperror.New(409, "AccessKeyChanged", messages.KeysAccessKeyChanged)
 	}
 	return current, nil
 }

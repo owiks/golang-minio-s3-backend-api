@@ -6,6 +6,7 @@ import (
 	"go.yaml.in/yaml/v3"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 // This is a presentation DTO, never the source job document. In particular,
@@ -31,7 +32,7 @@ type BatchRuleView struct {
 func SafeBatchParameters(raw string) (BatchParameters, error) {
 	invalid := func() (BatchParameters, error) {
 		// YAML decoding errors may include the original source line with secrets.
-		return BatchParameters{}, apperror.New(502, "InvalidBatchParameters", "MinIO вернул параметры задания в неподдерживаемом формате.")
+		return BatchParameters{}, apperror.New(502, "InvalidBatchParameters", messages.BatchInvalidBatchParameters)
 	}
 	if len(raw) > 1<<20 {
 		return invalid()

@@ -7,11 +7,11 @@ import (
 	"minio-web/api/src/services/apperror"
 )
 
-func Respond(w http.ResponseWriter, err error) {
+func Respond(w http.ResponseWriter, r *http.Request, err error) {
 	problem := apperror.Public(err)
 	// The wrapper exposes a request context without changing streaming writers.
 	if observed, ok := w.(interface{ Failure(string) }); ok {
 		observed.Failure(problem.Code)
 	}
-	common.WriteJSON(w, problem.Status, map[string]any{"error": problem})
+	common.WriteJSON(w, r, problem.Status, map[string]any{"error": problem})
 }

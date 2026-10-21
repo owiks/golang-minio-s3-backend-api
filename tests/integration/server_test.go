@@ -21,6 +21,7 @@ import (
 	settings "minio-web/api/src/config"
 	apihttp "minio-web/api/src/http/api"
 	httpcommon "minio-web/api/src/http/api/common"
+	"minio-web/api/src/http/presentation"
 	bucketssvc "minio-web/api/src/services/buckets"
 	"minio-web/api/src/services/revision"
 	runtimesvc "minio-web/api/src/services/runtime"
@@ -191,7 +192,7 @@ func TestMinIOIntegration(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, key := range []string{"policy", "versioning", "quota", "locking", "tags"} {
-		var field bucketssvc.DetailField
+		var field presentation.DetailField
 		if err := json.Unmarshal(settings[key], &field); err != nil {
 			t.Fatal(err)
 		}
@@ -258,7 +259,7 @@ func TestMinIOIntegration(t *testing.T) {
 	if err := json.Unmarshal(limitedDetails, &partial); err != nil {
 		t.Fatal(err)
 	}
-	var policyField, quotaField bucketssvc.DetailField
+	var policyField, quotaField presentation.DetailField
 	json.Unmarshal(partial["policy"], &policyField)
 	json.Unmarshal(partial["quota"], &quotaField)
 	if policyField.Error != "" || policyField.Value == nil || quotaField.Error == "" {

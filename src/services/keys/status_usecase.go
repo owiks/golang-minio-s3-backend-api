@@ -6,6 +6,7 @@ import (
 	"github.com/minio/madmin-go/v3"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 func SetKeyStatus(ctx context.Context, s ChangeKeyClient, name string, input StatusRequest) error {
@@ -13,7 +14,7 @@ func SetKeyStatus(ctx context.Context, s ChangeKeyClient, name string, input Sta
 		return err
 	}
 	if input.Enabled == nil {
-		return apperror.New(400, "InvalidStatus", "Укажите enabled.")
+		return apperror.New(400, "InvalidStatus", messages.IdentitiesInvalidStatus)
 	}
 	opts := madmin.UpdateServiceAccountReq{NewStatus: "off"}
 	if *input.Enabled {

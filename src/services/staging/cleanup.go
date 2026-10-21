@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 const (
@@ -35,7 +36,7 @@ type CleanupStats struct {
 }
 
 func closingError() error {
-	return apperror.New(503, "ServerClosing", "API завершает работу. Повторите запрос позже.")
+	return apperror.New(503, "ServerClosing", messages.RuntimeServerClosing)
 }
 
 func (b *Budget) isClosed() bool {

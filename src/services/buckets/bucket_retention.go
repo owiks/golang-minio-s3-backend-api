@@ -8,6 +8,7 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 type VersioningSetting struct {
@@ -42,7 +43,7 @@ func ReadLocking(ctx context.Context, s ReadLockingClient, bucket string) (Locki
 }
 func ParseRetention(raw json.RawMessage) (*RetentionRule, error) {
 	if len(raw) == 0 {
-		return nil, apperror.New(400, "InvalidRetention", "Передайте срок хранения или null для удаления срока по умолчанию.")
+		return nil, apperror.New(400, "InvalidRetention", messages.BucketsInvalidRetention)
 	}
 	if bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
 		return nil, nil
@@ -51,10 +52,10 @@ func ParseRetention(raw json.RawMessage) (*RetentionRule, error) {
 	d := json.NewDecoder(bytes.NewReader(raw))
 	d.DisallowUnknownFields()
 	if d.Decode(&rule) != nil || !rule.Mode.IsValid() || rule.Duration == nil || *rule.Duration == 0 || (rule.Unit != minio.Days && rule.Unit != minio.Years) {
-		return nil, apperror.New(400, "InvalidRetention", "Выберите GOVERNANCE или COMPLIANCE, целый положительный срок и единицу DAYS или YEARS.")
+		return nil, apperror.New(400, "InvalidRetention", messages.BucketsInvalidRetentionBucketRetention)
 	}
 	if (rule.Unit == minio.Days && *rule.Duration > 36500) || (rule.Unit == minio.Years && *rule.Duration > 100) {
-		return nil, apperror.New(400, "InvalidRetention", "Срок хранения: от 1 до 36500 дней или от 1 до 100 лет.")
+		return nil, apperror.New(400, "InvalidRetention", messages.BucketsInvalidRetentionBucketRetentionParseRetention)
 	}
 	return &rule, nil
 }

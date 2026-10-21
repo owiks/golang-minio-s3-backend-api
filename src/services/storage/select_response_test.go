@@ -17,7 +17,9 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/tests/testmessage"
 )
 
 func selectTestFrame(kind string, payload []byte) []byte {
@@ -304,7 +306,7 @@ func TestSelectSDKErrorsAfterRecordsArePartialAndSafe(t *testing.T) {
 			}
 			defer reader.Close()
 			data, err := io.ReadAll(reader)
-			if string(data) != "partial row\n" || err == nil || apperror.Public(err).Code != tc.code || strings.Contains(apperror.Public(err).Message, "secret") || reader.FinalStats() != nil || calls.Load() != 1 {
+			if string(data) != "partial row\n" || err == nil || apperror.Public(err).Code != tc.code || strings.Contains(testmessage.Russian(apperror.Public(err).Message), "secret") || reader.FinalStats() != nil || calls.Load() != 1 {
 				t.Fatal(string(data), err, calls.Load())
 			}
 		})

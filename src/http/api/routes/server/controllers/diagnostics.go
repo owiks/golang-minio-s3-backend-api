@@ -6,13 +6,14 @@ import (
 
 	httpcommon "minio-web/api/src/http/api/common"
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	runtimesvc "minio-web/api/src/services/runtime"
 	serversvc "minio-web/api/src/services/server"
 )
 
 func HandleDiagnostics(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
 	if r.Method != "GET" {
-		return apperror.New(405, "MethodNotAllowed", "Метод не поддерживается.")
+		return apperror.New(405, "MethodNotAllowed", messages.HttpMethodNotAllowed)
 	}
 	q := r.URL.Query()
 	seconds, e1 := strconv.Atoi(q.Get("seconds"))
@@ -24,6 +25,6 @@ func HandleDiagnostics(app *runtimesvc.State, w http.ResponseWriter, r *http.Req
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, report)
+	httpcommon.WriteJSON(w, r, 200, report)
 	return nil
 }

@@ -9,7 +9,8 @@ import (
 	"github.com/minio/minio-go/v7/pkg/tags"
 
 	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/objects/write"
+	"minio-web/api/src/services/messages"
+	objectwrite "minio-web/api/src/services/objects/write"
 )
 
 func GetProperties(ctx context.Context, s GetPropertiesClient, bucket, key string) (ObjectProperties, error) {
@@ -18,7 +19,7 @@ func GetProperties(ctx context.Context, s GetPropertiesClient, bucket, key strin
 		return ObjectProperties{}, err
 	}
 	if strings.HasSuffix(key, "/") {
-		return ObjectProperties{}, apperror.New(400, "InvalidObject", "Выберите файл, а не папку.")
+		return ObjectProperties{}, apperror.New(400, "InvalidObject", messages.ObjectsInvalidObjectObjectPropertiesUsecase)
 	}
 
 	_, current, err := ReadProperties(ctx, s, bucket, key)
@@ -34,7 +35,7 @@ func UpdateProperties(ctx context.Context, s UpdatePropertiesClient, bucket, key
 		return PropertiesUpdated{}, err
 	}
 	if strings.HasSuffix(key, "/") {
-		return PropertiesUpdated{}, apperror.New(400, "InvalidObject", "Выберите файл, а не папку.")
+		return PropertiesUpdated{}, apperror.New(400, "InvalidObject", messages.ObjectsInvalidObjectObjectPropertiesUsecase)
 	}
 
 	if err = ValidatePropertyPatch(body.Headers, body.Metadata, body.Tags, body.MetadataMode, body.TagsMode); err != nil {
@@ -47,14 +48,14 @@ func UpdateProperties(ctx context.Context, s UpdatePropertiesClient, bucket, key
 	}
 
 	if body.Revision == "" || body.Revision != current.Revision {
-		return PropertiesUpdated{}, apperror.New(409, "ObjectPropertiesChanged", "Файл или его свойства изменились. Обновите сведения перед сохранением.")
+		return PropertiesUpdated{}, apperror.New(409, "ObjectPropertiesChanged", messages.ObjectsObjectPropertiesChanged)
 	}
-	if current.TagsError != "" {
+	if !messages.Empty(current.TagsError) {
 		return PropertiesUpdated{}, apperror.New(403, "ObjectTagsUnavailable", current.TagsError)
 	}
 	metaChange := body.Headers != nil || body.Metadata != nil
 	if !metaChange && body.Tags == nil {
-		return PropertiesUpdated{}, apperror.New(400, "EmptyPropertyPatch", "Выберите свойства для изменения.")
+		return PropertiesUpdated{}, apperror.New(400, "EmptyPropertyPatch", messages.ObjectsEmptyPropertyPatch)
 	}
 	if body.Headers != nil {
 		for k, v := range body.Headers {
@@ -71,7 +72,7 @@ func UpdateProperties(ctx context.Context, s UpdatePropertiesClient, bucket, key
 		return PropertiesUpdated{}, err
 	}
 	if metaChange {
-		if current.MetadataReason != "" {
+		if !messages.Empty(current.MetadataReason) {
 			return PropertiesUpdated{}, apperror.New(409, "ObjectMetadataProtected", current.MetadataReason)
 		}
 		safeMetadata := map[string]string{}

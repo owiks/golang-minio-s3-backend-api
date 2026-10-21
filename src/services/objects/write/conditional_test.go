@@ -9,7 +9,8 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/objects/state"
+	"minio-web/api/src/services/messages"
+	objectstate "minio-web/api/src/services/objects/state"
 )
 
 type stateReaderFunc func(context.Context, string, string, minio.StatObjectOptions) (minio.ObjectInfo, error)
@@ -115,7 +116,7 @@ func TestNativeWriteConflictMapping(t *testing.T) {
 			t.Fatal("native conflict not mapped", got)
 		}
 	}
-	for _, failure := range []error{nil, context.Canceled, context.DeadlineExceeded, errors.New("transport failed"), minio.ErrorResponse{Code: "AccessDenied"}, apperror.New(409, "SourceChanged", "source changed")} {
+	for _, failure := range []error{nil, context.Canceled, context.DeadlineExceeded, errors.New("transport failed"), minio.ErrorResponse{Code: "AccessDenied"}, apperror.New(409, "SourceChanged", messages.Literal("source changed"))} {
 		if FileWriteError(failure) != failure {
 			t.Fatal("non-destination error replaced", failure)
 		}

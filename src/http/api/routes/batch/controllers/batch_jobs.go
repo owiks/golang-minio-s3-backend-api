@@ -1,11 +1,12 @@
 package controllers
 
 import (
+	"net/http"
+
 	httpcommon "minio-web/api/src/http/api/common"
 	httpvalidation "minio-web/api/src/http/validation"
 	svc "minio-web/api/src/services/batch"
 	runtimesvc "minio-web/api/src/services/runtime"
-	"net/http"
 )
 
 func HandleListBatchJobs(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -13,7 +14,7 @@ func HandleListBatchJobs(app *runtimesvc.State, w http.ResponseWriter, r *http.R
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 
@@ -26,7 +27,7 @@ func HandleStartBatchJob(app *runtimesvc.State, w http.ResponseWriter, r *http.R
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 
@@ -35,7 +36,7 @@ func HandleBatchJobStatus(app *runtimesvc.State, w http.ResponseWriter, r *http.
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 
@@ -46,6 +47,6 @@ func HandleCancelBatchJob(app *runtimesvc.State, w http.ResponseWriter, r *http.
 	if err := svc.Cancel(r.Context(), runtimesvc.NewClients(s), id); err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, httpcommon.Success{OK: true})
+	httpcommon.WriteJSON(w, r, 200, httpcommon.Success{OK: true})
 	return nil
 }

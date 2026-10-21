@@ -9,13 +9,14 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/objects/write"
+	"minio-web/api/src/services/messages"
+	objectwrite "minio-web/api/src/services/objects/write"
 	validationsvc "minio-web/api/src/services/validation"
 )
 
 func PrepareFile(ctx context.Context, s objectwrite.StateReader, bucket, key string) (objectwrite.FileState, error) {
 	if bucket == "" || len(bucket) > 63 || !validationsvc.ValidFileKey(key) {
-		return objectwrite.FileState{}, apperror.New(400, "InvalidFileKey", "Некорректный путь файла.")
+		return objectwrite.FileState{}, apperror.New(400, "InvalidFileKey", messages.ArchivesInvalidArchivePrepareUsecasePrepareArchive)
 	}
 	return objectwrite.DestinationState(ctx, s, bucket, key)
 }
@@ -25,7 +26,7 @@ func WriteFile(ctx context.Context, s ImportClient, bucket, key, revision, conte
 
 func writeFile(ctx context.Context, s ImportClient, bucket, key, revision, contentType string, size int64, source io.Reader, protect bool) (minio.UploadInfo, error) {
 	if size < 0 || size > objectwrite.MaxFileSize {
-		return minio.UploadInfo{}, apperror.New(400, "InvalidUploadSize", "Размер файла не должен превышать 5 ГиБ.")
+		return minio.UploadInfo{}, apperror.New(400, "InvalidUploadSize", messages.UploadsInvalidUploadSize)
 	}
 	current, err := PrepareFile(ctx, s, bucket, key)
 	if err != nil {
@@ -42,10 +43,10 @@ func writeFile(ctx context.Context, s ImportClient, bucket, key, revision, conte
 	result, err := s.PutObject(ctx, bucket, key, source, size, opts)
 	var tooLarge *http.MaxBytesError
 	if errors.As(err, &tooLarge) || errors.Is(err, io.ErrUnexpectedEOF) {
-		return minio.UploadInfo{}, apperror.New(400, "IncompleteUpload", "Файл передан не полностью. Проверьте состояние перед повтором.")
+		return minio.UploadInfo{}, apperror.New(400, "IncompleteUpload", messages.UploadsIncompleteUpload)
 	}
 	if code := minio.ToErrorResponse(err).Code; code == "BadDigest" || code == "InvalidDigest" || code == "XAmzContentSHA256Mismatch" {
-		return minio.UploadInfo{}, apperror.New(400, "ChecksumMismatch", "Хранилище отклонило контрольную сумму. Проверьте состояние файла перед повтором.")
+		return minio.UploadInfo{}, apperror.New(400, "ChecksumMismatch", messages.UploadsChecksumMismatchWriteUsecase)
 	}
 	return result, objectwrite.FileWriteError(err)
 }

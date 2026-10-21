@@ -7,6 +7,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/s3utils"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 type CreateBucketRequest struct {
@@ -16,7 +17,7 @@ type CreateBucketRequest struct {
 
 func CreateBucket(ctx context.Context, lock func(context.Context, string) (func(), error), s CreateBucketClient, b CreateBucketRequest) error {
 	if s3utils.CheckValidBucketNameStrict(b.Name) != nil {
-		return apperror.New(400, "InvalidBucketName", "Имя бакета: 3–63 строчных латинских символа, цифры, точки и дефисы; имя не должно быть IP-адресом.")
+		return apperror.New(400, "InvalidBucketName", messages.BucketsInvalidBucketNameCatalogChange)
 	}
 	release, lockErr := lock(ctx, "bucket/"+b.Name)
 	if lockErr != nil {
@@ -29,7 +30,7 @@ func CreateBucket(ctx context.Context, lock func(context.Context, string) (func(
 		return err
 	}
 	if exists {
-		return apperror.New(409, "AlreadyExists", "Бакет с таким именем уже существует.")
+		return apperror.New(409, "AlreadyExists", messages.BucketsAlreadyExists)
 	}
 	if err := s.MakeBucket(ctx, b.Name, minio.MakeBucketOptions{Region: s.RegionName(), ObjectLocking: b.ObjectLock}); err != nil {
 		return err

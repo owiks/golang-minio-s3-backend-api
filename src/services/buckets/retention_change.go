@@ -7,6 +7,7 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 type UpdateBucketVersioningRequest struct {
@@ -25,13 +26,13 @@ func ChangeRetention(ctx context.Context, s ChangeRetentionClient, bucket, kind 
 	if kind == "versioning" {
 		b := versioning
 		if b.Status != minio.Enabled && b.Status != minio.Suspended {
-			return apperror.New(400, "InvalidVersioning", "Версионирование можно включить или приостановить. Возврат в состояние «не включено» не поддерживается.")
+			return apperror.New(400, "InvalidVersioning", messages.BucketsInvalidVersioning)
 		}
 		expected, status = b.Revision, b.Status
 	} else {
 		b := locking
 		if b.Enabled == nil || !*b.Enabled {
-			return apperror.New(400, "InvalidObjectLock", "Object Lock можно включить, но нельзя отключить. Для удаления срока по умолчанию передайте defaultRetention: null и enabled: true.")
+			return apperror.New(400, "InvalidObjectLock", messages.BucketsInvalidObjectLock)
 		}
 		parsed, err := ParseRetention(b.DefaultRetention)
 		if err != nil {
@@ -52,7 +53,7 @@ func ChangeRetention(ctx context.Context, s ChangeRetentionClient, bucket, kind 
 		// Preserve exclusions, MFA and purge settings; only the selected status changes.
 		err = s.SetBucketVersioning(ctx, bucket, minio.BucketVersioningConfiguration{Status: status, MFADelete: v.MFADelete, ExcludedPrefixes: v.ExcludedPrefixes, ExcludeFolders: v.ExcludeFolders, PurgeOnDelete: v.PurgeOnDelete})
 		if status == minio.Suspended && minio.ToErrorResponse(err).Code == "InvalidBucketState" {
-			return apperror.New(409, "VersioningRestricted", "Сервер не разрешает приостановить версионирование этого бакета. При включённом Object Lock оно должно оставаться включённым.")
+			return apperror.New(409, "VersioningRestricted", messages.BucketsVersioningRestricted)
 		}
 	} else {
 		lock := current.(LockingSetting)
@@ -62,7 +63,7 @@ func ChangeRetention(ctx context.Context, s ChangeRetentionClient, bucket, kind 
 				return e
 			}
 			if v.Status != minio.Enabled {
-				return apperror.New(409, "VersioningRequired", "Сначала включите версионирование бакета, затем включите Object Lock.")
+				return apperror.New(409, "VersioningRequired", messages.BucketsVersioningRequired)
 			}
 		}
 		if rule == nil {
@@ -71,7 +72,7 @@ func ChangeRetention(ctx context.Context, s ChangeRetentionClient, bucket, kind 
 			err = s.SetBucketObjectLockConfig(ctx, bucket, &rule.Mode, rule.Duration, &rule.Unit)
 		}
 		if !lock.Enabled && minio.ToErrorResponse(err).Code == "InvalidBucketState" {
-			return apperror.New(409, "ObjectLockUnavailable", "Сервер не разрешил включить Object Lock для существующего бакета. Если он поддерживает эту настройку только при создании, создайте бакет с Object Lock.")
+			return apperror.New(409, "ObjectLockUnavailable", messages.BucketsObjectLockUnavailable)
 		}
 	}
 	if err != nil {

@@ -22,7 +22,7 @@ import (
 	apihttp "minio-web/api/src/http/api"
 	httpcommon "minio-web/api/src/http/api/common"
 	servercontroller "minio-web/api/src/http/api/routes/server/controllers"
-	accesssvc "minio-web/api/src/services/access"
+	"minio-web/api/src/http/presentation"
 	"minio-web/api/src/services/apperror"
 	runtimesvc "minio-web/api/src/services/runtime"
 	"minio-web/api/src/services/securetoken"
@@ -81,16 +81,16 @@ func TestPoolsSnapshotAndMutationGuards(t *testing.T) {
 	s := actionCheckSession(t, func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case strings.HasSuffix(r.URL.Path, "/accountinfo"):
-			httpcommon.WriteJSON(w, 200, map[string]any{"AccountName": "fixture-user", "Policy": permissions})
+			httpcommon.WriteJSON(w, r, 200, map[string]any{"AccountName": "fixture-user", "Policy": permissions})
 		case strings.HasSuffix(r.URL.Path, "/pools/list"):
-			httpcommon.WriteJSON(w, 200, []madmin.PoolStatus{{ID: 0, CmdLine: topology}, {ID: 1, CmdLine: "pool-B"}})
+			httpcommon.WriteJSON(w, r, 200, []madmin.PoolStatus{{ID: 0, CmdLine: topology}, {ID: 1, CmdLine: "pool-B"}})
 		case strings.HasSuffix(r.URL.Path, "/rebalance/status"):
-			httpcommon.WriteJSON(w, 200, madmin.RebalanceStatus{})
+			httpcommon.WriteJSON(w, r, 200, madmin.RebalanceStatus{})
 		case strings.HasSuffix(r.URL.Path, "/info"):
-			httpcommon.WriteJSON(w, 200, madmin.InfoMessage{Servers: []madmin.ServerProperties{{Endpoint: "node", State: "offline"}}})
+			httpcommon.WriteJSON(w, r, 200, madmin.InfoMessage{Servers: []madmin.ServerProperties{{Endpoint: "node", State: "offline"}}})
 		default:
 			writes++
-			httpcommon.WriteJSON(w, 200, map[string]bool{"ok": true})
+			httpcommon.WriteJSON(w, r, 200, map[string]bool{"ok": true})
 		}
 	})
 	v, _, e := serversvc.ReadPools(context.Background(), runtimesvc.NewClients(s))
@@ -127,9 +127,9 @@ func TestPoolsTerminalFlagsWithoutStartTime(t *testing.T) {
 		t.Run(state, func(t *testing.T) {
 			s := actionCheckSession(t, func(w http.ResponseWriter, r *http.Request) {
 				if strings.HasSuffix(r.URL.Path, "/pools/list") {
-					httpcommon.WriteJSON(w, 200, []madmin.PoolStatus{{ID: 0, Decommission: &madmin.PoolDecommissionInfo{Failed: state == "failed", Canceled: state == "canceled", Complete: state == "complete", ObjectsDecommissionFailed: 1}}})
+					httpcommon.WriteJSON(w, r, 200, []madmin.PoolStatus{{ID: 0, Decommission: &madmin.PoolDecommissionInfo{Failed: state == "failed", Canceled: state == "canceled", Complete: state == "complete", ObjectsDecommissionFailed: 1}}})
 				} else {
-					httpcommon.WriteJSON(w, 200, madmin.RebalanceStatus{})
+					httpcommon.WriteJSON(w, r, 200, madmin.RebalanceStatus{})
 				}
 			})
 			view, _, err := serversvc.ReadPools(context.Background(), runtimesvc.NewClients(s))
@@ -146,13 +146,13 @@ func TestServerConfigRejectsInjectionEnvUnknownAndStaleBeforeWrite(t *testing.T)
 	s := actionCheckSession(t, func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case strings.HasSuffix(r.URL.Path, "/accountinfo"):
-			httpcommon.WriteJSON(w, 200, map[string]any{"AccountName": "fixture-user", "Policy": actionCheckPolicy})
+			httpcommon.WriteJSON(w, r, 200, map[string]any{"AccountName": "fixture-user", "Policy": actionCheckPolicy})
 		case strings.HasSuffix(r.URL.Path, "/get-config-kv"):
 			data, _ := madmin.EncryptData("public-fixture-secret", []byte(raw))
 			w.Write(data)
 		default:
 			writes++
-			httpcommon.WriteJSON(w, 200, map[string]bool{"ok": true})
+			httpcommon.WriteJSON(w, r, 200, map[string]bool{"ok": true})
 		}
 	})
 	app := runtimesvc.New(testConfig())
@@ -192,15 +192,15 @@ func TestServerConfigRestoreNativeIntegration(t *testing.T) {
 	srv := httptest.NewServer(apihttp.NewHandler(app))
 	defer srv.Close()
 	c := loginTest(t, srv.URL, "minio-web-test", "minio-web-test-secret")
-	read := func() serversvc.ServerConfigView {
+	read := func() presentation.ServerConfigView {
 		t.Helper()
-		var view serversvc.ServerConfigView
+		var view presentation.ServerConfigView
 		if err := json.Unmarshal(c.call("GET", "admin/server-config?subsystem=scanner", nil, 200), &view); err != nil {
 			t.Fatal(err)
 		}
 		return view
 	}
-	speed := func(view serversvc.ServerConfigView) string {
+	speed := func(view presentation.ServerConfigView) string {
 		t.Helper()
 		for _, field := range view.Fields {
 			if field.Key == "speed" {
@@ -302,7 +302,7 @@ func TestServerPoolDecommissionNativeIntegration(t *testing.T) {
 			t.Fatal(e)
 		}
 	}
-	var view serversvc.PoolsView
+	var view presentation.PoolsView
 	json.Unmarshal(c.call("GET", "admin/server-pools", nil, 200), &view)
 	if view.Rebalancing {
 		c.call("POST", "admin/server-pools", map[string]any{"operation": "stop", "revision": view.Revision, "confirmation": "ОСТАНОВИТЬ"}, 200)
@@ -371,7 +371,7 @@ func TestServerAdminLeastPrivilegeIntegration(t *testing.T) {
 	defer srv.Close()
 	c := loginTest(t, srv.URL, user, secret)
 	var access struct {
-		Access accesssvc.NavigationAccess `json:"access"`
+		Access presentation.NavigationAccess `json:"access"`
 	}
 	json.Unmarshal(c.call("GET", "access", nil, 200), &access)
 	hasMetrics := false
@@ -404,7 +404,7 @@ func TestServerAdminNativeIntegration(t *testing.T) {
 	srv := httptest.NewServer(apihttp.NewHandler(app))
 	defer srv.Close()
 	c := loginTest(t, srv.URL, "minio-web-test", "minio-web-test-secret")
-	var conf serversvc.ServerConfigView
+	var conf presentation.ServerConfigView
 	json.Unmarshal(c.call("GET", "admin/server-config?subsystem=scanner", nil, 200), &conf)
 	if len(conf.Fields) == 0 {
 		t.Fatal("no scanner fields")
@@ -422,7 +422,7 @@ func TestServerAdminNativeIntegration(t *testing.T) {
 	if metric.Input == nil || metric.Output == nil {
 		t.Fatal("no traffic metrics")
 	}
-	var pools serversvc.PoolsView
+	var pools presentation.PoolsView
 	json.Unmarshal(c.call("GET", "admin/server-pools", nil, 200), &pools)
 	if pools.Supported {
 		t.Fatal("single drive must be unsupported")

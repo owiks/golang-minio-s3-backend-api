@@ -2,12 +2,14 @@ package controllers
 
 import (
 	"mime"
+	"net/http"
+
 	httpcommon "minio-web/api/src/http/api/common"
+	"minio-web/api/src/http/presentation"
 	"minio-web/api/src/http/stream"
 	httpvalidation "minio-web/api/src/http/validation"
 	archivessvc "minio-web/api/src/services/archives"
 	runtimesvc "minio-web/api/src/services/runtime"
-	"net/http"
 )
 
 func HandleArchiveStatus(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, ticket string) error {
@@ -15,7 +17,7 @@ func HandleArchiveStatus(app *runtimesvc.State, w http.ResponseWriter, r *http.R
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleForgetArchive(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, ticket string) error {
@@ -23,7 +25,7 @@ func HandleForgetArchive(app *runtimesvc.State, w http.ResponseWriter, r *http.R
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleCancelArchive(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, ticket string) error {
@@ -31,7 +33,7 @@ func HandleCancelArchive(app *runtimesvc.State, w http.ResponseWriter, r *http.R
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleConfigureArchive(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, ticket string) error {
@@ -43,7 +45,7 @@ func HandleConfigureArchive(app *runtimesvc.State, w http.ResponseWriter, r *htt
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleDownloadArchive(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, ticket string) error {
@@ -55,7 +57,10 @@ func HandleDownloadArchive(app *runtimesvc.State, w http.ResponseWriter, r *http
 	defer stream.InterruptOnCancel(download.Context(), w)()
 	w.Header().Set("Content-Type", "application/zip")
 	w.Header().Set("Content-Disposition", mime.FormatMediaType("attachment", map[string]string{"filename": download.Name()}))
-	if err := download.StreamTo(w); err != nil {
+	// This is a generated archive with API messages in its manifest, not a
+	// stored object's download whose Content-Language belongs to the object.
+	presentation.LanguageHeaders(r.Context(), w.Header())
+	if err := download.StreamTo(w, func(manifest archivessvc.Manifest) any { return presentation.Render(r.Context(), manifest) }); err != nil {
 		panic(http.ErrAbortHandler)
 	}
 	return nil
@@ -65,7 +70,7 @@ func HandleInspectZIP(app *runtimesvc.State, w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleExtractZIPEntry(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -77,6 +82,6 @@ func HandleExtractZIPEntry(app *runtimesvc.State, w http.ResponseWriter, r *http
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }

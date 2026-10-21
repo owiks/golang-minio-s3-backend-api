@@ -9,6 +9,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/tags"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/revision"
 )
 
@@ -41,11 +42,11 @@ func ReadBucketSetting(ctx context.Context, s ReadBucketSettingClient, bucket, k
 	case "tags":
 		return ReadTags(ctx, s, bucket)
 	}
-	return nil, apperror.New(405, "MethodNotAllowed", "Эта настройка не поддерживается.")
+	return nil, apperror.New(405, "MethodNotAllowed", messages.HttpMethodNotAllowedBucketUpdate)
 }
 func EnsureSettingRevision(current any, expected string) error {
 	if expected == "" || SettingField(current, nil).Revision != expected {
-		return apperror.New(409, "BucketSettingChanged", "Настройка изменилась после открытия. Ваши правки не записаны. Загрузите актуальное значение перед повторным сохранением.")
+		return apperror.New(409, "BucketSettingChanged", messages.BucketsBucketSettingChangedBucketUpdate)
 	}
 	return nil
 }
@@ -57,21 +58,21 @@ type TagInput struct {
 
 func ValidateBucketTags(items []TagInput) (*tags.Tags, error) {
 	if items == nil || len(items) > 50 {
-		return nil, apperror.New(400, "InvalidTags", "Передайте список не более 50 меток. Для удаления всех меток передайте пустой список.")
+		return nil, apperror.New(400, "InvalidTags", messages.BucketsInvalidTags)
 	}
 	values := map[string]string{}
 	for _, item := range items {
 		if _, found := values[item.Key]; found {
-			return nil, apperror.New(400, "InvalidTags", "Ключи меток не должны повторяться.")
+			return nil, apperror.New(400, "InvalidTags", messages.BucketsInvalidTagsBucketUpdate)
 		}
 		if strings.HasPrefix(strings.ToLower(item.Key), "aws:") {
-			return nil, apperror.New(400, "InvalidTags", "Префикс aws: зарезервирован. Выберите другой ключ метки.")
+			return nil, apperror.New(400, "InvalidTags", messages.BucketsInvalidTagsBucketUpdateValidateBucketTags)
 		}
 		values[item.Key] = item.Value
 	}
 	value, err := tags.NewTags(values, false)
 	if err != nil {
-		return nil, apperror.New(400, "InvalidTags", "Проверьте метки: ключ 1–128 символов, значение до 256. Допустимы латинские буквы, цифры, пробелы и символы + - . _ : / @ =.")
+		return nil, apperror.New(400, "InvalidTags", messages.BucketsInvalidTagsBucketUpdateValidateBucketTagsB75523)
 	}
 	return value, nil
 }

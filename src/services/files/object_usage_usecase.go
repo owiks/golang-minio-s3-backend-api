@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	objectssvc "minio-web/api/src/services/objects"
 	searchsvc "minio-web/api/src/services/search"
 	"minio-web/api/src/services/storage"
@@ -22,7 +23,7 @@ type ObjectUsageOptions struct {
 func ReadObjectUsage(ctx context.Context, s ReadObjectUsageClient, input ObjectUsageOptions) (ObjectUsage, error) {
 	bucket, prefix, token := input.Bucket, input.Prefix, input.Token
 	if bucket == "" || len(bucket) > 63 || len(prefix) > 1024 || len(token) > 16384 {
-		return ObjectUsage{}, apperror.New(400, "InvalidUsageScope", "Откройте корректный бакет и папку.")
+		return ObjectUsage{}, apperror.New(400, "InvalidUsageScope", messages.FilesInvalidUsageScope)
 	}
 	rows := []objectssvc.ObjectUsageRow{}
 	next := ""
@@ -48,25 +49,25 @@ func ReadObjectUsage(ctx context.Context, s ReadObjectUsageClient, input ObjectU
 			var cursor objectssvc.UsageCursor
 			raw, e := base64.RawURLEncoding.DecodeString(token)
 			if e != nil || json.Unmarshal(raw, &cursor) != nil || cursor.Bucket != bucket || cursor.Prefix != prefix || cursor.Marker == "" || !strings.HasPrefix(cursor.Marker, prefix) {
-				return ObjectUsage{}, apperror.New(400, "InvalidUsageCursor", "Курсор относится к другому расчёту.")
+				return ObjectUsage{}, apperror.New(400, "InvalidUsageCursor", messages.FilesInvalidUsageCursor)
 			}
 			keyMarker, versionMarker = cursor.Marker, cursor.Version
 		}
 		page, err := s.ReadVersionPage(ctx, bucket, prefix, keyMarker, versionMarker, 500)
 		if errors.Is(err, storage.ErrInvalidVersionResponse) {
-			return ObjectUsage{}, apperror.New(502, "UsageVersionsUnavailable", "Хранилище не вернуло список версий.")
+			return ObjectUsage{}, apperror.New(502, "UsageVersionsUnavailable", messages.FilesUsageVersionsUnavailable)
 		}
 		if err != nil {
 			return ObjectUsage{}, err
 		}
 		if len(page.Rows) > 500 {
-			return ObjectUsage{}, apperror.New(502, "InvalidUsagePage", "Хранилище вернуло слишком много записей.")
+			return ObjectUsage{}, apperror.New(502, "InvalidUsagePage", messages.FilesInvalidUsagePage)
 		}
 		scanned = len(page.Rows)
 		for _, obj := range page.Rows {
 			key, e := url.QueryUnescape(obj.Key)
 			if e != nil || !strings.HasPrefix(key, prefix) {
-				return ObjectUsage{}, apperror.New(502, "InvalidUsagePage", "Получены записи вне выбранной папки.")
+				return ObjectUsage{}, apperror.New(502, "InvalidUsagePage", messages.FilesInvalidUsagePageObjectUsageUsecase)
 			}
 			kind := "version"
 			if obj.Deleted {
@@ -82,7 +83,7 @@ func ReadObjectUsage(ctx context.Context, s ReadObjectUsageClient, input ObjectU
 		if page.Truncated {
 			marker, e := url.QueryUnescape(page.KeyMarker)
 			if e != nil || marker == "" {
-				return ObjectUsage{}, apperror.New(502, "InvalidUsagePage", "Хранилище не вернуло продолжение списка.")
+				return ObjectUsage{}, apperror.New(502, "InvalidUsagePage", messages.FilesInvalidUsagePageObjectUsageUsecaseReadObjectUsage)
 			}
 			raw, _ := json.Marshal(objectssvc.UsageCursor{Bucket: bucket, Prefix: prefix, Marker: marker, Version: page.VersionMarker})
 			next = base64.RawURLEncoding.EncodeToString(raw)

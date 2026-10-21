@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/minio/madmin-go/v3"
+
+	"minio-web/api/src/services/messages"
 )
 
 type NetworkLink struct {
@@ -78,7 +80,7 @@ type ServerSnapshot struct {
 	Nodes          []NodeInfo    `json:"nodes"`
 	Drives         []DriveInfo   `json:"drives"`
 	Usage          *ScannerUsage `json:"usage"`
-	UsageError     string        `json:"usageError,omitempty"`
+	UsageError     messages.Ref  `json:"usageError,omitempty"`
 }
 
 func ServerRows(info madmin.InfoMessage) ServerSnapshot {

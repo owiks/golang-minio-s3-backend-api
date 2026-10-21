@@ -8,5 +8,5 @@ import (
 )
 
 func Health(w http.ResponseWriter, r *http.Request) {
-	common.WriteJSON(w, http.StatusOK, healthresponse.Response{OK: true})
+	common.WriteJSON(w, r, http.StatusOK, healthresponse.Response{OK: true})
 }

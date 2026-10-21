@@ -6,6 +6,7 @@ import (
 	"net"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 func ActionAccountIssue(err error, status int) *ActionCheckIssue {
@@ -18,11 +19,11 @@ func ActionAccountIssue(err error, status int) *ActionCheckIssue {
 	case errors.As(err, &syntax) || errors.As(err, &mismatch):
 		issue.Code = "AccountInfoInvalidResponse"
 		issue.Cause = "invalid-json"
-		issue.Message = "Ответ MinIO о владельце подключения не удалось прочитать. Проверьте совместимость сервера и проксирование Admin API. Кнопки изменения скрыты."
+		issue.Message = messages.IamCouldNotReadMinIOSConnectionOwner
 	case apperror.Public(err).Code == "AccountInfoTooLarge":
 		issue.Code = "AccountInfoTooLarge"
 		issue.Cause = "response-too-large"
-		issue.Message = "Ответ MinIO о правах слишком большой. Кнопки изменения скрыты."
+		issue.Message = messages.IamTheMinIOPermissionsResponseIsTooLarge
 	case issue.Code == "ActionCheckTimeout":
 		issue.Cause = "timeout"
 	case issue.Code == "AccountInfoDenied":
@@ -32,11 +33,11 @@ func ActionAccountIssue(err error, status int) *ActionCheckIssue {
 	case status == 404 || status == 405:
 		issue.Code = "AccountInfoRouteUnavailable"
 		issue.Cause = "route-unavailable"
-		issue.Message = "Адрес MinIO или прокси не обслуживает Admin API проверки прав. Кнопки изменения скрыты."
+		issue.Message = messages.IamTheMinIOAddressOrProxyDoesNot
 	case status >= 500:
 		issue.Code = "AccountInfoServerError"
 		issue.Cause = "server-error"
-		issue.Message = "MinIO или прокси вернул ошибку при проверке прав. Кнопки изменения скрыты."
+		issue.Message = messages.IamMinIOOrItsProxyReturnedAnError
 	case errors.As(err, &network):
 		issue.Cause = "network"
 	default:

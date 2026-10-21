@@ -2,11 +2,12 @@ package integration
 
 import (
 	"context"
-	"github.com/minio/minio-go/v7"
 	"net/http"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/minio/minio-go/v7"
 )
 
 func TestMinioConditionalDeleteCompatibility(t *testing.T) {

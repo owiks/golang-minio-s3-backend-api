@@ -1,18 +1,20 @@
 package controllers
 
 import (
+	"net/http"
+
 	httpcommon "minio-web/api/src/http/api/common"
 	httpvalidation "minio-web/api/src/http/validation"
 	"minio-web/api/src/services/apperror"
 	folderssvc "minio-web/api/src/services/folders"
+	"minio-web/api/src/services/messages"
 	runtimesvc "minio-web/api/src/services/runtime"
-	"net/http"
 )
 
 func validateFolderDelete(r *http.Request) error {
 	q := r.URL.Query()
 	if q.Has("version") || q.Has("versionId") {
-		return apperror.New(400, "InvalidFolderDelete", "Выберите конкретную папку. Удаление всего бакета или отдельных версий этим запросом не выполняется.")
+		return apperror.New(400, "InvalidFolderDelete", messages.HttpInvalidFolderDelete)
 	}
 	return nil
 }
@@ -31,7 +33,7 @@ func HandleInspectFolderDeletion(app *runtimesvc.State, w http.ResponseWriter, r
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleDeleteFolderObject(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -47,7 +49,7 @@ func HandleDeleteFolderObject(app *runtimesvc.State, w http.ResponseWriter, r *h
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleListFolderShares(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -55,7 +57,7 @@ func HandleListFolderShares(app *runtimesvc.State, w http.ResponseWriter, r *htt
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleCreateFolderShare(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -67,7 +69,7 @@ func HandleCreateFolderShare(app *runtimesvc.State, w http.ResponseWriter, r *ht
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 201, value)
+	httpcommon.WriteJSON(w, r, 201, value)
 	return nil
 }
 func HandleRevokeFolderShare(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -75,6 +77,6 @@ func HandleRevokeFolderShare(app *runtimesvc.State, w http.ResponseWriter, r *ht
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }

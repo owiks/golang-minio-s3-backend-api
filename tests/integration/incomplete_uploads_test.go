@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"minio-web/api/tests/testsession"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -18,6 +17,7 @@ import (
 	"minio-web/api/src/services/apperror"
 	runtimesvc "minio-web/api/src/services/runtime"
 	uploadssvc "minio-web/api/src/services/uploads"
+	"minio-web/api/tests/testsession"
 )
 
 func TestIncompleteAbortVerification(t *testing.T) {

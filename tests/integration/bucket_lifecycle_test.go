@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"encoding/xml"
-	"minio-web/api/tests/testsession"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -21,10 +20,13 @@ import (
 
 	apihttp "minio-web/api/src/http/api"
 	bucketscontroller "minio-web/api/src/http/api/routes/buckets/controllers"
+	"minio-web/api/src/http/presentation"
 	"minio-web/api/src/services/apperror"
 	bucketssvc "minio-web/api/src/services/buckets"
+	"minio-web/api/src/services/messages"
 	runtimesvc "minio-web/api/src/services/runtime"
 	"minio-web/api/src/services/securetoken"
+	"minio-web/api/tests/testsession"
 )
 
 func TestLifecycleRoundTripGuard(t *testing.T) {
@@ -102,11 +104,11 @@ func TestLifecycleIntegration(t *testing.T) {
 	}()
 	root.call("POST", "admin/buckets", map[string]any{"name": bucket}, 200)
 	base := "admin/buckets/" + bucket + "/lifecycle"
-	get := func(c *apiClient) bucketssvc.LifecycleSnapshot {
+	get := func(c *apiClient) presentation.LifecycleSnapshot {
 		t.Helper()
 		var field struct {
-			Value bucketssvc.LifecycleSnapshot `json:"value"`
-			Error string                       `json:"error"`
+			Value presentation.LifecycleSnapshot `json:"value"`
+			Error string                         `json:"error"`
 		}
 		raw := c.call("GET", base, nil, 200)
 		if json.Unmarshal(raw, &field) != nil || field.Error != "" || !field.Value.Writable || field.Value.Revision == "" {
@@ -204,7 +206,7 @@ func TestLifecycleUnknownConfigCannotBeWritten(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 	current, err := bucketssvc.ReadLifecycle(ctx, runtimesvc.NewClients(session), "fixture-bucket")
-	if err != nil || current.View.Writable || current.View.Warning == "" {
+	if err != nil || current.View.Writable || messages.Empty(current.View.Warning) {
 		t.Fatal(current, err)
 	}
 	raw, _ := json.Marshal(map[string]any{"revision": current.View.Revision, "index": 0, "enabled": false})

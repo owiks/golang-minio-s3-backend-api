@@ -10,6 +10,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/s3utils"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/storage"
 )
 
@@ -21,16 +22,16 @@ type ProbeClient interface {
 func Validate(request Request) error {
 	s := request.Scope
 	if request.Feature != "" && !Known(request.Feature) {
-		return apperror.New(400, "InvalidCapability", "Неизвестная возможность хранилища.")
+		return apperror.New(400, "InvalidCapability", messages.CapabilitiesInvalidCapability)
 	}
 	if s.Bucket != "" && s3utils.CheckValidBucketNameStrict(s.Bucket) != nil {
-		return apperror.New(400, "InvalidBucket", "Укажите корректное имя бакета.")
+		return apperror.New(400, "InvalidBucket", messages.BucketsInvalidBucketName)
 	}
 	if len(s.Key) > 1024 || len(s.VersionID) > 1024 || !utf8.ValidString(s.Key) || !utf8.ValidString(s.VersionID) || strings.ContainsRune(s.Key, 0) || strings.ContainsRune(s.VersionID, 0) {
-		return apperror.New(400, "InvalidCapabilityScope", "Некорректная область проверки возможности.")
+		return apperror.New(400, "InvalidCapabilityScope", messages.CapabilitiesInvalidCapabilityScope)
 	}
 	if s.Bucket == "" && (s.Key != "" || s.VersionID != "") || s.Key == "" && s.VersionID != "" {
-		return apperror.New(400, "InvalidCapabilityScope", "Для файла нужен бакет, для версии — файл.")
+		return apperror.New(400, "InvalidCapabilityScope", messages.CapabilitiesInvalidCapabilityScopeReportUsecase)
 	}
 	return nil
 }

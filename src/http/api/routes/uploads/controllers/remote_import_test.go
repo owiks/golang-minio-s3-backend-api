@@ -21,7 +21,7 @@ func TestImportPreflightErrorsRemainHTTPJSON(t *testing.T) {
 		if err == nil || apperror.Public(err).Code != tc.code || w.Body.Len() != 0 || w.Header().Get("Content-Type") != "" {
 			t.Fatal("preflight started a stream", err, w.Body.String(), w.Header())
 		}
-		httperrors.Respond(w, err)
+		httperrors.Respond(w, r, err)
 		if w.Code != 400 || w.Header().Get("Content-Type") != "application/json; charset=utf-8" || w.Header().Get("X-Accel-Buffering") != "" || !strings.Contains(w.Body.String(), `"code":"`+tc.code+`"`) {
 			t.Fatal("preflight error became NDJSON", w.Code, w.Body.String())
 		}

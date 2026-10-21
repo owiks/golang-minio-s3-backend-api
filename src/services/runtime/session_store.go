@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 type SessionStore struct {
@@ -27,7 +28,7 @@ func (store *SessionStore) Put(s *Session) error {
 		return closingError()
 	}
 	if len(store.items) >= 256 {
-		return apperror.New(429, "SessionLimit", "Достигнут лимит активных сессий. Закройте старые подключения или попробуйте позже.")
+		return apperror.New(429, "SessionLimit", messages.RuntimeSessionLimit)
 	}
 	store.items[s.id] = s
 	return nil

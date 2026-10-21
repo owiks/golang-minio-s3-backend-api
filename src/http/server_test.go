@@ -7,6 +7,8 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -64,5 +66,23 @@ func TestStartupAndServeFailuresAreSafe(t *testing.T) {
 	listener.Close()
 	if err := serve(context.Background(), httpapi.New(config.Default()), listener, logger); !errors.Is(err, ErrServe) {
 		t.Fatalf("unexpected serve result: %v", err)
+	}
+}
+
+func TestStoppingResponseUsesLocaleAndPreservesPlainTextContract(t *testing.T) {
+	for _, tc := range []struct{ mode, accept, lang, body string }{
+		{"auto", "", "en", "API is stopping\n"},
+		{"auto", "ru-RU, en;q=0.8", "ru", "API завершает работу\n"},
+		{"auto", "und-RU", "en", "API is stopping\n"},
+		{"en", "ru", "en", "API is stopping\n"},
+		{"ru", "en", "ru", "API завершает работу\n"},
+	} {
+		r := httptest.NewRequest("GET", "/health", nil)
+		r.Header.Set("Accept-Language", tc.accept)
+		w := httptest.NewRecorder()
+		writeStoppingResponse(w, r, tc.mode)
+		if w.Code != 503 || w.Body.String() != tc.body || w.Header().Get("Content-Type") != "text/plain; charset=utf-8" || w.Header().Get("Content-Language") != tc.lang || strings.Contains(w.Header().Get("Vary"), "Accept-Language") != (tc.mode == "auto") {
+			t.Fatal(tc, w.Code, w.Body, w.Header())
+		}
 	}
 }

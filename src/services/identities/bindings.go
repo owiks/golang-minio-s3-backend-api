@@ -6,6 +6,7 @@ import (
 	"github.com/minio/madmin-go/v3"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/validation"
 )
 
@@ -33,11 +34,11 @@ func GetBindings(ctx context.Context, admin BindingAdmin, user, group, policy st
 		query.Policy = []string{policy}
 	}
 	if len(query.Users)+len(query.Groups)+len(query.Policy) != 1 {
-		return Bindings{}, apperror.New(400, "InvalidTarget", "Выберите одного пользователя, группу или политику.")
+		return Bindings{}, apperror.New(400, "InvalidTarget", messages.IdentitiesInvalidTarget)
 	}
 	for _, target := range []string{user, group, policy} {
 		if target != "" && !validation.ValidName(target) {
-			return Bindings{}, apperror.New(400, "InvalidTarget", "Некорректное имя получателя или политики.")
+			return Bindings{}, apperror.New(400, "InvalidTarget", messages.IdentitiesInvalidTargetBindings)
 		}
 	}
 	value, err := admin.GetPolicyEntities(ctx, query)
@@ -45,7 +46,7 @@ func GetBindings(ctx context.Context, admin BindingAdmin, user, group, policy st
 }
 func SaveBinding(ctx context.Context, admin BindingAdmin, b BindingRequest) error {
 	if !validation.ValidName(b.Policy) || (b.User == "") == (b.Group == "") || b.User != "" && !validation.ValidName(b.User) || b.Group != "" && !validation.ValidName(b.Group) {
-		return apperror.New(400, "InvalidBinding", "Выберите политику и одного пользователя или группу.")
+		return apperror.New(400, "InvalidBinding", messages.IdentitiesInvalidBinding)
 	}
 	req := madmin.PolicyAssociationReq{User: b.User, Group: b.Group, Policies: []string{b.Policy}}
 	if b.Remove {

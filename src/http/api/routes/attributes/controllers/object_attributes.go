@@ -6,6 +6,7 @@ import (
 
 	httpcommon "minio-web/api/src/http/api/common"
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/objects"
 	"minio-web/api/src/services/runtime"
 )
@@ -20,11 +21,11 @@ func HandleGetObjectAttributes(app *runtime.State, w http.ResponseWriter, r *htt
 		if q.Has(field.name) {
 			value, err := strconv.Atoi(q.Get(field.name))
 			if err != nil {
-				return apperror.New(400, "InvalidObjectAttributes", "Некорректные параметры страницы частей.")
+				return apperror.New(400, "InvalidObjectAttributes", messages.HttpInvalidObjectAttributes)
 			}
 			*field.value = value
 			if field.name == "maxParts" && value == 0 {
-				return apperror.New(400, "InvalidObjectAttributes", "Размер страницы должен быть больше нуля.")
+				return apperror.New(400, "InvalidObjectAttributes", messages.HttpInvalidObjectAttributesObjectAttributes)
 			}
 		}
 	}
@@ -32,6 +33,6 @@ func HandleGetObjectAttributes(app *runtime.State, w http.ResponseWriter, r *htt
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, http.StatusOK, value)
+	httpcommon.WriteJSON(w, r, http.StatusOK, value)
 	return nil
 }

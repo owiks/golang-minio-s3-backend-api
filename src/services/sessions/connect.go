@@ -9,6 +9,7 @@ import (
 	accesssvc "minio-web/api/src/services/access"
 	"minio-web/api/src/services/apperror"
 	endpoints "minio-web/api/src/services/endpoint"
+	"minio-web/api/src/services/messages"
 	objectssvc "minio-web/api/src/services/objects"
 	runtimesvc "minio-web/api/src/services/runtime"
 	"minio-web/api/src/services/telemetry"
@@ -30,7 +31,7 @@ func Connect(ctx context.Context, cfg settings.Config, registry ConnectionRegist
 	c.Region = strings.TrimSpace(c.Region)
 	c.SessionToken = strings.TrimSpace(c.SessionToken)
 	if c.AccessKey == "" || c.SecretKey == "" || len(c.AccessKey) > 256 || len(c.SecretKey) > 4096 || len(c.SessionToken) > 16384 || len(c.Region) > 128 {
-		return nil, LoginResponse{}, apperror.New(400, "InvalidCredentials", "Введите корректные Access Key, Secret Key и регион.")
+		return nil, LoginResponse{}, apperror.New(400, "InvalidCredentials", messages.SessionsInvalidCredentials)
 	}
 	if c.Region == "" {
 		c.Region = "us-east-1"

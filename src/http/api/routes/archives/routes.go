@@ -7,7 +7,8 @@ import (
 	"minio-web/api/src/http/api/routes/archives/controllers"
 	"minio-web/api/src/services/apperror"
 	archivesdto "minio-web/api/src/services/archives"
-	"minio-web/api/src/services/archives/plan"
+	archiveplan "minio-web/api/src/services/archives/plan"
+	"minio-web/api/src/services/messages"
 	resultdto "minio-web/api/src/services/result"
 	"minio-web/api/src/services/runtime"
 )
@@ -67,9 +68,9 @@ func GetRoutes() []routes.APIRoute {
 				{Suffix: "{ticket}", Method: "GET", Long: true, Summary: "Скачивание и отмена ZIP",
 					Input:      routes.Inputs(),
 					Controller: "HandleDownloadArchive",
-					Responses:  []routes.Response{{Status: 200, MediaType: "application/zip", Binary: true}}, Handler: func(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session, rest string) error {
+					Responses:  []routes.Response{{Status: 200, MediaType: "application/zip", Binary: true, Localized: true}}, Handler: func(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session, rest string) error {
 						if rest == "" {
-							return apperror.New(404, "NotFound", "Маршрут API не найден.")
+							return apperror.New(404, "NotFound", messages.RouteNotFound)
 						}
 						return controllers.HandleDownloadArchive(app, w, r, s, rest)
 					}},
@@ -79,7 +80,7 @@ func GetRoutes() []routes.APIRoute {
 					Controller: "HandleConfigureArchive",
 					Response:   archiveplan.ArchiveSnapshot{}, Handler: func(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session, rest string) error {
 						if rest == "" {
-							return apperror.New(404, "NotFound", "Маршрут API не найден.")
+							return apperror.New(404, "NotFound", messages.RouteNotFound)
 						}
 						return controllers.HandleConfigureArchive(app, w, r, s, rest)
 					}},
@@ -88,7 +89,7 @@ func GetRoutes() []routes.APIRoute {
 					Controller: "HandleCancelArchive",
 					Response:   archiveplan.ArchiveSnapshot{}, Handler: func(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session, rest string) error {
 						if rest == "" {
-							return apperror.New(404, "NotFound", "Маршрут API не найден.")
+							return apperror.New(404, "NotFound", messages.RouteNotFound)
 						}
 						return controllers.HandleCancelArchive(app, w, r, s, rest)
 					}},
@@ -103,7 +104,7 @@ func GetRoutes() []routes.APIRoute {
 					Controller: "HandleArchiveStatus",
 					Response:   archiveplan.ArchiveSnapshot{}, Handler: func(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session, rest string) error {
 						if rest == "" {
-							return apperror.New(404, "NotFound", "Маршрут API не найден.")
+							return apperror.New(404, "NotFound", messages.RouteNotFound)
 						}
 						return controllers.HandleArchiveStatus(app, w, r, s, rest)
 					}}, {Suffix: "{ticket}", Method: "DELETE", Summary: "Удаление результата ZIP",
@@ -111,7 +112,7 @@ func GetRoutes() []routes.APIRoute {
 					Controller: "HandleForgetArchive",
 					Response:   resultdto.Success{}, Handler: func(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session, rest string) error {
 						if rest == "" {
-							return apperror.New(404, "NotFound", "Маршрут API не найден.")
+							return apperror.New(404, "NotFound", messages.RouteNotFound)
 						}
 						return controllers.HandleForgetArchive(app, w, r, s, rest)
 					}},

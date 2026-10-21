@@ -11,7 +11,8 @@ import (
 
 	"minio-web/api/src/services/apperror"
 	"minio-web/api/src/services/iam"
-	"minio-web/api/src/services/objects/write"
+	"minio-web/api/src/services/messages"
+	objectwrite "minio-web/api/src/services/objects/write"
 	"minio-web/api/src/services/securetoken"
 	"minio-web/api/src/services/uploads/integrity"
 	"minio-web/api/src/services/validation"
@@ -19,33 +20,35 @@ import (
 
 var metadataName = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{0,63}$`)
 
-func invalid(code, message string) error { return apperror.New(http.StatusBadRequest, code, message) }
+func invalid(code string, message messages.Ref) error {
+	return apperror.New(http.StatusBadRequest, code, message)
+}
 func notFound() error {
-	return apperror.New(404, "MultipartNotFound", "Загрузка не найдена в текущей сессии.")
+	return apperror.New(404, "MultipartNotFound", messages.UploadsMultipartNotFound)
 }
 func transitionError() error {
-	return apperror.New(409, "MultipartStateConflict", "Действие недоступно в текущем состоянии загрузки. Получите её состояние.")
+	return apperror.New(409, "MultipartStateConflict", messages.UploadsMultipartStateConflict)
 }
 
 func canWrite(c Client, bucket, key string) error {
 	if policy := c.ActionPolicySnapshot(); policy != nil && !policy.Allows(c.ActorName(), iam.Query{Action: "s3:PutObject", Bucket: bucket, Key: key}) {
-		return apperror.New(403, "AccessDenied", "Нет прав на запись в это назначение.")
+		return apperror.New(403, "AccessDenied", messages.UploadsAccessDenied)
 	}
 	return nil
 }
 
 func Create(ctx context.Context, store Store, c Client, input CreateRequest) (Snapshot, error) {
 	if !c.ConditionalCompletionConfigured() {
-		return Snapshot{}, apperror.New(409, "ConditionalCompletionUnverified", "Условное завершение multipart не подтверждено для этого подключения. Администратор должен проверить сервер и явно разрешить его в конфигурации API.")
+		return Snapshot{}, apperror.New(409, "ConditionalCompletionUnverified", messages.UploadsConditionalCompletionUnverified)
 	}
 	if input.Bucket == "" || len(input.Bucket) > 63 || !validation.ValidFileKey(input.Key) {
-		return Snapshot{}, invalid("InvalidFileKey", "Некорректный бакет или путь файла.")
+		return Snapshot{}, invalid("InvalidFileKey", messages.UploadsInvalidBucketOrFilePath)
 	}
 	if input.Size < 0 || input.Size > objectwrite.MaxFileSize {
-		return Snapshot{}, invalid("InvalidUploadSize", "Размер файла должен быть от 0 до 5 ГиБ.")
+		return Snapshot{}, invalid("InvalidUploadSize", messages.UploadsTheFileSizeMustBeBetween0)
 	}
 	if len(input.ContentType) > 256 || strings.ContainsAny(input.ContentType, "\r\n") {
-		return Snapshot{}, invalid("InvalidContentType", "Некорректный тип содержимого.")
+		return Snapshot{}, invalid("InvalidContentType", messages.UploadsInvalidContentType)
 	}
 	if err := canWrite(c, input.Bucket, input.Key); err != nil {
 		return Snapshot{}, err
@@ -53,18 +56,18 @@ func Create(ctx context.Context, store Store, c Client, input CreateRequest) (Sn
 	metadata := make(map[string]string, len(input.Metadata)+2)
 	total := 0
 	if len(input.Metadata) > 32 {
-		return Snapshot{}, invalid("InvalidMetadata", "Допускается до 32 метаданных.")
+		return Snapshot{}, invalid("InvalidMetadata", messages.UploadsUpTo32MetadataEntriesAreAllowed)
 	}
 	for k, v := range input.Metadata {
 		name := strings.ToLower(k)
 		if !metadataName.MatchString(name) || strings.HasPrefix(name, "x-amz-") || strings.HasPrefix(name, "x-minio-") || strings.HasPrefix(name, "minio-web-") || strings.ContainsAny(v, "\r\n") || len(v) > 2048 {
-			return Snapshot{}, invalid("InvalidMetadata", "Некорректные метаданные файла.")
+			return Snapshot{}, invalid("InvalidMetadata", messages.UploadsInvalidFileMetadata)
 		}
 		total += len(name) + len(v)
 		metadata[name] = v
 	}
 	if total > 8192 {
-		return Snapshot{}, invalid("InvalidMetadata", "Размер метаданных не должен превышать 8 КиБ.")
+		return Snapshot{}, invalid("InvalidMetadata", messages.UploadsMetadataMustNotExceed8KiB)
 	}
 	count := max(1, int((input.Size+PartSize-1)/PartSize))
 	var checksum *integrity.Spec
@@ -74,7 +77,7 @@ func Create(ctx context.Context, store Store, c Client, input CreateRequest) (Sn
 			return Snapshot{}, err
 		}
 		if spec.Algorithm != "SHA256" || spec.Type != "COMPOSITE" || !strings.HasSuffix(spec.Value, "-"+partNumber(count)) {
-			return Snapshot{}, apperror.New(422, "UnsupportedChecksumMode", "Для управляемой загрузки доступна SHA256 COMPOSITE с количеством частей плана.")
+			return Snapshot{}, apperror.New(422, "UnsupportedChecksumMode", messages.UploadsUnsupportedChecksumModeCreate)
 		}
 		checksum = &spec
 	}
@@ -89,7 +92,7 @@ func Create(ctx context.Context, store Store, c Client, input CreateRequest) (Sn
 	now := time.Now()
 	expires := minTime(now.Add(TTL), c.SessionExpiresAt())
 	if !expires.After(now) {
-		return Snapshot{}, apperror.New(401, "SessionExpired", "Сессия истекла. Подключитесь заново.")
+		return Snapshot{}, apperror.New(401, "SessionExpired", messages.RuntimeSessionExpired)
 	}
 	op := &Operation{id: securetoken.New(), owner: c.SessionID(), bucket: input.Bucket, key: input.Key, size: input.Size, count: count, created: now, expires: expires, destination: current, metadata: metadata, contentType: input.ContentType, checksum: checksum, state: "creating", sealed: map[int]string{}, cleanup: c}
 	// Publish ownership before the first modifying call; even an ambiguous
@@ -126,7 +129,7 @@ func Create(ctx context.Context, store Store, c Client, input CreateRequest) (Sn
 		return op.snapshotLocked(), nil
 	}
 	if uid == "" || len(uid) > 4096 || strings.ContainsAny(uid, "\r\n") {
-		observe(ctx, c, "create", op.bucket, op.key, apperror.New(502, "InvalidCreateResponse", "Некорректный ответ хранилища."))
+		observe(ctx, c, "create", op.bucket, op.key, apperror.New(502, "InvalidCreateResponse", messages.UploadsInvalidCompleteResponse))
 		op.state = "create_uncertain"
 		op.reason = "InvalidCreateResponse"
 		return op.snapshotLocked(), nil
@@ -174,7 +177,7 @@ func acquire(ctx context.Context, store Store, c Client, id string) (*Operation,
 	o.mu.Unlock()
 	if stopped || !o.expires.After(time.Now()) {
 		release()
-		return nil, nil, apperror.New(410, "MultipartExpired", "Срок загрузки истёк. Создайте новую загрузку.")
+		return nil, nil, apperror.New(410, "MultipartExpired", messages.UploadsMultipartExpired)
 	}
 	return o, release, nil
 }

@@ -9,6 +9,7 @@ import (
 
 	"minio-web/api/src/services/apperror"
 	"minio-web/api/src/services/coordination"
+	"minio-web/api/src/services/messages"
 	objectssvc "minio-web/api/src/services/objects"
 )
 
@@ -23,14 +24,14 @@ func ReadGzip(ctx context.Context, admission coordination.TransferAdmission, s I
 		return GzipContent{}, e
 	}
 	if !strings.HasSuffix(strings.ToLower(key), ".gz") {
-		return GzipContent{}, apperror.New(415, "NotGzip", "Выберите файл .gz.")
+		return GzipContent{}, apperror.New(415, "NotGzip", messages.ArchivesNotGzip)
 	}
 	info, e := s.StatObject(ctx, bucket, key, minio.StatObjectOptions{})
 	if e != nil {
 		return GzipContent{}, e
 	}
 	if info.Size > MaxGzipInput {
-		return GzipContent{}, apperror.New(413, "GzipTooLarge", "Для просмотра поддерживаются GZip-файлы до 32 МиБ.")
+		return GzipContent{}, apperror.New(413, "GzipTooLarge", messages.ArchivesGzipTooLarge)
 	}
 	opts := minio.GetObjectOptions{}
 	_ = opts.SetMatchETag(info.ETag)
@@ -44,7 +45,7 @@ func ReadGzip(ctx context.Context, admission coordination.TransferAdmission, s I
 		return GzipContent{}, e
 	}
 	if int64(len(data)) != info.Size {
-		return GzipContent{}, apperror.New(409, "ObjectChanged", "Файл изменился. Повторите загрузку.")
+		return GzipContent{}, apperror.New(409, "ObjectChanged", messages.ArchivesObjectChanged)
 	}
 	text, e := DecodeGzipText(ctx, data)
 	if e != nil {

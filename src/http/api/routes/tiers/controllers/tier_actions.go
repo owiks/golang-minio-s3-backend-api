@@ -1,12 +1,14 @@
 package controllers
 
 import (
+	"net/http"
+
 	httpcommon "minio-web/api/src/http/api/common"
 	httpvalidation "minio-web/api/src/http/validation"
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	runtimesvc "minio-web/api/src/services/runtime"
 	tierssvc "minio-web/api/src/services/tiers"
-	"net/http"
 )
 
 func HandleListTiers(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -14,7 +16,7 @@ func HandleListTiers(app *runtimesvc.State, w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleCreateOrVerifyTier(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -27,17 +29,17 @@ func HandleCreateOrVerifyTier(app *runtimesvc.State, w http.ResponseWriter, r *h
 		if err != nil {
 			return err
 		}
-		httpcommon.WriteJSON(w, 200, value)
+		httpcommon.WriteJSON(w, r, 200, value)
 		return nil
 	}
 	if body.Operation != "" {
-		return apperror.New(400, "InvalidTierOperation", "Неизвестная операция.")
+		return apperror.New(400, "InvalidTierOperation", messages.HttpInvalidTierOperation)
 	}
 	value, err := tierssvc.CreateTier(r.Context(), app.Config().Endpoints.Allowed, runtimesvc.NewClients(s), tierssvc.CreateTierCommand{Name: body.Name, Type: body.Type, Endpoint: body.Endpoint, Bucket: body.Bucket, Prefix: body.Prefix, Region: body.Region, StorageClass: body.StorageClass, AccessKey: body.AccessKey, SecretKey: body.SecretKey})
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleUpdateTier(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -49,7 +51,7 @@ func HandleUpdateTier(app *runtimesvc.State, w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleRemoveTier(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -61,6 +63,6 @@ func HandleRemoveTier(app *runtimesvc.State, w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }

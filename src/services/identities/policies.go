@@ -8,6 +8,7 @@ import (
 	"github.com/minio/madmin-go/v3"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/revision"
 	"minio-web/api/src/services/validation"
 )
@@ -72,7 +73,7 @@ func savePolicy(ctx context.Context, admin PolicyAdmin, name string, b PolicyReq
 		name = b.Name
 	}
 	if !validation.ValidName(name) {
-		return apperror.New(400, "InvalidPolicyName", "Введите корректное имя политики.")
+		return apperror.New(400, "InvalidPolicyName", messages.IdentitiesInvalidPolicyName)
 	}
 	if err := validation.ValidateDocument(b.Document); err != nil {
 		return err
@@ -80,20 +81,20 @@ func savePolicy(ctx context.Context, admin PolicyAdmin, name string, b PolicyReq
 	raw, err := admin.InfoCannedPolicy(ctx, name)
 	if create {
 		if err == nil {
-			return apperror.New(409, "AlreadyExists", "Политика уже существует. Откройте её для редактирования.")
+			return apperror.New(409, "AlreadyExists", messages.IdentitiesAlreadyExistsPolicies)
 		}
 		if !Missing(err, "XMinioAdminNoSuchPolicy") {
 			return err
 		}
 		if !b.AcknowledgeNonAtomicCreate {
-			return apperror.New(400, "PolicyCreateAcknowledgementRequired", "Подтвердите риск одновременного создания: если другой клиент займёт это имя после проверки, MinIO может перезаписать его политику, сохранив назначения.")
+			return apperror.New(400, "PolicyCreateAcknowledgementRequired", messages.IdentitiesPolicyCreateAcknowledgementRequired)
 		}
 	} else {
 		if err != nil {
 			return err
 		}
 		if b.Revision == "" || b.Revision != revision.Of(raw) {
-			return apperror.New(409, "PolicyChanged", "Политика изменилась. Закройте редактор и откройте актуальную версию.")
+			return apperror.New(409, "PolicyChanged", messages.IdentitiesPolicyChanged)
 		}
 	}
 	return admin.AddCannedPolicy(ctx, name, b.Document)
@@ -105,7 +106,7 @@ func DeletePolicy(ctx context.Context, admin PolicyAdmin, name string) error {
 	}
 	for _, mapping := range entities.PolicyMappings {
 		if len(mapping.Users)+len(mapping.Groups) > 0 {
-			return apperror.New(409, "PolicyInUse", "Сначала отвяжите политику от пользователей и групп.")
+			return apperror.New(409, "PolicyInUse", messages.IdentitiesPolicyInUse)
 		}
 	}
 	return admin.RemoveCannedPolicy(ctx, name)

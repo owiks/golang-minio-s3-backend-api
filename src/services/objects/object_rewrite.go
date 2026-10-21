@@ -6,6 +6,7 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/storage"
 )
 
@@ -29,7 +30,7 @@ func MultipartRewrite(ctx context.Context, client MultipartRewriteClient, bucket
 	opts.SetMatchETag(info.ETag)
 	_, handled, err := storage.CopyConditional(ctx, client, storage.CopyRequest{SourceBucket: bucket, SourceKey: key, DestinationBucket: bucket, DestinationKey: key}, info, opts, partSize)
 	if !handled {
-		return apperror.New(501, "CopyUnsupported", "Хранилище не поддерживает серверное копирование частей.")
+		return apperror.New(501, "CopyUnsupported", messages.ObjectsCopyUnsupported)
 	}
 	return err
 }

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 type metricsReader func(context.Context) ([]byte, error)
@@ -23,7 +24,9 @@ func TestMetricsPortParsesPayloadAndSanitizesAdapterError(t *testing.T) {
 	if err != nil || len(value.APIs) != 1 || value.APIs[0].Requests == nil || *value.APIs[0].Requests != 42 {
 		t.Fatal("metrics parsing changed", value, err)
 	}
-	reader = func(context.Context) ([]byte, error) { return nil, apperror.New(502, "MetricsTooLarge", "bounded") }
+	reader = func(context.Context) ([]byte, error) {
+		return nil, apperror.New(502, "MetricsTooLarge", messages.Literal("bounded"))
+	}
 	if _, err = ReadLiveMetrics(ctx, reader); apperror.Public(err).Code != "ServerOperationFailed" {
 		t.Fatal("public error sanitization changed", err)
 	}

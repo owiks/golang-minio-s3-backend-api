@@ -30,7 +30,7 @@ func TestConditionalWritesAreIndependentOfUploadUseCases(t *testing.T) {
 				if importPath == "minio-web/api/src/services/uploads" {
 					t.Error("object operation depends on upload use cases", path)
 				}
-				if filepath.Dir(path) == filepath.Join(root, "objects", "write") && strings.HasPrefix(importPath, "minio-web/api/src/services/") && importPath != "minio-web/api/src/services/apperror" && importPath != "minio-web/api/src/services/objects/state" {
+				if filepath.Dir(path) == filepath.Join(root, "objects", "write") && strings.HasPrefix(importPath, "minio-web/api/src/services/") && importPath != "minio-web/api/src/services/apperror" && importPath != "minio-web/api/src/services/messages" && importPath != "minio-web/api/src/services/objects/state" {
 					t.Error("conditional write mechanism imports a use case", path, importPath)
 				}
 			}

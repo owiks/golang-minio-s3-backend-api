@@ -1,16 +1,17 @@
 package controllers_test
 
 import (
-	"minio-web/api/src/config"
-	"minio-web/api/tests/testsession"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
+	"minio-web/api/src/config"
 	"minio-web/api/src/http/api/routes"
 	"minio-web/api/src/http/api/routes/keys"
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/runtime"
+	"minio-web/api/tests/testsession"
 )
 
 func TestKeyCommandHTTPPreflight(t *testing.T) {
@@ -47,7 +48,7 @@ func TestKeyCommandHTTPPreflight(t *testing.T) {
 			}
 			match := registry.Match(tc.method, path)
 			if !match.MethodAllowed {
-				err = apperror.New(405, "MethodNotAllowed", "Метод не поддерживается.")
+				err = apperror.New(405, "MethodNotAllowed", messages.Literal("Метод не поддерживается."))
 			} else {
 				err = match.Operation.Handler(nil, httptest.NewRecorder(), r, s, match.Rest)
 			}

@@ -7,7 +7,9 @@ import (
 	"time"
 
 	"github.com/minio/minio-go/v7"
+
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 func RecursivePage(ctx context.Context, s RecursivePageClient, bucket, prefix, token string) (minio.ListBucketV2Result, error) {
@@ -47,7 +49,7 @@ func (g *ListingGuard) Check(ctx context.Context, token string, page minio.ListB
 		return err
 	}
 	invalid := func() error {
-		return apperror.New(502, "InvalidObjectListing", "S3 вернул некорректный или неполный список объектов. Повторите проверку.")
+		return apperror.New(502, "InvalidObjectListing", messages.SearchInvalidObjectListing)
 	}
 	g.pages++
 	if g.maxPages < 1 || g.pages > g.maxPages || g.seen[token] {

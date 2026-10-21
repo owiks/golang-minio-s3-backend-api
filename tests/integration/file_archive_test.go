@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"mime"
-	"minio-web/api/tests/testsession"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -22,9 +21,11 @@ import (
 	archivescontroller "minio-web/api/src/http/api/routes/archives/controllers"
 	"minio-web/api/src/services/apperror"
 	archivessvc "minio-web/api/src/services/archives"
-	"minio-web/api/src/services/archives/plan"
-	"minio-web/api/src/services/objects/state"
+	archiveplan "minio-web/api/src/services/archives/plan"
+	"minio-web/api/src/services/messages"
+	objectstate "minio-web/api/src/services/objects/state"
 	runtimesvc "minio-web/api/src/services/runtime"
+	"minio-web/api/tests/testsession"
 )
 
 func TestArchiveNamesAndPaths(t *testing.T) {
@@ -51,7 +52,7 @@ func TestArchiveNamesAndPaths(t *testing.T) {
 func TestArchiveControlAndSnapshotOwnership(t *testing.T) {
 	app := runtimesvc.New(testConfig())
 	session := testsession.New(t, "http://fixture.example")
-	plan := archiveplan.New(archiveplan.Config{SessionID: session.SessionID(), Name: "a.zip", Created: time.Now(), RelativeBase: "root/", Base: "root/", Items: []archiveplan.ArchiveItem{{Key: "root/a", Path: "a", State: "pending", Size: 5, Info: objectstate.DeletionSnapshot{ETag: "x"}}}, Issues: map[string]string{}})
+	plan := archiveplan.New(archiveplan.Config{SessionID: session.SessionID(), Name: "a.zip", Created: time.Now(), RelativeBase: "root/", Base: "root/", Items: []archiveplan.ArchiveItem{{Key: "root/a", Path: "a", State: "pending", Size: 5, Info: objectstate.DeletionSnapshot{ETag: "x"}}}, Issues: map[string]messages.Ref{}})
 	if err := app.StoreSession(session); err != nil {
 		t.Fatal(err)
 	}
@@ -68,7 +69,7 @@ func TestArchiveControlAndSnapshotOwnership(t *testing.T) {
 			path = "objects/archive-status/" + ticket
 		}
 		if err := runHTTPAction(app, w, r, session, path); err != nil {
-			httpcommon.WriteJSON(w, apperror.Public(err).Status, apperror.Public(err))
+			httpcommon.WriteJSON(w, r, apperror.Public(err).Status, apperror.Public(err))
 		}
 		return w
 	}
@@ -219,7 +220,7 @@ func TestArchiveCancelStreamingIntegration(t *testing.T) {
 	}
 	app := runtimesvc.New(testConfig())
 	s := testsession.New(t, client.EndpointURL().String())
-	plan := archiveplan.New(archiveplan.Config{SessionID: s.SessionID(), Bucket: "bucket", Name: "test.zip", Created: time.Now(), Issues: map[string]string{}, Items: []archiveplan.ArchiveItem{{Key: "data.bin", Path: "data.bin", Size: 1048576, State: "pending", Info: objectstate.DeletionSnapshot{ETag: "etag", Size: 1048576, Modified: time.Unix(1700000000, 0).UTC()}}}})
+	plan := archiveplan.New(archiveplan.Config{SessionID: s.SessionID(), Bucket: "bucket", Name: "test.zip", Created: time.Now(), Issues: map[string]messages.Ref{}, Items: []archiveplan.ArchiveItem{{Key: "data.bin", Path: "data.bin", Size: 1048576, State: "pending", Info: objectstate.DeletionSnapshot{ETag: "etag", Size: 1048576, Modified: time.Unix(1700000000, 0).UTC()}}}})
 	if err := app.StoreSession(s); err != nil {
 		t.Fatal(err)
 	}

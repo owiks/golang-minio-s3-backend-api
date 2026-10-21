@@ -8,6 +8,7 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 type SharedFileInfo struct {
@@ -84,7 +85,7 @@ func (s *SharedRead) StreamTo(target io.Writer) (int64, error) {
 	s.mu.Lock()
 	if s.started || s.closed || s.object == nil {
 		s.mu.Unlock()
-		return 0, apperror.New(409, "SharedReadClosed", "Чтение уже запускалось или закрыто. Получите новую ссылку.")
+		return 0, apperror.New(409, "SharedReadClosed", messages.FoldersSharedReadClosed)
 	}
 	s.started = true
 	object := s.object

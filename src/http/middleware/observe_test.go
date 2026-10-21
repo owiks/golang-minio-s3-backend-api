@@ -10,6 +10,7 @@ import (
 
 	"minio-web/api/src/http/httperrors"
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/telemetry"
 )
 
@@ -25,7 +26,7 @@ func TestObserveStreamingAndSafeErrors(t *testing.T) {
 	var metrics telemetry.Metrics
 	Observe(w, r, "GET /api/receive", &metrics, func(w http.ResponseWriter, r *http.Request) {
 		telemetry.Identify(r.Context(), "PRIVATE-ACCESS-KEY", "PRIVATE-ENDPOINT")
-		httperrors.Respond(w, apperror.New(409, "Changed", "Безопасное сообщение"))
+		httperrors.Respond(w, r, apperror.New(409, "Changed", messages.Literal("Безопасное сообщение")))
 	})
 	if w.Code != 409 || len(w.Header().Get("X-Request-ID")) != 32 || w.Header().Get("X-Request-ID") == "FORGED-ID" {
 		t.Fatal("bad observed response", w)

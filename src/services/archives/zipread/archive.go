@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 // Index owns the parsed directory. Neither the shared zip.Reader nor its mutable
@@ -51,11 +52,11 @@ func (i *Index) Borrow(revision string, release func()) *Archive {
 func (a *Archive) Revision() string { return a.revision }
 
 func closedArchive() error {
-	return apperror.New(409, "ZIPClosed", "Чтение архива закрыто. Откройте архив заново.")
+	return apperror.New(409, "ZIPClosed", messages.ArchivesZIPClosed)
 }
 
 func invalidEntry() error {
-	return apperror.New(400, "InvalidZIPEntry", "Запись архива не найдена.")
+	return apperror.New(400, "InvalidZIPEntry", messages.ArchivesInvalidZIPEntry)
 }
 
 func (a *Archive) Entries() ([]Entry, error) {

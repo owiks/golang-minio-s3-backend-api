@@ -8,6 +8,7 @@ import (
 
 func Default() Config {
 	return Config{
+		Language:       "auto",
 		Listen:         ":8081",
 		Endpoints:      endpoint.Policy{Allowed: map[string]bool{}, Overrides: map[string]string{}},
 		SessionTTL:     time.Hour,
@@ -19,6 +20,9 @@ func Default() Config {
 // WithDefaults supports embedded callers constructing a partial Config.
 func (c Config) WithDefaults() Config {
 	d := Default()
+	if c.Language == "" {
+		c.Language = d.Language
+	}
 	if c.TemporaryBytes <= 0 {
 		c.TemporaryBytes = d.TemporaryBytes
 	}

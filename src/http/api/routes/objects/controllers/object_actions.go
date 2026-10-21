@@ -2,17 +2,19 @@ package controllers
 
 import (
 	"context"
+	"net/http"
+	"strconv"
+	"strings"
+
 	httpcommon "minio-web/api/src/http/api/common"
 	"minio-web/api/src/http/stream"
 	httpvalidation "minio-web/api/src/http/validation"
 	"minio-web/api/src/services/apperror"
 	filessvc "minio-web/api/src/services/files"
+	"minio-web/api/src/services/messages"
 	objectssvc "minio-web/api/src/services/objects"
 	"minio-web/api/src/services/result"
 	runtimesvc "minio-web/api/src/services/runtime"
-	"net/http"
-	"strconv"
-	"strings"
 )
 
 func HandleListBuckets(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -20,7 +22,7 @@ func HandleListBuckets(app *runtimesvc.State, w http.ResponseWriter, r *http.Req
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleListObjects(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -29,7 +31,7 @@ func HandleListObjects(app *runtimesvc.State, w http.ResponseWriter, r *http.Req
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleGetObjectInfo(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -38,7 +40,7 @@ func HandleGetObjectInfo(app *runtimesvc.State, w http.ResponseWriter, r *http.R
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleGetObjectPreview(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -59,7 +61,7 @@ func HandleGetObjectLink(app *runtimesvc.State, w http.ResponseWriter, r *http.R
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleGetObjectContent(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -68,7 +70,7 @@ func HandleGetObjectContent(app *runtimesvc.State, w http.ResponseWriter, r *htt
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleUpdateObjectContent(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -81,7 +83,7 @@ func HandleUpdateObjectContent(app *runtimesvc.State, w http.ResponseWriter, r *
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleGetObjectProperties(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -90,7 +92,7 @@ func HandleGetObjectProperties(app *runtimesvc.State, w http.ResponseWriter, r *
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleUpdateObjectProperties(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -103,12 +105,12 @@ func HandleUpdateObjectProperties(app *runtimesvc.State, w http.ResponseWriter, 
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func validateSingleDelete(r *http.Request) error {
 	if r.URL.Query().Has("version") || r.URL.Query().Has("versionId") {
-		return apperror.New(400, "InvalidDelete", "Выберите один файл. Удаление папок и отдельных версий этим запросом не выполняется.")
+		return apperror.New(400, "InvalidDelete", messages.HttpInvalidDelete)
 	}
 	return nil
 }
@@ -121,7 +123,7 @@ func HandleInspectObjectDeletion(app *runtimesvc.State, w http.ResponseWriter, r
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleDeleteObject(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -137,7 +139,7 @@ func HandleDeleteObject(app *runtimesvc.State, w http.ResponseWriter, r *http.Re
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 
@@ -155,7 +157,7 @@ func HandleGetChecksum(app *runtimesvc.State, w http.ResponseWriter, r *http.Req
 		return err
 	}
 	defer run.Close()
-	httpcommon.WriteJSON(w, 200, run.Summary())
+	httpcommon.WriteJSON(w, r, 200, run.Summary())
 	return nil
 }
 func HandleCalculateChecksum(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -183,7 +185,7 @@ func HandleListObjectVersions(app *runtimesvc.State, w http.ResponseWriter, r *h
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleGetVersionLink(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -192,7 +194,7 @@ func HandleGetVersionLink(app *runtimesvc.State, w http.ResponseWriter, r *http.
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleGetVersionProtection(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -201,7 +203,7 @@ func HandleGetVersionProtection(app *runtimesvc.State, w http.ResponseWriter, r 
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleUpdateVersionProtection(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, kind filessvc.ProtectionKind) error {
@@ -214,6 +216,6 @@ func HandleUpdateVersionProtection(app *runtimesvc.State, w http.ResponseWriter,
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }

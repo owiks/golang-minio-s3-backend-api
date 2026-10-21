@@ -13,18 +13,19 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/objects/state"
+	"minio-web/api/src/services/messages"
+	objectstate "minio-web/api/src/services/objects/state"
 	"minio-web/api/src/services/result"
 	"minio-web/api/src/services/telemetry"
 )
 
 func PrepareChecksum(parent context.Context, s PrepareChecksumClient, bucket, key, expected string, calculate bool) (*ChecksumRun, error) {
 	if strings.HasSuffix(key, "/") {
-		return nil, apperror.New(400, "InvalidObject", "Выберите файл.")
+		return nil, apperror.New(400, "InvalidObject", messages.ObjectsInvalidObject)
 	}
 	if expected != "" {
 		if value, e := hex.DecodeString(expected); e != nil || len(value) != 32 {
-			return nil, apperror.New(400, "InvalidExpectedChecksum", "SHA-256 должен содержать 64 шестнадцатеричных символа.")
+			return nil, apperror.New(400, "InvalidExpectedChecksum", messages.ObjectsInvalidExpectedChecksum)
 		}
 	}
 	ctx, cancel := context.WithCancel(parent)
@@ -36,10 +37,10 @@ func PrepareChecksum(parent context.Context, s PrepareChecksumClient, bucket, ke
 		}
 	}()
 	info, err := s.StatObject(ctx, bucket, key, minio.StatObjectOptions{Checksum: true})
-	warning := ""
+	var warning messages.Ref
 	if err != nil {
 		info, err = s.StatObject(ctx, bucket, key, minio.StatObjectOptions{})
-		warning = "Хранилище не вернуло контрольные суммы. Можно рассчитать SHA-256."
+		warning = messages.ObjectsTheStorageDidNotReturnChecksumsYou
 	}
 	if err != nil {
 		return nil, err
@@ -127,7 +128,7 @@ func (c *ChecksumRun) stream(ctx context.Context, emit func(result.StreamEvent[C
 		n, readErr = object.Read(first)
 	}
 	if count != info.Size {
-		fail(apperror.New(409, "IncompleteChecksumRead", "Получен неполный файл. Повторите проверку."))
+		fail(apperror.New(409, "IncompleteChecksumRead", messages.ObjectsIncompleteChecksumRead))
 		return
 	}
 	current, e := c.client.StatObject(c.ctx, c.bucket, c.key, minio.StatObjectOptions{})
@@ -136,7 +137,7 @@ func (c *ChecksumRun) stream(ctx context.Context, emit func(result.StreamEvent[C
 		return
 	}
 	if objectstate.DeletionRevision(objectstate.DeletionSnapshot{ETag: info.ETag, Size: info.Size, Modified: info.LastModified, Version: info.VersionID}) != objectstate.DeletionRevision(objectstate.DeletionSnapshot{ETag: current.ETag, Size: current.Size, Modified: current.LastModified, Version: current.VersionID}) {
-		fail(apperror.New(409, "ObjectChanged", "Файл изменился во время проверки. Запустите её заново."))
+		fail(apperror.New(409, "ObjectChanged", messages.ObjectsObjectChanged))
 		return
 	}
 	sha256Sum := hashes["SHA256"].Sum(nil)

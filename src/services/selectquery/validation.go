@@ -5,11 +5,13 @@ import (
 	"unicode/utf8"
 
 	"github.com/minio/minio-go/v7"
+
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 func invalidRequest() error {
-	return apperror.New(400, "InvalidSelectQuery", "Укажите SQL до 16 КиБ, один формат CSV/JSON, допустимую сериализацию и ограничения выполнения.")
+	return apperror.New(400, "InvalidSelectQuery", messages.SelectqueryInvalidSelectQuery)
 }
 func oneChar(value string) bool {
 	return value == "" || utf8.ValidString(value) && utf8.RuneCountInString(value) == 1 && !strings.ContainsAny(value, "\x00\r\n")

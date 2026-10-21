@@ -5,7 +5,8 @@ import (
 	"time"
 
 	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/uploads/invite"
+	"minio-web/api/src/services/messages"
+	uploadinvite "minio-web/api/src/services/uploads/invite"
 )
 
 type UploadInviteStore struct {
@@ -42,10 +43,10 @@ func (store *UploadInviteStore) Add(g *uploadinvite.UploadInvite) error {
 	}
 	store.reapLocked(time.Now())
 	if len(store.invites) >= 256 {
-		return apperror.New(429, "InviteLimit", "Достигнут лимит активных ссылок. Отзовите ненужные.")
+		return apperror.New(429, "InviteLimit", messages.RuntimeInviteLimit)
 	}
 	if _, exists := store.invites[g.Token()]; exists {
-		return apperror.New(409, "InviteExists", "Ссылка уже существует.")
+		return apperror.New(409, "InviteExists", messages.RuntimeInviteExists)
 	}
 	store.invites[g.Token()] = g
 	return nil
@@ -55,7 +56,7 @@ func (store *UploadInviteStore) Revoke(owner, token string) error {
 	defer store.mu.Unlock()
 	g := store.invites[token]
 	if g == nil || g.Owner() != owner {
-		return apperror.New(404, "InviteNotFound", "Ссылка не найдена.")
+		return apperror.New(404, "InviteNotFound", messages.RuntimeInviteNotFound)
 	}
 	delete(store.invites, token)
 	g.Stop()

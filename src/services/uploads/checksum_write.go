@@ -8,7 +8,8 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/objects/write"
+	"minio-web/api/src/services/messages"
+	objectwrite "minio-web/api/src/services/objects/write"
 	"minio-web/api/src/services/staging"
 	"minio-web/api/src/services/uploads/integrity"
 )
@@ -33,7 +34,7 @@ func WriteFileWithChecksum(ctx context.Context, budget *staging.Budget, client I
 		return UploadReceipt{}, integrity.UnsupportedMode()
 	}
 	if size < 0 || size > objectwrite.MaxFileSize {
-		return UploadReceipt{}, apperror.New(400, "InvalidUploadSize", "Размер файла не должен превышать 5 ГиБ.")
+		return UploadReceipt{}, apperror.New(400, "InvalidUploadSize", messages.UploadsInvalidUploadSize)
 	}
 	current, err := PrepareFile(ctx, client, bucket, key)
 	if err != nil {
@@ -43,7 +44,7 @@ func WriteFileWithChecksum(ctx context.Context, budget *staging.Budget, client I
 		return UploadReceipt{}, err
 	}
 	if budget == nil {
-		return UploadReceipt{}, apperror.New(503, "ChecksumStagingUnavailable", "Временное хранилище для проверки контрольной суммы недоступно.")
+		return UploadReceipt{}, apperror.New(503, "ChecksumStagingUnavailable", messages.UploadsChecksumStagingUnavailable)
 	}
 	file, err := budget.Create(size, "minio-checksum-upload-*")
 	if err != nil {
@@ -126,7 +127,7 @@ func checkEnd(ctx context.Context, source io.Reader) error {
 }
 
 func incompleteBody() error {
-	return apperror.New(400, "IncompleteUpload", "Размер переданного файла не совпадает с ожидаемым. Файл не записан.")
+	return apperror.New(400, "IncompleteUpload", messages.UploadSizeMismatch)
 }
 
 func uploadBodyError(ctx context.Context, err error) error {
@@ -137,5 +138,5 @@ func uploadBodyError(ctx context.Context, err error) error {
 	if errors.As(err, &issue) {
 		return err
 	}
-	return apperror.NewWithCause(400, "IncompleteUpload", "Передача файла прервалась. Файл не записан.", err)
+	return apperror.NewWithCause(400, "IncompleteUpload", messages.UploadInterrupted, err)
 }

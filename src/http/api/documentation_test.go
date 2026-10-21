@@ -109,3 +109,26 @@ func TestIAMDocumentationMatchesEachAction(t *testing.T) {
 		}
 	}
 }
+
+func TestLanguageHeadersIncludeGeneratedArchivesAndPreserveRawBinaryContract(t *testing.T) {
+	document := doc.Build(Catalog())
+	prefix := "/api/sessions/{sessionID}/"
+	for _, tc := range []struct {
+		path, media string
+		localized   bool
+	}{
+		{"objects/archive/{ticket}", "application/zip", true},
+		{"objects/preview", "text/plain", false},
+	} {
+		response := document.Paths[prefix+tc.path]["get"].Responses["200"].(map[string]any)
+		headers := response["headers"].(map[string]any)
+		if (headers["Content-Language"] != nil) != tc.localized || (headers["Vary"] != nil) != tc.localized || headers["X-Request-ID"] == nil {
+			t.Fatal(tc.path, headers)
+		}
+		content := response["content"].(map[string]any)
+		schema := content[tc.media].(map[string]any)["schema"].(openapi.Schema)
+		if schema["type"] != "string" || schema["format"] != "binary" {
+			t.Fatal("binary contract changed", schema)
+		}
+	}
+}

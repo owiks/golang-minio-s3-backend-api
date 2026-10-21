@@ -10,6 +10,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/s3utils"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 type BatchInput struct {
@@ -25,13 +26,13 @@ type BatchInput struct {
 
 func BatchDocument(b BatchInput) (string, error) {
 	invalid := func() (string, error) {
-		return "", apperror.New(400, "InvalidBatch", "Проверьте бакет, префикс, тип и параметры задания.")
+		return "", apperror.New(400, "InvalidBatch", messages.BatchInvalidBatch)
 	}
 	if s3utils.CheckValidBucketNameStrict(b.Bucket) != nil || len(b.Prefix) > 1024 || strings.ContainsFunc(b.Prefix, unicode.IsControl) || strings.ContainsAny(b.Prefix, "*?[") {
 		return invalid()
 	}
 	if b.Confirmation != b.Bucket {
-		return "", apperror.New(400, "ConfirmationRequired", "Для запуска введите точное имя бакета.")
+		return "", apperror.New(400, "ConfirmationRequired", messages.BatchConfirmationRequired)
 	}
 	job := map[string]any{"apiVersion": "v1", "bucket": b.Bucket, "prefix": b.Prefix}
 	switch b.Type {

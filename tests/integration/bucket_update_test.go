@@ -12,6 +12,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
 	apihttp "minio-web/api/src/http/api"
+	"minio-web/api/src/http/presentation"
 	bucketssvc "minio-web/api/src/services/buckets"
 	runtimesvc "minio-web/api/src/services/runtime"
 	"minio-web/api/src/services/securetoken"
@@ -50,16 +51,16 @@ func TestBucketSettingsIntegration(t *testing.T) {
 	defer fixture.RemoveBucket(context.Background(), bucket)
 	root.call("POST", "admin/buckets", map[string]string{"name": bucket}, 200)
 	base := "admin/buckets/" + bucket + "/"
-	fields := func() map[string]bucketssvc.DetailField {
+	fields := func() map[string]presentation.DetailField {
 		t.Helper()
 		var result map[string]json.RawMessage
 		raw := root.call("GET", base+"details", nil, 200)
 		if err := json.Unmarshal(raw, &result); err != nil {
 			t.Fatal(err)
 		}
-		values := map[string]bucketssvc.DetailField{}
+		values := map[string]presentation.DetailField{}
 		for _, kind := range []string{"policy", "quota", "tags"} {
-			var f bucketssvc.DetailField
+			var f presentation.DetailField
 			if err := json.Unmarshal(result[kind], &f); err != nil {
 				t.Fatal(err)
 			}
@@ -70,10 +71,10 @@ func TestBucketSettingsIntegration(t *testing.T) {
 		}
 		return values
 	}
-	put := func(kind string, body map[string]any, want int) bucketssvc.DetailField {
+	put := func(kind string, body map[string]any, want int) presentation.DetailField {
 		t.Helper()
 		raw := root.call("PUT", base+kind, body, want)
-		var result bucketssvc.DetailField
+		var result presentation.DetailField
 		if want == 200 {
 			if err := json.Unmarshal(raw, &result); err != nil {
 				t.Fatal(err)

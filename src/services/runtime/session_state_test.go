@@ -15,6 +15,7 @@ import (
 
 	"minio-web/api/src/config"
 	"minio-web/api/src/services/iam"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/runtime"
 	"minio-web/api/tests/testsession"
 )
@@ -112,7 +113,7 @@ func TestSessionActionSnapshotsAreCoherentAndDetached(t *testing.T) {
 	if issue == nil || issue.Code != "AccountInfoDenied" {
 		t.Fatal(issue)
 	}
-	issue.Code, issue.Message = "changed", "changed"
+	issue.Code, issue.Message = "changed", messages.Literal("changed")
 	failed := s.Actions()
 	copy := failed.Issue()
 	if copy == nil || copy.Code != "AccountInfoDenied" {

@@ -18,6 +18,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/lifecycle"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	validationsvc "minio-web/api/src/services/validation"
 )
 
@@ -43,14 +44,14 @@ type LifecycleRow struct {
 	Index        int            `json:"index"`
 	Status       string         `json:"status"`
 	Rule         LifecycleInput `json:"rule"`
-	Conditions   []string       `json:"conditions"`
-	ExtraActions []string       `json:"extraActions"`
+	Conditions   []messages.Ref `json:"conditions"`
+	ExtraActions []messages.Ref `json:"extraActions"`
 }
 type LifecycleSnapshot struct {
 	Rules    []LifecycleRow `json:"rules"`
 	Revision string         `json:"revision"`
 	Writable bool           `json:"writable"`
-	Warning  string         `json:"warning,omitempty"`
+	Warning  messages.Ref   `json:"warning,omitempty"`
 }
 type LifecycleState struct {
 	Config *lifecycle.Configuration `json:"-"`
@@ -162,43 +163,43 @@ func LifecycleRuleInput(r lifecycle.Rule) LifecycleInput {
 func LifecycleRows(config *lifecycle.Configuration) []LifecycleRow {
 	rows := []LifecycleRow{}
 	for index, r := range config.Rules {
-		conditions, extra := []string{}, []string{}
+		conditions, extra := []messages.Ref{}, []messages.Ref{}
 		f := r.RuleFilter
 		tags := f.And.Tags
 		if !f.Tag.IsEmpty() {
 			tags = append(append([]lifecycle.Tag{}, tags...), f.Tag)
 		}
 		for _, tag := range tags {
-			conditions = append(conditions, "Метка объекта: "+tag.Key+" = "+tag.Value)
+			conditions = append(conditions, messages.BucketsObjectTag.With(messages.String("Key", tag.Key), messages.String("Value", tag.Value)))
 		}
 		lower, upper := f.ObjectSizeGreaterThan, f.ObjectSizeLessThan
 		if !f.And.IsEmpty() {
 			lower, upper = f.And.ObjectSizeGreaterThan, f.And.ObjectSizeLessThan
 		}
 		if lower > 0 {
-			conditions = append(conditions, fmt.Sprintf("Размер больше %d байт", lower))
+			conditions = append(conditions, messages.BucketsSizeGreaterThan.With(messages.Int("Count", int64(lower))))
 		}
 		if upper > 0 {
-			conditions = append(conditions, fmt.Sprintf("Размер меньше %d байт", upper))
+			conditions = append(conditions, messages.BucketsSizeLessThan.With(messages.Int("Count", int64(upper))))
 		}
 
 		if !r.AbortIncompleteMultipartUpload.IsDaysNull() {
-			extra = append(extra, fmt.Sprintf("Очистка незавершённых загрузок через %d дн.", r.AbortIncompleteMultipartUpload.DaysAfterInitiation))
+			extra = append(extra, messages.BucketsAbortIncompleteUploadsAfter.With(messages.Int("Count", int64(r.AbortIncompleteMultipartUpload.DaysAfterInitiation))))
 		}
 		if r.Expiration.DeleteAll.IsEnabled() {
-			extra = append(extra, "Удаление всех версий при истечении срока текущей версии")
+			extra = append(extra, messages.BucketsDeleteAllVersionsWhenTheCurrentVersion)
 		}
 		if !r.AllVersionsExpiration.IsNull() {
-			extra = append(extra, fmt.Sprintf("Удаление всех версий через %d дн.", r.AllVersionsExpiration.Days))
+			extra = append(extra, messages.BucketsDeleteAllVersionsAfter.With(messages.Int("Count", int64(r.AllVersionsExpiration.Days))))
 		}
 		if !r.DelMarkerExpiration.IsNull() {
-			extra = append(extra, fmt.Sprintf("Удаление маркера вместе с версиями через %d дн.", r.DelMarkerExpiration.Days))
+			extra = append(extra, messages.BucketsDeleteTheMarkerAndItsVersionsAfter.With(messages.Int("Count", int64(r.DelMarkerExpiration.Days))))
 		}
 		if r.Compression != nil {
-			extra = append(extra, "Сжатие текущей версии")
+			extra = append(extra, messages.BucketsCompressTheCurrentVersion)
 		}
 		if r.NoncurrentVersionCompression != nil {
-			extra = append(extra, "Сжатие старых версий")
+			extra = append(extra, messages.BucketsCompressOlderVersions)
 		}
 		rows = append(rows, LifecycleRow{Index: index, Status: r.Status, Rule: LifecycleRuleInput(r), Conditions: conditions, ExtraActions: extra})
 	}
@@ -219,7 +220,7 @@ func ReadLifecycle(ctx context.Context, s ReadLifecycleClient, bucket string) (L
 	safe := LifecycleRoundTripSafe(raw, config)
 	view := LifecycleSnapshot{Rules: LifecycleRows(config), Revision: hex.EncodeToString(hash[:]), Writable: safe}
 	if !safe {
-		view.Warning = "В конфигурации есть параметры, которые текущий SDK не может сохранить без потерь. Изменения недоступны; исходные правила сохранены в MinIO."
+		view.Warning = messages.BucketsTheConfigurationContainsParametersThatTheCurrent
 	}
 	return LifecycleState{Config: config, View: view}, nil
 }
@@ -231,18 +232,18 @@ func LifecycleField(state LifecycleState, err error) DetailField {
 }
 
 func ApplyLifecycleInput(old lifecycle.Rule, input LifecycleInput) (lifecycle.Rule, error) {
-	invalid := func(message string) (lifecycle.Rule, error) {
+	invalid := func(message messages.Ref) (lifecycle.Rule, error) {
 		return old, apperror.New(400, "InvalidLifecycleRule", message)
 	}
 	if input.ID == "" || len(input.ID) > 255 || !utf8.ValidString(input.ID) || strings.ContainsFunc(input.ID, unicode.IsControl) {
-		return invalid("Имя правила: от 1 до 255 байт, без управляющих символов.")
+		return invalid(messages.BucketsTheRuleNameMustContain1To)
 	}
 	if len(input.Prefix) > 1024 || !utf8.ValidString(input.Prefix) || strings.ContainsFunc(input.Prefix, unicode.IsControl) {
-		return invalid("Путь: до 1024 байт, без управляющих символов. Пустой путь означает весь бакет.")
+		return invalid(messages.BucketsThePathMustBeAtMost1)
 	}
 	for _, days := range []int{input.ExpirationDays, input.NoncurrentDays, input.KeepVersions} {
 		if days < 0 || days > 2147483647 {
-			return invalid("Сроки и число сохраняемых версий должны быть целыми числами от 0 до 2 147 483 647.")
+			return invalid(messages.BucketsPeriodsAndRetainedVersionCountsMustBe)
 		}
 	}
 
@@ -257,11 +258,11 @@ func ApplyLifecycleInput(old lifecycle.Rule, input LifecycleInput) (lifecycle.Ru
 		count++
 	}
 	if count > 1 {
-		return invalid("Выберите для текущих версий срок в днях, дату или очистку маркеров удаления.")
+		return invalid(messages.BucketsChooseAnAgeInDaysADate)
 	}
 	if t := input.Tiering; t != nil {
 		if t.Days < 0 || t.Days > 2147483647 || t.NoncurrentDays < 0 || t.NoncurrentDays > 2147483647 {
-			return invalid("Укажите корректный возраст переноса в днях.")
+			return invalid(messages.BucketsSpecifyAValidTransitionAgeInDays)
 		}
 		for i, name := range []string{t.Current, t.Noncurrent} {
 			previous := old.Transition.StorageClass
@@ -269,7 +270,7 @@ func ApplyLifecycleInput(old lifecycle.Rule, input LifecycleInput) (lifecycle.Ru
 				previous = old.NoncurrentVersionTransition.StorageClass
 			}
 			if name != "" && name != previous && !validationsvc.TierNamePattern.MatchString(name) {
-				return invalid("Имя уровня: 3–32 заглавных латинских символа, цифры, _ и -.")
+				return invalid(messages.BucketsATierNameMustContain3To)
 			}
 		}
 		old.Transition = lifecycle.Transition{}
@@ -278,22 +279,22 @@ func ApplyLifecycleInput(old lifecycle.Rule, input LifecycleInput) (lifecycle.Ru
 			if t.Date != "" {
 				date, e := time.Parse("2006-01-02", t.Date)
 				if e != nil || t.Days != 0 {
-					return invalid("Укажите дату переноса или возраст в днях.")
+					return invalid(messages.BucketsSpecifyATransitionDateOrAnAge)
 				}
 				old.Transition.Date = lifecycle.ExpirationDate{Time: date}
 			}
 		} else if t.Date != "" || t.Days != 0 {
-			return invalid("Выберите уровень для переноса текущих версий.")
+			return invalid(messages.BucketsSelectATierForCurrentVersions)
 		}
 		retained := old.NoncurrentVersionTransition.NewerNoncurrentVersions
 		old.NoncurrentVersionTransition = lifecycle.NoncurrentVersionTransition{}
 		if t.Noncurrent != "" {
 			if t.NoncurrentDays < 1 {
-				return invalid("Возраст переноса старых версий должен быть больше нуля.")
+				return invalid(messages.BucketsTheTransitionAgeForOlderVersionsMust)
 			}
 			old.NoncurrentVersionTransition = lifecycle.NoncurrentVersionTransition{StorageClass: t.Noncurrent, NoncurrentDays: lifecycle.ExpirationDays(t.NoncurrentDays), NewerNoncurrentVersions: retained}
 		} else if t.NoncurrentDays != 0 {
-			return invalid("Выберите уровень для старых версий.")
+			return invalid(messages.BucketsSelectATierForOlderVersions)
 		}
 	}
 	old.ID = input.ID
@@ -338,14 +339,14 @@ func ApplyLifecycleInput(old lifecycle.Rule, input LifecycleInput) (lifecycle.Ru
 	if input.ExpirationDate != "" {
 		date, err := time.Parse("2006-01-02", input.ExpirationDate)
 		if err != nil {
-			return invalid("Укажите корректную дату удаления в формате ГГГГ-ММ-ДД.")
+			return invalid(messages.BucketsSpecifyAValidExpirationDateInYYYY)
 		}
 		exp.Date = lifecycle.ExpirationDate{Time: date}
 	}
 	old.Expiration = exp
 	old.NoncurrentVersionExpiration = lifecycle.NoncurrentVersionExpiration{NoncurrentDays: lifecycle.ExpirationDays(input.NoncurrentDays), NewerNoncurrentVersions: input.KeepVersions}
 	if old.Expiration.IsNull() && old.NoncurrentVersionExpiration.NoncurrentDays == 0 && old.NoncurrentVersionExpiration.NewerNoncurrentVersions == 0 && old.Transition.IsNull() && old.NoncurrentVersionTransition.IsStorageClassEmpty() && old.AbortIncompleteMultipartUpload.IsDaysNull() && old.AllVersionsExpiration.IsNull() && old.DelMarkerExpiration.IsNull() && old.Compression == nil && old.NoncurrentVersionCompression == nil {
-		return invalid("Добавьте хотя бы одно действие: удаление версий/маркеров или перенос в уровень хранения.")
+		return invalid(messages.BucketsAddAtLeastOneActionDeletingVersions)
 	}
 	return old, nil
 }

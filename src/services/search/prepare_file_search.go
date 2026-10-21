@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 // FileSearchInput contains decoded values, preserving empty optional fields and
@@ -19,7 +20,7 @@ type FileSearchInput struct {
 
 func prepareFileSearch(input FileSearchInput) (FileFilter, error) {
 	if input.Bucket == "" || len(input.Bucket) > 63 || len(input.Prefix) > 1024 || len(input.Token) > 8192 || len(input.Query) > 256 || len(input.Extensions) > 128 {
-		return FileFilter{}, apperror.New(400, "InvalidSearch", "Проверьте параметры поиска.")
+		return FileFilter{}, apperror.New(400, "InvalidSearch", messages.SearchInvalidSearch)
 	}
 	f := FileFilter{Text: strings.ToLower(input.Query), Extensions: NormalizeExtensions(input.Extensions), Max: -1}
 	for _, value := range []struct {
@@ -29,13 +30,13 @@ func prepareFileSearch(input FileSearchInput) (FileFilter, error) {
 		if value.raw != "" {
 			n, err := strconv.ParseInt(value.raw, 10, 64)
 			if err != nil || n < 0 {
-				return FileFilter{}, apperror.New(400, "InvalidSearch", "Размер должен быть целым числом байт от нуля.")
+				return FileFilter{}, apperror.New(400, "InvalidSearch", messages.SearchInvalidSearchPrepareFileSearch)
 			}
 			*value.target = n
 		}
 	}
 	if f.Max >= 0 && f.Max < f.Min {
-		return FileFilter{}, apperror.New(400, "InvalidSearch", "Максимальный размер меньше минимального.")
+		return FileFilter{}, apperror.New(400, "InvalidSearch", messages.SearchInvalidSearchPrepareFileSearchFileSearch)
 	}
 	for _, value := range []struct {
 		raw          string
@@ -45,7 +46,7 @@ func prepareFileSearch(input FileSearchInput) (FileFilter, error) {
 		if value.raw != "" {
 			date, err := time.Parse("2006-01-02", value.raw)
 			if err != nil {
-				return FileFilter{}, apperror.New(400, "InvalidSearch", "Укажите дату в формате ГГГГ-ММ-ДД.")
+				return FileFilter{}, apperror.New(400, "InvalidSearch", messages.SearchInvalidSearchPrepareFileSearchFileSearch8EDB05)
 			}
 			if value.inclusiveEnd {
 				date = date.AddDate(0, 0, 1)
@@ -54,7 +55,7 @@ func prepareFileSearch(input FileSearchInput) (FileFilter, error) {
 		}
 	}
 	if !f.After.IsZero() && !f.Before.IsZero() && !f.After.Before(f.Before) {
-		return FileFilter{}, apperror.New(400, "InvalidSearch", "Дата окончания раньше даты начала.")
+		return FileFilter{}, apperror.New(400, "InvalidSearch", messages.SearchInvalidSearchPrepareFileSearchFileSearch448466)
 	}
 	return f, nil
 }

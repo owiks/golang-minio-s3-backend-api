@@ -7,8 +7,9 @@ import (
 	"minio-web/api/src/http/stream"
 	httpvalidation "minio-web/api/src/http/validation"
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	objectssvc "minio-web/api/src/services/objects"
-	"minio-web/api/src/services/objects/write"
+	objectwrite "minio-web/api/src/services/objects/write"
 	"minio-web/api/src/services/remotesource"
 	"minio-web/api/src/services/result"
 	runtimesvc "minio-web/api/src/services/runtime"
@@ -23,7 +24,7 @@ func HandleRemoteImport(app *runtimesvc.State, w http.ResponseWriter, r *http.Re
 }
 func HandleImportFromURL(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, client uploadssvc.RemoteSource) error {
 	if r.Method != "POST" {
-		return apperror.New(405, "MethodNotAllowed", "Метод не поддерживается.")
+		return apperror.New(405, "MethodNotAllowed", messages.HttpMethodNotAllowed)
 	}
 	bucket, key, err := objectssvc.ObjectParams(r.URL.Query().Get("bucket"), r.URL.Query().Get("key"))
 	if err != nil {

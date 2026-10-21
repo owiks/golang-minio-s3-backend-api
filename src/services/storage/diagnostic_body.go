@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 const maxDiagnosticRecord = 1 << 20
@@ -54,7 +55,7 @@ func (b *diagnosticBody) record() ([]byte, error) {
 	for c := first; ; {
 		value = append(value, c)
 		if len(value) > maxDiagnosticRecord {
-			return nil, apperror.New(502, "DiagnosticRecordTooLarge", "Запись диагностики MinIO превышает 1 МиБ. Сбор остановлен.")
+			return nil, apperror.New(502, "DiagnosticRecordTooLarge", messages.StorageDiagnosticRecordTooLarge)
 		}
 		if quoted {
 			if escaped {
@@ -93,7 +94,7 @@ func (b *diagnosticBody) record() ([]byte, error) {
 		c = next
 	}
 	if !json.Valid(value) {
-		return nil, apperror.New(502, "InvalidDiagnosticRecord", "MinIO вернул некорректную запись диагностики. Сбор остановлен.")
+		return nil, apperror.New(502, "InvalidDiagnosticRecord", messages.StorageInvalidDiagnosticRecord)
 	}
 	return append(value, '\n'), nil
 }

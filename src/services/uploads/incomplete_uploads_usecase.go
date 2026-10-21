@@ -7,6 +7,7 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/telemetry"
 )
 
@@ -18,7 +19,7 @@ type IncompleteUploadOptions struct {
 func InspectIncompleteUpload(ctx context.Context, s InspectIncompleteUploadClient, input IncompleteUploadOptions) (IncompleteUploadState, error) {
 	bucket, key, id := input.Bucket, input.Key, input.UploadID
 	if bucket == "" || len(bucket) > 63 || key == "" || len(key) > 1024 || id == "" || len(id) > 4096 {
-		return IncompleteUploadState{}, apperror.New(400, "InvalidUploadListing", "Выберите загрузку для проверки частей.")
+		return IncompleteUploadState{}, apperror.New(400, "InvalidUploadListing", messages.UploadsInvalidUploadListing)
 	}
 	parts, err := InspectParts(ctx, s, bucket, key, id)
 	if minio.ToErrorResponse(err).Code == "NoSuchUpload" {
@@ -35,7 +36,7 @@ func InspectIncompleteUpload(ctx context.Context, s InspectIncompleteUploadClien
 
 func AbortIncompleteUpload(ctx context.Context, s AbortIncompleteUploadClient, body IncompleteUploadsRequest) (AbortUploadResult, error) {
 	if body.Bucket == "" || len(body.Bucket) > 63 || body.Key == "" || len(body.Key) > 1024 || body.UploadID == "" || len(body.UploadID) > 4096 || body.Confirmation != "ОТМЕНИТЬ" {
-		return AbortUploadResult{}, apperror.New(400, "InvalidAbort", "Выберите загрузку и введите ОТМЕНИТЬ для подтверждения.")
+		return AbortUploadResult{}, apperror.New(400, "InvalidAbort", messages.UploadsInvalidAbort)
 	}
 	current, err := InspectParts(ctx, s, body.Bucket, body.Key, body.UploadID)
 	if minio.ToErrorResponse(err).Code == "NoSuchUpload" {
@@ -45,7 +46,7 @@ func AbortIncompleteUpload(ctx context.Context, s AbortIncompleteUploadClient, b
 		return AbortUploadResult{}, err
 	}
 	if current.Revision != body.Revision || body.Revision == "" {
-		return AbortUploadResult{}, apperror.New(409, "UploadChanged", "Список частей изменился. Возможно, загрузка продолжается. Обновите список перед отменой.")
+		return AbortUploadResult{}, apperror.New(409, "UploadChanged", messages.UploadsUploadChanged)
 	}
 	if err := s.AbortMultipartUpload(ctx, body.Bucket, body.Key, body.UploadID); err != nil {
 		return AbortUploadResult{}, err
@@ -53,13 +54,13 @@ func AbortIncompleteUpload(ctx context.Context, s AbortIncompleteUploadClient, b
 	// Abort can race with an in-flight part. Never report confirmed cancellation
 	// until ListParts says the exact upload no longer exists.
 	_, checkErr := InspectParts(ctx, s, body.Bucket, body.Key, body.UploadID)
-	state, message := "uncertain", "Не удалось подтвердить отмену. Проверьте результат перед повтором."
+	state, message := "uncertain", messages.UploadsCouldNotConfirmTheAbortCheckThe
 	if minio.ToErrorResponse(checkErr).Code == "NoSuchUpload" {
 		state = "cancelled"
-		message = "Отмена подтверждена. Готовый объект не удалялся."
+		message = messages.UploadsTheAbortWasConfirmedTheCompletedObject
 	} else if checkErr == nil {
 		state = "remaining"
-		message = "Загрузка ещё доступна. Проверьте части перед повторной отменой."
+		message = messages.UploadsTheUploadIsStillAvailableCheckIts
 	}
 	if state != "cancelled" {
 		telemetry.Outcome(ctx, "partial", "AbortUnconfirmed")
@@ -70,7 +71,7 @@ func AbortIncompleteUpload(ctx context.Context, s AbortIncompleteUploadClient, b
 func ListIncompleteUploads(ctx context.Context, s ListIncompleteUploadsClient, input IncompleteUploadOptions) (IncompleteUploadsPage, error) {
 	bucket, prefix := input.Bucket, input.Prefix
 	if bucket == "" || len(bucket) > 63 || len(prefix) > 1024 || len(input.KeyMarker) > 2048 || len(input.UploadIDMarker) > 8192 {
-		return IncompleteUploadsPage{}, apperror.New(400, "InvalidUploadListing", "Выберите бакет и проверьте начало пути.")
+		return IncompleteUploadsPage{}, apperror.New(400, "InvalidUploadListing", messages.UploadsInvalidUploadListingIncompleteUploadsUsecase)
 	}
 	// Some MinIO releases omit matching multipart uploads when a prefix is
 	// sent upstream. Summary mode filters a bounded scan locally and returns
@@ -102,7 +103,7 @@ func ListIncompleteUploads(ctx context.Context, s ListIncompleteUploadsClient, i
 				return IncompleteUploadsPage{}, err
 			}
 			if page.IsTruncated && page.NextKeyMarker == previousKey && page.NextUploadIDMarker == previousID {
-				return IncompleteUploadsPage{}, apperror.New(502, "InvalidUploadCursor", "MinIO не обновил позицию списка. Повторите запрос.")
+				return IncompleteUploadsPage{}, apperror.New(502, "InvalidUploadCursor", messages.UploadsInvalidUploadCursor)
 			}
 		}
 	}

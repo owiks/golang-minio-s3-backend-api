@@ -9,6 +9,7 @@ import (
 
 	"minio-web/api/src/services/apperror"
 	"minio-web/api/src/services/coordination"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/securetoken"
 )
 
@@ -86,7 +87,7 @@ func (g *FolderShare) BeginRead(parent context.Context, admission coordination.T
 	return ctx, func() { once.Do(func() { cancel(); g.mu.Lock(); delete(g.active, id); g.mu.Unlock(); release() }) }, nil
 }
 func expired() error {
-	return apperror.New(410, "FolderShareExpired", "Ссылка отозвана или срок действия истёк.")
+	return apperror.New(410, "FolderShareExpired", messages.FoldersFolderShareExpiredModel)
 }
 
 // The store serializes issuing this value with link revocation; no lock escapes.
@@ -97,10 +98,10 @@ func (g *FolderShare) FileTicket(key, kind string, now time.Time) (FolderFileTic
 		return FolderFileTicket{}, expired()
 	}
 	if !g.Contains(key) {
-		return FolderFileTicket{}, apperror.New(403, "FolderScopeDenied", "Файл недоступен по этой ссылке.")
+		return FolderFileTicket{}, apperror.New(403, "FolderScopeDenied", messages.FoldersFolderScopeDeniedPublicUsecase)
 	}
 	if kind != "download" && kind != "media" {
-		return FolderFileTicket{}, apperror.New(400, "InvalidTicket", "Неверный вид ссылки.")
+		return FolderFileTicket{}, apperror.New(400, "InvalidTicket", messages.FoldersInvalidTicket)
 	}
 	expires := g.expires
 	if limit := now.Add(5 * time.Minute); kind == "download" && limit.Before(expires) {

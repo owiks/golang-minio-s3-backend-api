@@ -2,7 +2,6 @@ package integration
 
 import (
 	"encoding/json"
-	"minio-web/api/tests/testsession"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -12,6 +11,7 @@ import (
 
 	bucketscontroller "minio-web/api/src/http/api/routes/buckets/controllers"
 	runtimesvc "minio-web/api/src/services/runtime"
+	"minio-web/api/tests/testsession"
 )
 
 func TestBucketDetailsSelectedFields(t *testing.T) {

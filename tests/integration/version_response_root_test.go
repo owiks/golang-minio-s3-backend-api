@@ -15,7 +15,7 @@ import (
 
 	apihttp "minio-web/api/src/http/api"
 	httpcommon "minio-web/api/src/http/api/common"
-	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/http/presentation"
 	objectssvc "minio-web/api/src/services/objects"
 	runtimesvc "minio-web/api/src/services/runtime"
 )
@@ -103,7 +103,7 @@ func TestVersionListingHTTPRejectsErrorRootWithoutEmptySuccess(t *testing.T) {
 			var listings atomic.Int32
 			s := actionCheckSession(t, func(w http.ResponseWriter, r *http.Request) {
 				if strings.HasSuffix(r.URL.Path, "/accountinfo") {
-					httpcommon.WriteJSON(w, 200, map[string]any{"AccountName": "fixture-user", "Policy": actionCheckPolicy})
+					httpcommon.WriteJSON(w, r, 200, map[string]any{"AccountName": "fixture-user", "Policy": actionCheckPolicy})
 					return
 				}
 				if r.Method != "GET" || r.URL.Path != "/fixture-bucket/" || !r.URL.Query().Has("versions") || r.URL.Query().Get("prefix") != "file" {
@@ -130,7 +130,7 @@ func TestVersionListingHTTPRejectsErrorRootWithoutEmptySuccess(t *testing.T) {
 				t.Fatal("root error hidden, exposed or retried", w.Code, w.Body.String(), listings.Load())
 			}
 			if tc.code != "" {
-				var failure struct{ Error apperror.Error }
+				var failure struct{ Error presentation.Error }
 				if err := json.Unmarshal(w.Body.Bytes(), &failure); err != nil || failure.Error.Code != tc.code || strings.Contains(w.Body.String(), `"rows"`) {
 					t.Fatal("wrong error envelope or false successful page", w.Body.String(), err)
 				}

@@ -9,6 +9,7 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/revision"
 )
 
@@ -33,7 +34,7 @@ func InspectParts(ctx context.Context, s InspectIncompleteUploadClient, bucket, 
 	var size int64
 	last := 0
 	invalid := func() (UploadParts, error) {
-		return UploadParts{}, apperror.New(502, "InvalidUploadPartsResponse", "S3 вернул некорректный список частей. Обновите сведения перед повтором операции.")
+		return UploadParts{}, apperror.New(502, "InvalidUploadPartsResponse", messages.UploadsInvalidUploadPartsResponse)
 	}
 	for page := 0; page < 10; page++ {
 		result, err := core.ListObjectParts(ctx, bucket, key, id, marker, 1000)
@@ -70,5 +71,5 @@ func InspectParts(ctx context.Context, s InspectIncompleteUploadClient, bucket, 
 		}
 		marker = result.NextPartNumberMarker
 	}
-	return UploadParts{}, apperror.New(409, "PartsLimit", "Не удалось получить полный список частей. Обновите сведения.")
+	return UploadParts{}, apperror.New(409, "PartsLimit", messages.UploadsPartsLimit)
 }

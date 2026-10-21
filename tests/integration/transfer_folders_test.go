@@ -9,9 +9,9 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/http/presentation"
 	folderssvc "minio-web/api/src/services/folders"
-	"minio-web/api/src/services/objects/write"
+	objectwrite "minio-web/api/src/services/objects/write"
 	transferssvc "minio-web/api/src/services/transfers"
 )
 
@@ -61,7 +61,7 @@ func TestTransferFoldersIntegration(t *testing.T) {
 	for _, parameter := range []string{"version", "versionId"} {
 		for _, version := range []string{"", "old-version"} {
 			var reply struct {
-				Error apperror.Error `json:"error"`
+				Error presentation.Error `json:"error"`
 			}
 			q := url.Values{"bucket": {b}, "prefix": {"source/"}, parameter: {version}}
 			if err := json.Unmarshal(c.call("GET", "objects/transfer-list?"+q.Encode(), nil, 400), &reply); err != nil || reply.Error.Code != "InvalidFolderDelete" {

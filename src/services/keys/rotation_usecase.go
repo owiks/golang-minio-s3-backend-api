@@ -6,6 +6,7 @@ import (
 	"github.com/minio/madmin-go/v3"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/securetoken"
 )
 
@@ -14,7 +15,7 @@ func RotateKeySecret(ctx context.Context, s ChangeKeyClient, name string, input 
 		return GeneratedKey{}, err
 	}
 	if input.Confirmation != name {
-		return GeneratedKey{}, apperror.New(400, "ConfirmationRequired", "Для смены секрета введите Access Key.")
+		return GeneratedKey{}, apperror.New(400, "ConfirmationRequired", messages.KeysConfirmationRequired)
 	}
 	current, err := keyForChange(ctx, s, name, input.Revision)
 	if err != nil {

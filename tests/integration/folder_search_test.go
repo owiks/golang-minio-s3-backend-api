@@ -15,8 +15,9 @@ import (
 
 	settings "minio-web/api/src/config"
 	apihttp "minio-web/api/src/http/api"
+	"minio-web/api/src/http/presentation"
 	folderssvc "minio-web/api/src/services/folders"
-	"minio-web/api/src/services/folders/share"
+	foldershare "minio-web/api/src/services/folders/share"
 	objectssvc "minio-web/api/src/services/objects"
 	runtimesvc "minio-web/api/src/services/runtime"
 	searchsvc "minio-web/api/src/services/search"
@@ -179,7 +180,7 @@ func TestContentSearchNativePaginationAndSkipsIntegration(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		var result struct {
 			Matches                []searchsvc.ContentMatch
-			Issues                 []searchsvc.ContentIssue
+			Issues                 []presentation.ContentIssue
 			Scanned, Skipped, Read int
 			NextToken              string
 		}
@@ -234,7 +235,7 @@ func TestFolderAndContentLeastPrivilegeIntegration(t *testing.T) {
 	reader.call("POST", "objects/folder-shares", map[string]any{"bucket": bucket, "prefix": "", "expiresIn": 600}, 403)
 	var result struct {
 		Matches []searchsvc.ContentMatch
-		Issues  []searchsvc.ContentIssue
+		Issues  []presentation.ContentIssue
 	}
 	json.Unmarshal(reader.call("POST", "objects/content-search", map[string]any{"bucket": bucket, "prefix": "shared/", "query": "needle", "extensions": "txt", "maxSize": 1024, "pageSize": 20}, 200), &result)
 	if len(result.Matches) != 1 || result.Matches[0].Key != "shared/allowed.txt" || len(result.Issues) != 1 || result.Issues[0].Key != "shared/denied.txt" {

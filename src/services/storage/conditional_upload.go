@@ -9,6 +9,7 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 type conditionalUploadKey struct{}
@@ -46,7 +47,7 @@ func restoreConditionalComplete(ctx context.Context, method string, target *url.
 	for _, field := range []struct{ name, value string }{{"If-Match", condition.matchETag}, {"If-None-Match", condition.exceptETag}} {
 		current := headers.Get(field.name)
 		if current != "" && current != field.value {
-			return apperror.New(502, "ConditionalUploadConflict", "Хранилище не получило согласованные условия записи. Проверьте состояние перед повтором операции.")
+			return apperror.New(502, "ConditionalUploadConflict", messages.StorageConditionalUploadConflict)
 		}
 		if field.value != "" {
 			headers.Set(field.name, field.value)

@@ -10,6 +10,7 @@ import (
 	bucketssvc "minio-web/api/src/services/buckets"
 	endpoints "minio-web/api/src/services/endpoint"
 	"minio-web/api/src/services/iam"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/revision"
 )
 
@@ -75,7 +76,7 @@ func TierError(err error) error {
 	if p.Status != 502 {
 		return p
 	}
-	return apperror.New(502, "TierOperationFailed", "MinIO отклонил операцию уровня. Проверьте доступность удалённого бакета, права ключей и отсутствие данных/правил при удалении. Обновите список перед повтором.")
+	return apperror.New(502, "TierOperationFailed", messages.TiersTierOperationFailed)
 }
 
 // Native RemoveTier protects remote data; also refuse to orphan lifecycle rules.
@@ -83,7 +84,7 @@ func UnusedTier(ctx context.Context, s UnusedTierClient, name string) error {
 	policy := s.ActionPolicySnapshot()
 	allowed := policy.Allows(s.ActorName(), iam.Query{Action: "s3:ListAllMyBuckets"})
 	if !allowed {
-		return apperror.New(403, "TierUsageUnknown", "Для проверки использования уровня нужно право s3:ListAllMyBuckets и чтение Lifecycle всех бакетов.")
+		return apperror.New(403, "TierUsageUnknown", messages.TiersTierUsageUnknown)
 	}
 	buckets, e := s.ListBuckets(ctx)
 	if e != nil {
@@ -92,14 +93,14 @@ func UnusedTier(ctx context.Context, s UnusedTierClient, name string) error {
 	for _, bucket := range buckets {
 		state, e := bucketssvc.ReadLifecycle(ctx, s, bucket.Name)
 		if e != nil {
-			return apperror.New(409, "TierUsageUnknown", "Не удалось проверить Lifecycle всех бакетов. Уровень не удалён.")
+			return apperror.New(409, "TierUsageUnknown", messages.TiersTierUsageUnknownTiers)
 		}
 		if !state.View.Writable {
-			return apperror.New(409, "TierUsageUnknown", "Не удалось полностью прочитать Lifecycle. Уровень не удалён.")
+			return apperror.New(409, "TierUsageUnknown", messages.TiersTierUsageUnknownTiersUnusedTier)
 		}
 		for _, rule := range state.Config.Rules {
 			if rule.Transition.StorageClass == name || rule.NoncurrentVersionTransition.StorageClass == name {
-				return apperror.New(409, "TierInUse", "Уровень указан в правиле Lifecycle. Сначала измените или удалите это правило.")
+				return apperror.New(409, "TierInUse", messages.TiersTierInUse)
 			}
 		}
 	}

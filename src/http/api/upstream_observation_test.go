@@ -18,6 +18,7 @@ import (
 	"minio-web/api/src/http/api/routes"
 	"minio-web/api/src/http/middleware"
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/runtime"
 	"minio-web/api/src/services/server"
 	"minio-web/api/src/services/telemetry"
@@ -67,7 +68,7 @@ func TestObservedHTTPErrorKeepsPrivateDiagnosticsOutsidePublicJSON(t *testing.T)
 						return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader("data"))}, nil
 					})}).RoundTrip(req)
 					_ = resp.Body.Close()
-					return apperror.New(409, "ServerConfigChanged", "safe")
+					return apperror.New(409, "ServerConfigChanged", messages.Literal("safe"))
 				}
 				return server.ServerOperationError(errors.New("PRIVATE-OPAQUE-CAUSE"))
 			}}}

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/telemetry"
 )
 
@@ -23,10 +24,10 @@ func NativeConditionalDelete(endpoint *url.URL) bool {
 // without the precondition, and never targets a version or bypasses retention.
 func ConditionalDelete(ctx context.Context, c Config, transport http.RoundTripper, bucket, key, etag string, confirmed bool) error {
 	if !confirmed {
-		return apperror.New(409, "ConditionalDeleteUnavailable", "Сервер не подтвердил поддержку условного удаления. Копия создана, исходник сохранён.")
+		return apperror.New(409, "ConditionalDeleteUnavailable", messages.StorageConditionalDeleteUnavailable)
 	}
 	if etag == "" || strings.ContainsAny(etag, "\r\n\"") {
-		return apperror.New(409, "InvalidDeletionCondition", "Не удалось получить условие безопасного удаления. Исходник сохранён.")
+		return apperror.New(409, "InvalidDeletionCondition", messages.StorageInvalidDeletionCondition)
 	}
 	client, err := NewS3(c, transport)
 	if err != nil {
@@ -44,19 +45,19 @@ func ConditionalDelete(ctx context.Context, c Config, transport http.RoundTrippe
 	req.Header = headers
 	response, err := (telemetry.Transport{Base: transport}).RoundTrip(req)
 	if err != nil {
-		return apperror.New(502, "DeleteUncertain", "Результат удаления не подтверждён. Проверьте исходник перед повтором.")
+		return apperror.New(502, "DeleteUncertain", messages.StorageDeleteUncertain)
 	}
 	defer response.Body.Close()
 	switch response.StatusCode {
 	case 204:
 		return nil
 	case 409, 412:
-		return apperror.New(409, "SourceChanged", "Исходник изменился во время перемещения и не удалён.")
+		return apperror.New(409, "SourceChanged", messages.StorageSourceChanged)
 	case 403:
-		return apperror.New(403, "AccessDenied", "Копия создана, MinIO запретил удаление исходника.")
+		return apperror.New(403, "AccessDenied", messages.StorageAccessDenied)
 	case 400, 405, 501:
-		return apperror.New(409, "ConditionalDeleteUnavailable", "Сервер отклонил условное удаление. Исходник сохранён.")
+		return apperror.New(409, "ConditionalDeleteUnavailable", messages.StorageConditionalDeleteUnavailableConditional)
 	default:
-		return apperror.New(502, "DeleteUncertain", "Сервер не подтвердил удаление. Проверьте исходник перед повтором.")
+		return apperror.New(502, "DeleteUncertain", messages.StorageDeleteUncertainConditional)
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"minio-web/api/src/http/api/routes"
 	"minio-web/api/src/http/api/routes/server/controllers"
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	resultdto "minio-web/api/src/services/result"
 	"minio-web/api/src/services/runtime"
 	serverdto "minio-web/api/src/services/server"
@@ -46,7 +47,7 @@ func GetRoutes() []routes.APIRoute {
 					Controller: "HandleServerInfo",
 					Response:   serverdto.ServerSnapshot{}, Handler: func(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session, rest string) error {
 						if r.Method != "GET" {
-							return apperror.New(405, "MethodNotAllowed", "Операция управления не поддерживается.")
+							return apperror.New(405, "MethodNotAllowed", messages.ManagementUnsupported)
 						}
 						return controllers.HandleServerInfo(app, w, r, s)
 					}},

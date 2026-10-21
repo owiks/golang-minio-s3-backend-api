@@ -12,6 +12,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/sse"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 // ConfigRead retains the exact upstream representation so business validation
@@ -54,7 +55,7 @@ func (wire *configurationTransport) RoundTrip(r *http.Request) (*http.Response, 
 				return nil, readErr
 			}
 			if len(raw) > 4*1024*1024 {
-				return nil, apperror.New(502, "LifecycleTooLarge", "Конфигурация Lifecycle превышает 4 МиБ. Изменения не выполнялись.")
+				return nil, apperror.New(502, "LifecycleTooLarge", messages.StorageLifecycleTooLarge)
 			}
 			wire.Raw = raw
 			resp.Body = io.NopCloser(bytes.NewReader(raw))

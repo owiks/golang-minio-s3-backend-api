@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 const (
@@ -62,7 +63,7 @@ func boundAdminResponse(method, path string, response *http.Response) error {
 	body := response.Body
 	defer body.Close() // Never drain the untrusted remainder, including in SDK cleanup.
 	tooLarge := func() error {
-		return apperror.New(502, "AdminResponseTooLarge", "Ответ MinIO Admin API превышает допустимый размер.")
+		return apperror.New(502, "AdminResponseTooLarge", messages.StorageAdminResponseTooLarge)
 	}
 	var data []byte
 	var err error

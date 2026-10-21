@@ -10,8 +10,9 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/archives/plan"
-	"minio-web/api/src/services/objects/state"
+	archiveplan "minio-web/api/src/services/archives/plan"
+	"minio-web/api/src/services/messages"
+	objectstate "minio-web/api/src/services/objects/state"
 	searchsvc "minio-web/api/src/services/search"
 	"minio-web/api/src/services/telemetry"
 )
@@ -29,17 +30,17 @@ func PrepareArchive(ctx context.Context, store PrepareArchiveStore, s PrepareArc
 		modes++
 	}
 	if body.Bucket == "" || len(body.Bucket) > 63 || modes != 1 || len(body.Keys) > MaxArchiveFiles || len(body.Entries) > MaxArchiveFiles || body.Prefix != nil && len(*body.Prefix) > 1024 {
-		return archiveplan.ArchiveSnapshot{}, apperror.New(400, "InvalidArchive", "Выберите файлы или папки. Максимум 1000 файлов и 10 ГиБ на архив.")
+		return archiveplan.ArchiveSnapshot{}, apperror.New(400, "InvalidArchive", messages.ArchivesInvalidArchive)
 	}
 	name, err := archiveplan.ArchiveFilename(body.Name)
 	if err != nil {
 		return archiveplan.ArchiveSnapshot{}, err
 	}
-	draft := archiveplan.Config{SessionID: s.SessionID(), Bucket: body.Bucket, Name: name, Base: body.Base, RelativeBase: body.Base, Created: time.Now(), Issues: map[string]string{}}
+	draft := archiveplan.Config{SessionID: s.SessionID(), Bucket: body.Bucket, Name: name, Base: body.Base, RelativeBase: body.Base, Created: time.Now(), Issues: map[string]messages.Ref{}}
 	keys := map[string]bool{}
 	excluded := map[string]bool{}
 	if len(body.ExcludeKeys) > MaxArchiveFiles {
-		return archiveplan.ArchiveSnapshot{}, apperror.New(400, "InvalidArchive", "Слишком много исключённых файлов.")
+		return archiveplan.ArchiveSnapshot{}, apperror.New(400, "InvalidArchive", messages.ArchivesInvalidArchivePrepareUsecase)
 	}
 	for _, key := range body.ExcludeKeys {
 		excluded[key] = true
@@ -47,7 +48,7 @@ func PrepareArchive(ctx context.Context, store PrepareArchiveStore, s PrepareArc
 	folders := []string{}
 	for _, key := range body.Keys {
 		if len(key) > 1024 || !utf8.ValidString(key) {
-			return archiveplan.ArchiveSnapshot{}, apperror.New(400, "InvalidArchive", "Некорректный путь файла.")
+			return archiveplan.ArchiveSnapshot{}, apperror.New(400, "InvalidArchive", messages.ArchivesInvalidArchivePrepareUsecasePrepareArchive)
 		}
 		if !excluded[key] {
 			keys[key] = true
@@ -58,23 +59,23 @@ func PrepareArchive(ctx context.Context, store PrepareArchiveStore, s PrepareArc
 	}
 	for _, entry := range body.Entries {
 		if len(entry.Key) > 1024 || !utf8.ValidString(entry.Key) {
-			return archiveplan.ArchiveSnapshot{}, apperror.New(400, "InvalidArchive", "Некорректный путь элемента.")
+			return archiveplan.ArchiveSnapshot{}, apperror.New(400, "InvalidArchive", messages.ArchivesInvalidArchivePrepareUsecasePrepareArchiveD520E6)
 		}
 		switch entry.Kind {
 		case "file":
 			if entry.Key == "" {
-				return archiveplan.ArchiveSnapshot{}, apperror.New(400, "InvalidArchive", "Пустой путь файла.")
+				return archiveplan.ArchiveSnapshot{}, apperror.New(400, "InvalidArchive", messages.ArchivesInvalidArchivePrepareUsecasePrepareArchive4AEA25)
 			}
 			if !excluded[entry.Key] {
 				keys[entry.Key] = true
 			}
 		case "folder":
 			if entry.Key != "" && !strings.HasSuffix(entry.Key, "/") {
-				return archiveplan.ArchiveSnapshot{}, apperror.New(400, "InvalidArchive", "Путь папки должен заканчиваться слешем.")
+				return archiveplan.ArchiveSnapshot{}, apperror.New(400, "InvalidArchive", messages.ArchivesInvalidArchivePrepareUsecasePrepareArchive0BA8AF)
 			}
 			folders = append(folders, entry.Key)
 		default:
-			return archiveplan.ArchiveSnapshot{}, apperror.New(400, "InvalidArchive", "Неизвестный тип элемента.")
+			return archiveplan.ArchiveSnapshot{}, apperror.New(400, "InvalidArchive", messages.ArchivesInvalidArchivePrepareUsecasePrepareArchive3EDEA0)
 		}
 	}
 	sort.Slice(folders, func(i, j int) bool { return len(folders[i]) < len(folders[j]) })
@@ -114,7 +115,7 @@ func PrepareArchive(ctx context.Context, store PrepareArchiveStore, s PrepareArc
 				}
 			}
 			if len(keys) > MaxArchiveFiles {
-				return archiveplan.ArchiveSnapshot{}, apperror.New(400, "ArchiveTooLarge", "Выбрано больше 1000 файлов. Уменьшите выделение.")
+				return archiveplan.ArchiveSnapshot{}, apperror.New(400, "ArchiveTooLarge", messages.ArchivesArchiveTooLarge)
 			}
 			if !page.IsTruncated {
 				break
@@ -123,7 +124,7 @@ func PrepareArchive(ctx context.Context, store PrepareArchiveStore, s PrepareArc
 		}
 	}
 	if len(keys) > MaxArchiveFiles {
-		return archiveplan.ArchiveSnapshot{}, apperror.New(400, "ArchiveTooLarge", "Выбрано больше 1000 файлов. Уменьшите выделение.")
+		return archiveplan.ArchiveSnapshot{}, apperror.New(400, "ArchiveTooLarge", messages.ArchivesArchiveTooLarge)
 	}
 	sorted := make([]string, 0, len(keys))
 	for key := range keys {
@@ -146,10 +147,10 @@ func PrepareArchive(ctx context.Context, store PrepareArchiveStore, s PrepareArc
 		item.Path = paths[i]
 		if item.Path == "" {
 			if !modern {
-				return archiveplan.ArchiveSnapshot{}, apperror.New(400, "UnsafeArchivePath", "В списке есть небезопасный путь ZIP. Скачайте файл отдельно: "+item.Key)
+				return archiveplan.ArchiveSnapshot{}, apperror.New(400, "UnsafeArchivePath", messages.ArchivesUnsafeArchivePath.With(messages.String("Path", item.Key)))
 			}
 			item.State = "error"
-			item.Message = "Путь небезопасно сохранять в ZIP. Скачайте файл отдельно."
+			item.Message = messages.ArchivesThisPathCannotBeSafelyStoredIn
 			continue
 		}
 		info, err := s.StatObject(ctx, body.Bucket, item.Key, minio.StatObjectOptions{})
@@ -165,11 +166,11 @@ func PrepareArchive(ctx context.Context, store PrepareArchiveStore, s PrepareArc
 		item.Info = objectstate.DeletionSnapshot{ETag: info.ETag, Size: info.Size, Modified: info.LastModified, Version: info.VersionID}
 		total += info.Size
 		if total > MaxArchiveBytes {
-			return archiveplan.ArchiveSnapshot{}, apperror.New(400, "ArchiveTooLarge", "Общий размер превышает 10 ГиБ. Выберите меньше файлов.")
+			return archiveplan.ArchiveSnapshot{}, apperror.New(400, "ArchiveTooLarge", messages.ArchivesArchiveTooLargePrepareUsecase)
 		}
 	}
 	if len(draft.Items) == 0 && len(draft.Issues) == 0 && !modern {
-		return archiveplan.ArchiveSnapshot{}, apperror.New(400, "EmptyArchive", "В выбранной папке нет файлов.")
+		return archiveplan.ArchiveSnapshot{}, apperror.New(400, "EmptyArchive", messages.ArchivesEmptyArchivePrepareUsecase)
 	}
 	if err := ctx.Err(); err != nil {
 		return archiveplan.ArchiveSnapshot{}, err

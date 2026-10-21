@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"minio-web/api/src/services/messages"
 )
 
 // TypeSchema is used for explicit per-operation contracts. Runtime validation
@@ -16,6 +18,9 @@ func TypeSchema(value any, request bool) Schema { return typeSchema(reflect.Type
 func typeSchema(t reflect.Type, request bool, depth int) Schema {
 	if t == nil || depth > 16 {
 		return Schema{}
+	}
+	if t == reflect.TypeFor[messages.Ref]() {
+		return Schema{"type": "string"}
 	}
 	if t == reflect.TypeFor[json.RawMessage]() {
 		return Schema{}

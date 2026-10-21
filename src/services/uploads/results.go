@@ -3,6 +3,7 @@ package uploads
 import (
 	"time"
 
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/uploads/integrity"
 )
 
@@ -19,9 +20,9 @@ type IncompleteUploadState struct {
 	Parts *UploadParts `json:"parts,omitempty"`
 }
 type AbortUploadResult struct {
-	State   string `json:"state"`
-	OK      *bool  `json:"ok,omitempty"`
-	Message string `json:"message,omitempty"`
+	State   string       `json:"state"`
+	OK      *bool        `json:"ok,omitempty"`
+	Message messages.Ref `json:"message,omitempty"`
 }
 type IncompleteUploadRow struct {
 	Key          string       `json:"key"`
@@ -29,7 +30,7 @@ type IncompleteUploadRow struct {
 	Initiated    time.Time    `json:"initiated"`
 	Owner        string       `json:"owner"`
 	Parts        *UploadParts `json:"parts"`
-	Error        string       `json:"error,omitempty"`
+	Error        messages.Ref `json:"error,omitempty"`
 	Initiator    string       `json:"initiator,omitempty"`
 	StorageClass string       `json:"storageClass,omitempty"`
 }

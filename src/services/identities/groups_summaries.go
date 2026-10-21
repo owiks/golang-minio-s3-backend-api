@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 func GroupSummaries(ctx context.Context, s GroupSummariesClient) ([]GroupSummary, error) {
@@ -20,7 +21,7 @@ func GroupSummaries(ctx context.Context, s GroupSummariesClient) ([]GroupSummary
 	defer cancel()
 	for i, name := range names {
 		rows[i].Name = name
-		rows[i].Error = "Сведения не получены в отведённое время."
+		rows[i].Error = messages.IdentitiesTheDetailsWereNotRetrievedWithinThe
 	}
 	_ = ReadSummaryRows(ctx, len(names), func(i int) {
 		rows[i].Name = names[i]
@@ -29,7 +30,7 @@ func GroupSummaries(ctx context.Context, s GroupSummariesClient) ([]GroupSummary
 			rows[i].Error = apperror.Public(err).Message
 			return
 		}
-		rows[i].Error = ""
+		rows[i].Error = nil
 		rows[i].Details = &GroupSummaryDetails{Status: group.Status, Members: SortedUnique(group.Members), Policies: SortedUnique(SplitPolicies(group.Policy)), UpdatedAt: KnownTime(group.UpdatedAt)}
 	})
 	if err := parent.Err(); err != nil {

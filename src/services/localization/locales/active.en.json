@@ -1,0 +1,2399 @@
+[
+  {
+    "id": "http.method_not_allowed",
+    "other": "This method is not supported."
+  },
+  {
+    "id": "http.invalid_permission_queries",
+    "other": "Specify between 1 and 128 checks."
+  },
+  {
+    "id": "http.invalid_permission_queries_action_access",
+    "other": "Invalid action check."
+  },
+  {
+    "id": "http.invalid_permission_queries_action_access_handle_action_access",
+    "other": "This action is not supported."
+  },
+  {
+    "id": "http.invalid_object_attributes",
+    "other": "Invalid parts page parameters."
+  },
+  {
+    "id": "http.invalid_object_attributes_object_attributes",
+    "other": "The page size must be greater than zero."
+  },
+  {
+    "id": "http.method_not_allowed_bucket_update",
+    "other": "This setting is not supported."
+  },
+  {
+    "id": "http.invalid_folder_delete",
+    "other": "Select a specific folder. This request does not delete the entire bucket or individual versions."
+  },
+  {
+    "id": "http.invalid_folder_result",
+    "other": "Could not build the folder response."
+  },
+  {
+    "id": "http.invalid_multipartid",
+    "other": "Invalid upload ID."
+  },
+  {
+    "id": "http.invalid_part_number",
+    "other": "Invalid part number."
+  },
+  {
+    "id": "http.invalid_part_size",
+    "other": "The body size must match X-Upload-Size and the part plan."
+  },
+  {
+    "id": "http.invalid_delete",
+    "other": "Select one file. This request does not delete folders or individual versions."
+  },
+  {
+    "id": "http.invalid_select_query",
+    "other": "This API does not support selecting a version or a Range for S3 Select."
+  },
+  {
+    "id": "http.origin_denied",
+    "other": "The request must originate from this interface."
+  },
+  {
+    "id": "http.invalid_tier_operation",
+    "other": "Unknown operation."
+  },
+  {
+    "id": "http.invalid_upload_size",
+    "other": "The file size must match the request body and must not exceed 5 GiB."
+  },
+  {
+    "id": "http.origin_denied_upload_actions",
+    "other": "Uploads are only allowed from this page."
+  },
+  {
+    "id": "http.invalid_upload",
+    "other": "Check the file size."
+  },
+  {
+    "id": "http.internal_error",
+    "other": "Internal API error."
+  },
+  {
+    "id": "http.session_expired",
+    "other": "The session has expired. Disconnect and reconnect."
+  },
+  {
+    "id": "http.session_expired_session",
+    "other": "The session is invalid. Reconnect."
+  },
+  {
+    "id": "http.csrf_denied",
+    "other": "Request verification failed. Refresh the page and reconnect."
+  },
+  {
+    "id": "http.confirmation_required",
+    "other": "Enter the exact resource name to delete it."
+  },
+  {
+    "id": "http.json_required",
+    "other": "A JSON request is required."
+  },
+  {
+    "id": "http.invalidjson",
+    "other": "Invalid JSON or the request size limit was exceeded."
+  },
+  {
+    "id": "http.invalidjson_response",
+    "other": "Exactly one JSON document is required."
+  },
+  {
+    "id": "access.access_denied",
+    "other": "Insufficient permissions."
+  },
+  {
+    "id": "apperror.could_not_verify_the_credentials_check_the",
+    "other": "Could not verify the credentials. Check the Access Key, Secret Key, region and device clock."
+  },
+  {
+    "id": "apperror.insufficient_minio_permissions_for_this_operation",
+    "other": "Insufficient MinIO permissions for this operation."
+  },
+  {
+    "id": "apperror.the_resource_no_longer_exists_refresh_the",
+    "other": "The resource no longer exists. Refresh the list."
+  },
+  {
+    "id": "apperror.the_bucket_state_does_not_allow_this",
+    "other": "The bucket state does not allow this setting."
+  },
+  {
+    "id": "apperror.the_bucket_is_not_empty_this_operation",
+    "other": "The bucket is not empty. This operation does not delete objects, versions or delete markers."
+  },
+  {
+    "id": "apperror.the_storage_rejected_the_data_because_the",
+    "other": "The storage rejected the data because the checksum does not match. Check the upload state before retrying."
+  },
+  {
+    "id": "apperror.the_storage_rejected_the_checksum_format_check",
+    "other": "The storage rejected the checksum format. Check the algorithm and encoding."
+  },
+  {
+    "id": "apperror.the_resource_already_exists_or_is_in",
+    "other": "The resource already exists or is in use. Refresh the list and check its dependencies."
+  },
+  {
+    "id": "apperror.minio_rejected_the_parameters_check_the_name",
+    "other": "MinIO rejected the parameters. Check the name, password or policy document."
+  },
+  {
+    "id": "apperror.the_minio_token_is_invalid_or_expired",
+    "other": "The MinIO token is invalid or expired. Reconnect."
+  },
+  {
+    "id": "apperror.this_server_version_or_type_does_not",
+    "other": "This server version or type does not support the operation."
+  },
+  {
+    "id": "apperror.thes3api_did_not_respond_in",
+    "other": "The S3 API did not respond in time. Refresh the state before retrying the operation."
+  },
+  {
+    "id": "apperror.could_not_complete_the_minio_request_check",
+    "other": "Could not complete the MinIO request. Check the address, connectivity from the API container, certificate and user permissions."
+  },
+  {
+    "id": "archives.archive_expired",
+    "other": "The archive is no longer available. Prepare it again."
+  },
+  {
+    "id": "archives.archive_started",
+    "other": "The download has already started. Prepare the archive again to retry."
+  },
+  {
+    "id": "archives.the_file_changed_after_verification_preparea",
+    "other": "The file changed after verification. Prepare a new archive."
+  },
+  {
+    "id": "archives.could_not_read_the_entire_file_do",
+    "other": "Could not read the entire file. Do not use this copy."
+  },
+  {
+    "id": "archives.invalid_gzip",
+    "other": "The file is not a valid GZip archive."
+  },
+  {
+    "id": "archives.invalid_gzip_gzip_view",
+    "other": "Could not decompress GZip: the stream or checksum is damaged."
+  },
+  {
+    "id": "archives.gzip_text_too_large",
+    "other": "The decompressed file exceeds 8 MiB."
+  },
+  {
+    "id": "archives.gzip_too_many_lines",
+    "other": "The decompressed file contains more than 200,000 lines."
+  },
+  {
+    "id": "archives.notutf8_text",
+    "other": "The decompressed file must be UTF-8 text without null bytes."
+  },
+  {
+    "id": "archives.not_gzip",
+    "other": "Select a .gz file."
+  },
+  {
+    "id": "archives.gzip_too_large",
+    "other": "Preview supports GZip files up to 32 MiB."
+  },
+  {
+    "id": "archives.object_changed",
+    "other": "The file changed. Retry the upload."
+  },
+  {
+    "id": "archives.archive_started_model",
+    "other": "This archive has already started. Prepare a new archive to retry."
+  },
+  {
+    "id": "archives.invalid_archive_base",
+    "other": "Choose paths relative to the source folder or the bucket root."
+  },
+  {
+    "id": "archives.archive_running",
+    "other": "Stop the archive transfer first."
+  },
+  {
+    "id": "archives.the_transfer_was_not_started",
+    "other": "The transfer was not started."
+  },
+  {
+    "id": "archives.empty_archive",
+    "other": "No files are available for this archive."
+  },
+  {
+    "id": "archives.archive_partial_consent",
+    "other": "Confirm that you want to download only the available files."
+  },
+  {
+    "id": "archives.zip_completion_was_not_confirmed_preparea",
+    "other": "ZIP completion was not confirmed. Prepare a new archive."
+  },
+  {
+    "id": "archives.the_transfer_was_stopped_thezip_may",
+    "other": "The transfer was stopped. The ZIP may be incomplete."
+  },
+  {
+    "id": "archives.invalid_archive_name",
+    "other": "Specify a ZIP name up to 180 bytes, without slashes, control characters or : * ? \" < > |."
+  },
+  {
+    "id": "archives.invalid_archive_base_paths",
+    "other": "The path prefix must refer to a complete folder."
+  },
+  {
+    "id": "archives.invalid_archive_base_paths_archive_paths",
+    "other": "The selected files are outside the specified folder."
+  },
+  {
+    "id": "archives.archive_path_conflict",
+    "other": "File paths collide inside the archive. Choose paths relative to the bucket root."
+  },
+  {
+    "id": "archives.invalid_archive",
+    "other": "Select files or folders. An archive may contain up to 1,000 files and 10 GiB."
+  },
+  {
+    "id": "archives.invalid_archive_prepare_usecase",
+    "other": "Too many files were excluded."
+  },
+  {
+    "id": "archives.invalid_archive_prepare_usecase_prepare_archive",
+    "other": "Invalid file path."
+  },
+  {
+    "id": "archives.invalid_archive_prepare_usecase_prepare_archived520e6",
+    "other": "Invalid item path."
+  },
+  {
+    "id": "archives.invalid_archive_prepare_usecase_prepare_archive4aea25",
+    "other": "The file path is empty."
+  },
+  {
+    "id": "archives.invalid_archive_prepare_usecase_prepare_archive0ba8af",
+    "other": "A folder path must end with a slash."
+  },
+  {
+    "id": "archives.invalid_archive_prepare_usecase_prepare_archive3edea0",
+    "other": "Unknown item type."
+  },
+  {
+    "id": "archives.archive_too_large",
+    "other": "More than 1,000 files were selected. Select fewer files."
+  },
+  {
+    "id": "archives.unsafe_archive_path",
+    "other": "The list contains an unsafe ZIP path. Download this file separately: {{.Path}}"
+  },
+  {
+    "id": "archives.this_path_cannot_be_safely_stored_in",
+    "other": "This path cannot be safely stored in a ZIP. Download the file separately."
+  },
+  {
+    "id": "archives.archive_too_large_prepare_usecase",
+    "other": "The total size exceeds 10 GiB. Select fewer files."
+  },
+  {
+    "id": "archives.empty_archive_prepare_usecase",
+    "other": "The selected folder contains no files."
+  },
+  {
+    "id": "archives.unsafe_path",
+    "other": "Unsafe path"
+  },
+  {
+    "id": "archives.symbolic_link",
+    "other": "Symbolic link"
+  },
+  {
+    "id": "archives.the_archive_is_encrypted",
+    "other": "The archive is encrypted"
+  },
+  {
+    "id": "archives.the_compression_method_is_not_supported",
+    "other": "The compression method is not supported"
+  },
+  {
+    "id": "archives.the_file_exceeds256_mib",
+    "other": "The file exceeds 256 MiB"
+  },
+  {
+    "id": "archives.invalid_destination",
+    "other": "Check the destination path."
+  },
+  {
+    "id": "archives.zip_changed",
+    "other": "The archive changed. Refresh the list before extracting."
+  },
+  {
+    "id": "archives.zip_directory",
+    "other": "Select files from the folder."
+  },
+  {
+    "id": "archives.corruptzip_entry",
+    "other": "The archive entry cannot be read."
+  },
+  {
+    "id": "archives.corruptzip_entry_zip_explorer_usecase",
+    "other": "The file size or checksum does not match. The file was not saved."
+  },
+  {
+    "id": "archives.zip_closed",
+    "other": "Archive reading is closed. Reopen the archive."
+  },
+  {
+    "id": "archives.invalidzip_entry",
+    "other": "The archive entry was not found."
+  },
+  {
+    "id": "archives.invalidzip",
+    "other": "Invalid ZIP archive."
+  },
+  {
+    "id": "archives.zip_limit",
+    "other": "Only ordinary ZIP archives with up to 10,000 entries are supported, without ZIP64 or split volumes."
+  },
+  {
+    "id": "archives.invalidzip_reader",
+    "other": "Invalid ZIP directory."
+  },
+  {
+    "id": "archives.zip_limit_reader",
+    "other": "The ZIP contains too many entries."
+  },
+  {
+    "id": "archives.invalidzip_reader_checkedzip",
+    "other": "The ZIP entry count does not match."
+  },
+  {
+    "id": "archives.invalidzip_reader_checkedzipd112ec",
+    "other": "The ZIP structure was not found."
+  },
+  {
+    "id": "archives.invalidzip_reader_checkedzip9ad98f",
+    "other": "Could not read the ZIP archive."
+  },
+  {
+    "id": "archives.zip_limit_reader_load_storedzip",
+    "other": "Preview supports ZIP archives up to 256 MiB."
+  },
+  {
+    "id": "archives.zip_changed_reader",
+    "other": "The archive changed. Refresh the list."
+  },
+  {
+    "id": "batch.invalid_batch",
+    "other": "Check the bucket, prefix, job type and parameters."
+  },
+  {
+    "id": "batch.confirmation_required",
+    "other": "Enter the exact bucket name to start the job."
+  },
+  {
+    "id": "batch.invalid_batch_parameters",
+    "other": "MinIO returned job parameters in an unsupported format."
+  },
+  {
+    "id": "buckets.could_not_read_principal",
+    "other": "Could not read Principal"
+  },
+  {
+    "id": "buckets.invalid_policy_definition",
+    "other": "Could not read the policy rules."
+  },
+  {
+    "id": "buckets.invalid_bucket_name",
+    "other": "Specify a valid bucket name."
+  },
+  {
+    "id": "buckets.could_not_parse_one_of_theiam",
+    "other": "Could not parse one of the IAM policies."
+  },
+  {
+    "id": "buckets.showing_assignments_for_the_first1000",
+    "other": "Showing assignments for the first 1,000 associated policies."
+  },
+  {
+    "id": "buckets.iam_policy_assignments_were_only_partially_read",
+    "other": "IAM policy assignments were only partially read. {{.Cause}}"
+  },
+  {
+    "id": "buckets.users_were_only_partially_read",
+    "other": "Users were only partially read. {{.Cause}}"
+  },
+  {
+    "id": "buckets.groups_were_only_partially_read",
+    "other": "Groups were only partially read. {{.Cause}}"
+  },
+  {
+    "id": "buckets.checked_the_first500_groups",
+    "other": "Checked the first 500 groups."
+  },
+  {
+    "id": "buckets.the_group_check_timed_out",
+    "other": "The group check timed out."
+  },
+  {
+    "id": "buckets.could_not_retrieve_members_and_status_for",
+    "other": "Could not retrieve members and status for one of the groups."
+  },
+  {
+    "id": "buckets.direct",
+    "other": "Direct"
+  },
+  {
+    "id": "buckets.group",
+    "other": "Group {{.Name}}"
+  },
+  {
+    "id": "buckets.",
+    "other": "{{.Source}} (disabled)"
+  },
+  {
+    "id": "buckets.member_of_disabled_groups",
+    "other": "Member of disabled groups: {{.Groups}}"
+  },
+  {
+    "id": "buckets.application_keys_are_unavailable",
+    "other": "Application keys are unavailable. {{.Cause}}"
+  },
+  {
+    "id": "buckets.owner",
+    "other": "Owner {{.Owner}}: {{.Source}}"
+  },
+  {
+    "id": "buckets.the_key_restrictions_could_not_be_read",
+    "other": "The key restrictions could not be read; access is unconfirmed."
+  },
+  {
+    "id": "buckets.could_not_read_all_key_restrictions",
+    "other": "Could not read all key restrictions."
+  },
+  {
+    "id": "buckets.the_key_owner_changed_refresh_the_details",
+    "other": "The key owner changed; refresh the details."
+  },
+  {
+    "id": "buckets.a_key_owner_changed_during_the_check",
+    "other": "A key owner changed during the check."
+  },
+  {
+    "id": "buckets.could_not_read_the_restriction_policy_for",
+    "other": "Could not read the restriction policy for one of the keys."
+  },
+  {
+    "id": "buckets.the_owner_belongs_to_disabled_groups",
+    "other": "The owner belongs to disabled groups: {{.Groups}}"
+  },
+  {
+    "id": "buckets.the_owner_user_is_disabled",
+    "other": "The owner user is disabled."
+  },
+  {
+    "id": "buckets.the_owners_permissions_are_not_listed",
+    "other": "The owner's permissions are not listed among built-in users; the effective result was not calculated."
+  },
+  {
+    "id": "buckets.checked_the_first500_application_keys",
+    "other": "Checked the first 500 application keys."
+  },
+  {
+    "id": "buckets.the_bucket_policy_could_not_be_read",
+    "other": "The bucket policy could not be read. {{.Cause}}"
+  },
+  {
+    "id": "buckets.the_bucket_policy_has_an_unsupported_format",
+    "other": "The bucket policy has an unsupported format."
+  },
+  {
+    "id": "buckets.bucket_policy",
+    "other": "Bucket policy"
+  },
+  {
+    "id": "buckets.principal_is_evaluated_by_minio",
+    "other": "Principal is evaluated by MinIO"
+  },
+  {
+    "id": "buckets.these_rules_may_allow_anonymous_access_or",
+    "other": "These rules may allow anonymous access or deny actions. Recipients are specified in Principal; the document is available under Bucket policy."
+  },
+  {
+    "id": "buckets.this_setting_contains_parameters_that_the_current",
+    "other": "This setting contains parameters that the current SDK cannot save without loss. Only viewing is available."
+  },
+  {
+    "id": "buckets.invalidcors",
+    "other": "Check CORS: specify origins, GET/HEAD/PUT/POST/DELETE methods, valid headers and a non-negative Max-Age."
+  },
+  {
+    "id": "buckets.bucket_setting_changed",
+    "other": "The setting changed. Load its current value before saving."
+  },
+  {
+    "id": "buckets.cors_rule_not_found",
+    "other": "The CORS rule no longer exists. Refresh the list."
+  },
+  {
+    "id": "buckets.invalidcors_bucket_browser_settings_change",
+    "other": "Provide a CORS rule."
+  },
+  {
+    "id": "buckets.invalidcors_bucket_browser_settings_change_change_browser_setting",
+    "other": "A bucket may have no more than 100 CORS rules."
+  },
+  {
+    "id": "buckets.cors_duplicateid",
+    "other": "A rule with this name already exists."
+  },
+  {
+    "id": "buckets.confirmation_required",
+    "other": "Confirm deletion of the CORS rule."
+  },
+  {
+    "id": "buckets.invalid_encryption",
+    "other": "The key ID must be at most 1,024 characters without control characters."
+  },
+  {
+    "id": "buckets.confirmation_required_bucket_browser_settings_change",
+    "other": "Confirm removal of default encryption."
+  },
+  {
+    "id": "buckets.invalid_encryption_bucket_browser_settings_change",
+    "other": "SSE-S3 does not accept a key ID."
+  },
+  {
+    "id": "buckets.invalid_encryption_bucket_browser_settings_change_change_browser_setting",
+    "other": "Select SSE-S3 or SSE-KMS."
+  },
+  {
+    "id": "buckets.kms_unavailable",
+    "other": "MinIO could not use KMS. Check the KMS connection and the ID of an existing key."
+  },
+  {
+    "id": "buckets.invalid_bucket_setting",
+    "other": "MinIO rejected the setting. Check the parameters."
+  },
+  {
+    "id": "buckets.bucket_setting_write_failed",
+    "other": "MinIO did not confirm the change. Refresh the details."
+  },
+  {
+    "id": "buckets.object_tag",
+    "other": "Object tag: {{.Key}} = {{.Value}}"
+  },
+  {
+    "id": "buckets.size_greater_than",
+    "other": "Size greater than {{.Count}} bytes",
+    "one": "Size greater than {{.Count}} byte"
+  },
+  {
+    "id": "buckets.size_less_than",
+    "other": "Size less than {{.Count}} bytes",
+    "one": "Size less than {{.Count}} byte"
+  },
+  {
+    "id": "buckets.abort_incomplete_uploads_after",
+    "other": "Abort incomplete uploads after {{.Count}} days",
+    "one": "Abort incomplete uploads after {{.Count}} day"
+  },
+  {
+    "id": "buckets.delete_all_versions_when_the_current_version",
+    "other": "Delete all versions when the current version expires"
+  },
+  {
+    "id": "buckets.delete_all_versions_after",
+    "other": "Delete all versions after {{.Count}} days",
+    "one": "Delete all versions after {{.Count}} day"
+  },
+  {
+    "id": "buckets.delete_the_marker_and_its_versions_after",
+    "other": "Delete the marker and its versions after {{.Count}} days",
+    "one": "Delete the marker and its versions after {{.Count}} day"
+  },
+  {
+    "id": "buckets.compress_the_current_version",
+    "other": "Compress the current version"
+  },
+  {
+    "id": "buckets.compress_older_versions",
+    "other": "Compress older versions"
+  },
+  {
+    "id": "buckets.the_configuration_contains_parameters_that_the_current",
+    "other": "The configuration contains parameters that the current SDK cannot save without loss. Changes are disabled; the original rules are preserved in MinIO."
+  },
+  {
+    "id": "buckets.the_rule_name_must_contain1_to",
+    "other": "The rule name must contain 1 to 255 bytes without control characters."
+  },
+  {
+    "id": "buckets.the_path_must_be_at_most1",
+    "other": "The path must be at most 1,024 bytes without control characters. An empty path covers the entire bucket."
+  },
+  {
+    "id": "buckets.periods_and_retained_version_counts_must_be",
+    "other": "Periods and retained version counts must be integers between 0 and 2,147,483,647."
+  },
+  {
+    "id": "buckets.choose_an_age_in_daysa_date",
+    "other": "Choose an age in days, a date or delete marker cleanup for current versions."
+  },
+  {
+    "id": "buckets.specifya_valid_transition_age_in_days",
+    "other": "Specify a valid transition age in days."
+  },
+  {
+    "id": "buckets.a_tier_name_must_contain3_to",
+    "other": "A tier name must contain 3 to 32 uppercase Latin letters, digits, _ or -."
+  },
+  {
+    "id": "buckets.specifya_transition_date_or_an_age",
+    "other": "Specify a transition date or an age in days."
+  },
+  {
+    "id": "buckets.selecta_tier_for_current_versions",
+    "other": "Select a tier for current versions."
+  },
+  {
+    "id": "buckets.the_transition_age_for_older_versions_must",
+    "other": "The transition age for older versions must be greater than zero."
+  },
+  {
+    "id": "buckets.selecta_tier_for_older_versions",
+    "other": "Select a tier for older versions."
+  },
+  {
+    "id": "buckets.specifya_valid_expiration_date_inyyyy",
+    "other": "Specify a valid expiration date in YYYY-MM-DD format."
+  },
+  {
+    "id": "buckets.add_at_least_one_action_deleting_versions",
+    "other": "Add at least one action: deleting versions/markers or transitioning to a storage tier."
+  },
+  {
+    "id": "buckets.bucket_setting_changed_bucket_lifecycle_change",
+    "other": "Lifecycle rules changed. Load the current rules before saving."
+  },
+  {
+    "id": "buckets.lifecycle_rule_not_found",
+    "other": "The rule no longer exists. Refresh the list."
+  },
+  {
+    "id": "buckets.invalid_lifecycle_rule",
+    "other": "Provide the rule parameters."
+  },
+  {
+    "id": "buckets.lifecycle_limit",
+    "other": "A bucket may have no more than 1,000 Lifecycle rules."
+  },
+  {
+    "id": "buckets.invalid_lifecycle_rule_bucket_lifecycle_change",
+    "other": "Specify the rule status."
+  },
+  {
+    "id": "buckets.confirmation_required_bucket_lifecycle_change",
+    "other": "Confirm deletion of the selected rule."
+  },
+  {
+    "id": "buckets.method_not_allowed",
+    "other": "This Lifecycle modification method is not supported."
+  },
+  {
+    "id": "buckets.invalid_lifecycle_rule_bucket_lifecycle_change_change_lifecycle",
+    "other": "MinIO rejected the Lifecycle rule. Check periods, conditions and whether the actions are compatible with the bucket settings."
+  },
+  {
+    "id": "buckets.access_denied",
+    "other": "Insufficient MinIO permissions to modify Lifecycle rules."
+  },
+  {
+    "id": "buckets.lifecycle_write_failed",
+    "other": "MinIO did not confirm the rule changes. Refresh the list."
+  },
+  {
+    "id": "buckets.invalid_retention",
+    "other": "Provide a retention period or null to remove default retention."
+  },
+  {
+    "id": "buckets.invalid_retention_bucket_retention",
+    "other": "Select GOVERNANCE or COMPLIANCE, a positive integer period and DAYS or YEARS."
+  },
+  {
+    "id": "buckets.invalid_retention_bucket_retention_parse_retention",
+    "other": "The retention period must be between 1 and 36,500 days or between 1 and 100 years."
+  },
+  {
+    "id": "buckets.bucket_setting_changed_bucket_update",
+    "other": "The setting changed after it was opened. Your changes were not saved. Load the current value before saving again."
+  },
+  {
+    "id": "buckets.invalid_tags",
+    "other": "Provide up to 50 tags. Pass an empty list to remove all tags."
+  },
+  {
+    "id": "buckets.invalid_tags_bucket_update",
+    "other": "Tag keys must be unique."
+  },
+  {
+    "id": "buckets.invalid_tags_bucket_update_validate_bucket_tags",
+    "other": "The aws: prefix is reserved. Choose another tag key."
+  },
+  {
+    "id": "buckets.invalid_tags_bucket_update_validate_bucket_tagsb75523",
+    "other": "Check the tags: keys must contain 1 to 128 characters and values up to 256. Latin letters, digits, spaces and + - . _ : / @ = are allowed."
+  },
+  {
+    "id": "buckets.invalid_bucket_name_catalog_change",
+    "other": "A bucket name must contain 3 to 63 lowercase Latin letters, digits, dots or hyphens and must not be an IP address."
+  },
+  {
+    "id": "buckets.already_exists",
+    "other": "A bucket with this name already exists."
+  },
+  {
+    "id": "buckets.invalid_bucket_field",
+    "other": "Select an available settings section."
+  },
+  {
+    "id": "buckets.invalid_versioning",
+    "other": "Versioning can be enabled or suspended. Returning to the never-enabled state is not supported."
+  },
+  {
+    "id": "buckets.invalid_object_lock",
+    "other": "Object Lock can be enabled but cannot be disabled. To remove default retention, pass defaultRetention: null and enabled: true."
+  },
+  {
+    "id": "buckets.versioning_restricted",
+    "other": "The server does not allow suspending versioning on this bucket. It must remain enabled when Object Lock is enabled."
+  },
+  {
+    "id": "buckets.versioning_required",
+    "other": "Enable bucket versioning before enabling Object Lock."
+  },
+  {
+    "id": "buckets.object_lock_unavailable",
+    "other": "The server refused to enable Object Lock on the existing bucket. If it only supports this setting during creation, create a bucket with Object Lock enabled."
+  },
+  {
+    "id": "buckets.invalid_policy",
+    "other": "Provide a policy JSON document or null to remove it."
+  },
+  {
+    "id": "buckets.invalid_policy_settings_change",
+    "other": "Invalid policy JSON."
+  },
+  {
+    "id": "buckets.invalid_quota",
+    "other": "Specify an integer byte count between 0 and 9,007,199,254,740,991. Zero removes the size limit."
+  },
+  {
+    "id": "capabilities.invalid_capability",
+    "other": "Unknown storage capability."
+  },
+  {
+    "id": "capabilities.invalid_capability_scope",
+    "other": "Invalid capability check scope."
+  },
+  {
+    "id": "capabilities.invalid_capability_scope_report_usecase",
+    "other": "A file requires a bucket, and a version requires a file."
+  },
+  {
+    "id": "endpoint.invalid_endpoint",
+    "other": "Specify an HTTP(S) S3 API address without a path, parameters or embedded password."
+  },
+  {
+    "id": "endpoint.invalid_endpoint_endpoint",
+    "other": "Invalid S3 API address."
+  },
+  {
+    "id": "endpoint.endpoint_not_allowed",
+    "other": "For HTTP or internal MinIO, add the address to the API service's MINIO_ALLOWED_ENDPOINTS."
+  },
+  {
+    "id": "endpoint.endpoint_unavailable",
+    "other": "Could not resolve the S3 API. Check the address and DNS from the API container."
+  },
+  {
+    "id": "endpoint.endpoint_not_allowed_endpoint",
+    "other": "The internal MinIO address must be allowed through the API service's MINIO_ALLOWED_ENDPOINTS."
+  },
+  {
+    "id": "files.invalid_content_search",
+    "other": "Enter text up to 256 bytes and valid search limits."
+  },
+  {
+    "id": "files.invalid_content_extensions",
+    "other": "Select text extensions, for example json,yaml,txt,log."
+  },
+  {
+    "id": "files.invalid_usage_scope",
+    "other": "Open a valid bucket and folder."
+  },
+  {
+    "id": "files.invalid_usage_cursor",
+    "other": "This cursor belongs to a different calculation."
+  },
+  {
+    "id": "files.usage_versions_unavailable",
+    "other": "The storage did not return a versions list."
+  },
+  {
+    "id": "files.invalid_usage_page",
+    "other": "The storage returned too many entries."
+  },
+  {
+    "id": "files.invalid_usage_page_object_usage_usecase",
+    "other": "Entries outside the selected folder were returned."
+  },
+  {
+    "id": "files.invalid_usage_page_object_usage_usecase_read_object_usage",
+    "other": "The storage did not return a listing continuation."
+  },
+  {
+    "id": "files.invalid_version",
+    "other": "Select a specific file version."
+  },
+  {
+    "id": "files.invalid_protection",
+    "other": "Select a protection type."
+  },
+  {
+    "id": "files.confirmation_required",
+    "other": "Confirm changes to the selected version."
+  },
+  {
+    "id": "files.invalid_hold",
+    "other": "Select ON or OFF."
+  },
+  {
+    "id": "files.invalid_retention",
+    "other": "Select a retention mode and a future expiration date."
+  },
+  {
+    "id": "files.object_protected",
+    "other": "MinIO rejected the change: check permissions and the existing retention period. GOVERNANCE bypass is not used; COMPLIANCE retention cannot be shortened."
+  },
+  {
+    "id": "files.invalid_listing",
+    "other": "Invalid object listing parameters."
+  },
+  {
+    "id": "files.unsupported_preview",
+    "other": "File preview is not available for this format."
+  },
+  {
+    "id": "files.preview_too_large",
+    "other": "Preview limits: 1 MB for text, 20 MB for images and PDF."
+  },
+  {
+    "id": "files.object_changed",
+    "other": "The file changed. Open the preview again."
+  },
+  {
+    "id": "files.object_changed_objects_usecase",
+    "other": "The file changed or was only partially transferred. Open the preview again."
+  },
+  {
+    "id": "files.unsupported_media",
+    "other": "The file is not supported audio or video."
+  },
+  {
+    "id": "files.invalid_lifetime",
+    "other": "The link lifetime must be between 1 second and 7 days."
+  },
+  {
+    "id": "files.invalid_mode",
+    "other": "Invalid link type."
+  },
+  {
+    "id": "folders.invalid_folder_path",
+    "other": "Specify a valid bucket."
+  },
+  {
+    "id": "folders.invalid_folder_listing",
+    "other": "Could not confirm a complete folder listing. Check again."
+  },
+  {
+    "id": "folders.invalid_folder_listing_folder_delete",
+    "other": "MinIO returned an object outside the selected folder. A complete listing could not be confirmed."
+  },
+  {
+    "id": "folders.folder_delete_limit",
+    "other": "The folder contains more than 5,000 objects. Select a smaller subfolder."
+  },
+  {
+    "id": "folders.invalid_folder_delete",
+    "other": "The object does not belong to the selected folder."
+  },
+  {
+    "id": "folders.confirmation_required",
+    "other": "Confirm the exact path of the folder to delete."
+  },
+  {
+    "id": "folders.revision_required",
+    "other": "Check the object before deleting it."
+  },
+  {
+    "id": "folders.object_changed",
+    "other": "The object changed after verification and was not deleted. Reload the folder contents before retrying."
+  },
+  {
+    "id": "folders.folder_not_empty",
+    "other": "The folder marker was retained because objects remain inside. Check the errors or reload the folder."
+  },
+  {
+    "id": "folders.object_delete_denied",
+    "other": "MinIO denied deletion. Check permissions, the bucket policy and object protection."
+  },
+  {
+    "id": "folders.invalid_range",
+    "other": "The file range is unavailable."
+  },
+  {
+    "id": "folders.invalid_folder_name",
+    "other": "Specify a folder name without slashes or control characters. The names . and .. are not allowed."
+  },
+  {
+    "id": "folders.invalid_folder_path_folders",
+    "other": "Invalid parent folder path. Reopen the folder."
+  },
+  {
+    "id": "folders.invalid_folder_path_folders_folder_key",
+    "other": "The parent folder path must not contain . or .. segments."
+  },
+  {
+    "id": "folders.invalid_folder_name_folders",
+    "other": "The name is too long: the full folder path must not exceed 1,024 UTF-8 bytes."
+  },
+  {
+    "id": "folders.folder_exists",
+    "other": "A folder with this name already exists. Choose another name."
+  },
+  {
+    "id": "folders.folder_share_expired",
+    "other": "The link is invalid or expired."
+  },
+  {
+    "id": "folders.folder_scope_denied",
+    "other": "This link does not provide access to the folder."
+  },
+  {
+    "id": "folders.folder_scope_denied_public_usecase",
+    "other": "This link does not provide access to the file."
+  },
+  {
+    "id": "folders.invalid_ticket",
+    "other": "Incorrect link type."
+  },
+  {
+    "id": "folders.unsupported_preview",
+    "other": "Streaming preview is not available for this format."
+  },
+  {
+    "id": "folders.unsupported_preview_public_usecase",
+    "other": "Preview is unavailable."
+  },
+  {
+    "id": "folders.preview_too_large",
+    "other": "The file exceeds the preview limit."
+  },
+  {
+    "id": "folders.invalid_text",
+    "other": "The file is not UTF-8 text."
+  },
+  {
+    "id": "folders.not_found",
+    "other": "The section was not found."
+  },
+  {
+    "id": "folders.download_expired",
+    "other": "The file link expired. Click Download again."
+  },
+  {
+    "id": "folders.folder_scope_denied_public_usecase_open_shared_file",
+    "other": "The file is unavailable."
+  },
+  {
+    "id": "folders.folder_share_expired_model",
+    "other": "The link was revoked or expired."
+  },
+  {
+    "id": "folders.shared_read_closed",
+    "other": "Reading has already started or is closed. Obtain a new link."
+  },
+  {
+    "id": "folders.invalid_folder_share",
+    "other": "Specify a folder and a lifetime between one minute and one day."
+  },
+  {
+    "id": "folders.share_permissions_unavailable",
+    "other": "Could not verify permissions to issue the link."
+  },
+  {
+    "id": "folders.folder_share_denied",
+    "other": "There are no confirmed permissions to browse the selected folder."
+  },
+  {
+    "id": "iam.minio_did_not_return_action_permissions_in",
+    "other": "MinIO did not return action permissions in time. Modification buttons are hidden."
+  },
+  {
+    "id": "iam.minio_denied_reading_action_permissions_modification_buttons",
+    "other": "MinIO denied reading action permissions. Modification buttons are hidden."
+  },
+  {
+    "id": "iam.the_server_does_not_support_checking_action",
+    "other": "The server does not support checking action permissions. Modification buttons are hidden."
+  },
+  {
+    "id": "iam.could_not_retrieve_action_permissions_from_minio",
+    "other": "Could not retrieve action permissions from MinIO. Modification buttons are hidden."
+  },
+  {
+    "id": "iam.minio_did_not_return_the_connection_owner",
+    "other": "MinIO did not return the connection owner. Modification buttons are hidden."
+  },
+  {
+    "id": "iam.could_not_read_theiam_policy_format",
+    "other": "Could not read the IAM policy format. Modification buttons are hidden."
+  },
+  {
+    "id": "iam.could_not_confirm_the_key_owner_modification",
+    "other": "Could not confirm the key owner. Modification buttons are hidden."
+  },
+  {
+    "id": "iam.minio_reports_that_the_key_is_disabled",
+    "other": "MinIO reports that the key is disabled. Modification buttons are hidden."
+  },
+  {
+    "id": "iam.could_not_read_the_key_restrictions_modification",
+    "other": "Could not read the key restrictions. Modification buttons are hidden."
+  },
+  {
+    "id": "iam.could_not_read_minios_connection_owner",
+    "other": "Could not read MinIO's connection owner response. Check server compatibility and Admin API proxying. Modification buttons are hidden."
+  },
+  {
+    "id": "iam.the_minio_permissions_response_is_too_large",
+    "other": "The MinIO permissions response is too large. Modification buttons are hidden."
+  },
+  {
+    "id": "iam.the_minio_address_or_proxy_does_not",
+    "other": "The MinIO address or proxy does not serve the Admin API permissions endpoint. Modification buttons are hidden."
+  },
+  {
+    "id": "iam.minio_or_its_proxy_returned_an_error",
+    "other": "MinIO or its proxy returned an error while checking permissions. Modification buttons are hidden."
+  },
+  {
+    "id": "identities.invalid_target",
+    "other": "Select one user, group or policy."
+  },
+  {
+    "id": "identities.invalid_target_bindings",
+    "other": "Invalid principal or policy name."
+  },
+  {
+    "id": "identities.invalid_binding",
+    "other": "Select a policy and one user or group."
+  },
+  {
+    "id": "identities.invalid_group",
+    "other": "Specify a group name and at least one member."
+  },
+  {
+    "id": "identities.already_exists",
+    "other": "The group already exists. Use member management."
+  },
+  {
+    "id": "identities.group_create_acknowledgement_required",
+    "other": "Acknowledge the concurrent creation risk: if another client takes this name after the check, MinIO may add members to that client's group."
+  },
+  {
+    "id": "identities.invalid_status",
+    "other": "Specify enabled."
+  },
+  {
+    "id": "identities.group_not_empty",
+    "other": "Remove the group's members first."
+  },
+  {
+    "id": "identities.the_details_were_not_retrieved_within_the",
+    "other": "The details were not retrieved within the time limit."
+  },
+  {
+    "id": "identities.invalid_policy_definition",
+    "other": "The server returned a rule with an unknown Effect."
+  },
+  {
+    "id": "identities.invalid_policy_name",
+    "other": "Enter a valid policy name."
+  },
+  {
+    "id": "identities.already_exists_policies",
+    "other": "The policy already exists. Open it for editing."
+  },
+  {
+    "id": "identities.policy_create_acknowledgement_required",
+    "other": "Acknowledge the concurrent creation risk: if another client takes this name after the check, MinIO may overwrite that client's policy while preserving assignments."
+  },
+  {
+    "id": "identities.policy_changed",
+    "other": "The policy changed. Close the editor and open the current version."
+  },
+  {
+    "id": "identities.policy_in_use",
+    "other": "Detach the policy from users and groups first."
+  },
+  {
+    "id": "identities.the_assignments_were_not_retrieved_within_the",
+    "other": "The assignments were not retrieved within the time limit."
+  },
+  {
+    "id": "identities.the_dates_were_not_retrieved_within_the",
+    "other": "The dates were not retrieved within the time limit."
+  },
+  {
+    "id": "identities.invalid_user",
+    "other": "The user name must contain 3 to 128 characters. The password must contain 8 to 256 characters."
+  },
+  {
+    "id": "identities.already_exists_users",
+    "other": "The user already exists. Their password was not changed."
+  },
+  {
+    "id": "identities.user_create_acknowledgement_required",
+    "other": "Acknowledge the concurrent creation risk: if another client takes this name after the check, MinIO may replace that user's password and enable the user."
+  },
+  {
+    "id": "identities.current_user",
+    "other": "You cannot disable the user of the current connection."
+  },
+  {
+    "id": "identities.current_user_users",
+    "other": "You cannot delete the user of the current connection."
+  },
+  {
+    "id": "keys.access_key_not_found",
+    "other": "The key no longer exists or is unavailable to this connection. Refresh the list."
+  },
+  {
+    "id": "keys.unreadable_access_key_policy",
+    "other": "MinIO did not return the key policy. Settings cannot be changed until the policy has been read."
+  },
+  {
+    "id": "keys.invalid_key_name",
+    "other": "A key name may contain up to 32 Latin letters, digits, hyphens or underscores. The first character must be a letter."
+  },
+  {
+    "id": "keys.invalid_key_description",
+    "other": "The description must not exceed 256 UTF-8 bytes."
+  },
+  {
+    "id": "keys.invalid_parent",
+    "other": "Specify a valid owner user."
+  },
+  {
+    "id": "keys.invalid_policy",
+    "other": "Provide a policy or null to inherit the user's permissions."
+  },
+  {
+    "id": "keys.invalid_policy_access_keys",
+    "other": "Statement must contain an access rule or a list of access rules."
+  },
+  {
+    "id": "keys.invalid_policy_access_keys_validate_key_input",
+    "other": "Add at least one rule. Use a rule with Effect: Deny to deny all access."
+  },
+  {
+    "id": "keys.invalid_expiration",
+    "other": "Choose a lifetime between 15 minutes and 365 days. Choose No expiration for a permanent key."
+  },
+  {
+    "id": "keys.access_key_changed",
+    "other": "The key changed after the dialog was opened. Your changes were not saved. Close the dialog and open the current settings."
+  },
+  {
+    "id": "keys.immutable_parent",
+    "other": "An existing key's owner cannot be changed. Create a new key for the required user."
+  },
+  {
+    "id": "keys.empty_key_metadata",
+    "other": "Provide a new name or description to change it. This MinIO operation does not support clearing these fields."
+  },
+  {
+    "id": "keys.invalid_scope",
+    "other": "Select your keys, all keys or one user."
+  },
+  {
+    "id": "keys.current_access_key",
+    "other": "You cannot modify or delete the key used by the current connection. Connect with another key."
+  },
+  {
+    "id": "keys.confirmation_required",
+    "other": "Enter the Access Key to rotate its secret."
+  },
+  {
+    "id": "objects.checksum_started",
+    "other": "The check has already started. Prepare it again."
+  },
+  {
+    "id": "objects.checksum_closed",
+    "other": "The check is closed. Prepare it again."
+  },
+  {
+    "id": "objects.checksum_not_prepared",
+    "other": "The checksum calculation was not prepared."
+  },
+  {
+    "id": "objects.invalid_object",
+    "other": "Select a file."
+  },
+  {
+    "id": "objects.invalid_expected_checksum",
+    "other": "SHA-256 must contain 64 hexadecimal characters."
+  },
+  {
+    "id": "objects.the_storage_did_not_return_checksums_you",
+    "other": "The storage did not return checksums. You can calculate SHA-256."
+  },
+  {
+    "id": "objects.incomplete_checksum_read",
+    "other": "The file was incomplete. Repeat the check."
+  },
+  {
+    "id": "objects.object_changed",
+    "other": "The file changed during verification. Start the check again."
+  },
+  {
+    "id": "objects.invalid_version",
+    "other": "Specify a valid version ID."
+  },
+  {
+    "id": "objects.invalid_object_attributes",
+    "other": "The page size must be between 1 and 1,000, and the part marker between 0 and 10,000."
+  },
+  {
+    "id": "objects.invalid_attributes_snapshot",
+    "other": "Invalid attributes snapshot."
+  },
+  {
+    "id": "objects.attributes_snapshot_required",
+    "other": "To continue, provide the previous page's snapshot or a specific immutable version."
+  },
+  {
+    "id": "objects.object_attributes_changed",
+    "other": "The object changed between pages. Restart reading attributes."
+  },
+  {
+    "id": "objects.attributes_snapshot_unavailable",
+    "other": "The storage did not return identifiers for safe pagination. Specify a specific object version."
+  },
+  {
+    "id": "objects.not_editable",
+    "other": "The editor is available for text files."
+  },
+  {
+    "id": "objects.text_too_large",
+    "other": "The editor and table viewer support files up to 1 MiB."
+  },
+  {
+    "id": "objects.encoded_text",
+    "other": "Compressed contents cannot be edited as plain text."
+  },
+  {
+    "id": "objects.object_changed_object_content_usecase",
+    "other": "The file changed. Refresh its contents."
+  },
+  {
+    "id": "objects.invalid_text",
+    "other": "Preview requires UTF-8 text without null bytes."
+  },
+  {
+    "id": "objects.invalid_text_object_content_usecase",
+    "other": "UTF-8 text up to 1 MiB without null bytes is required."
+  },
+  {
+    "id": "objects.invalid_document",
+    "other": "Fix the JSON errors before saving."
+  },
+  {
+    "id": "objects.content_changed",
+    "other": "The file changed in S3. Your draft is preserved in the editor; load the current file for comparison."
+  },
+  {
+    "id": "objects.content_protected",
+    "other": "Could not safely preserve file properties or protection. Editing is unavailable."
+  },
+  {
+    "id": "objects.confirmation_required",
+    "other": "Confirm the exact file key to delete it."
+  },
+  {
+    "id": "objects.revision_required",
+    "other": "Refresh the file details before deleting it."
+  },
+  {
+    "id": "objects.object_changed_object_delete_usecase",
+    "other": "The file changed after the dialog was opened. Refresh its details and check the file before deleting it."
+  },
+  {
+    "id": "objects.object_delete_denied",
+    "other": "MinIO denied deletion. Check s3:DeleteObject permission, the bucket policy and object protection."
+  },
+  {
+    "id": "objects.tags_are_unavailable_check_permission_to_read",
+    "other": "Tags are unavailable. Check permission to read tags."
+  },
+  {
+    "id": "objects.editing_metadata_for_this_encryption_type_is",
+    "other": "Editing metadata for this encryption type is not yet supported."
+  },
+  {
+    "id": "objects.metadata_ofa_protected_object_is_read",
+    "other": "Metadata of a protected object is read-only. Tags can be changed with the required permissions."
+  },
+  {
+    "id": "objects.invalid_property_mode",
+    "other": "Select how to modify the values."
+  },
+  {
+    "id": "objects.invalid_object_headers",
+    "other": "Check the headers: up to 2,048 bytes, without control characters."
+  },
+  {
+    "id": "objects.invalid_object_headers_object_properties",
+    "other": "Specify a valid Content-Type, for example image/png."
+  },
+  {
+    "id": "objects.invalid_object_metadata",
+    "other": "Metadata keys may contain lowercase Latin letters, digits, hyphens and underscores, without x-amz-."
+  },
+  {
+    "id": "objects.invalid_object_metadata_object_properties",
+    "other": "Invalid metadata key."
+  },
+  {
+    "id": "objects.invalid_object_metadata_object_properties_validate_property_patch",
+    "other": "Metadata exceeds 2 KiB."
+  },
+  {
+    "id": "objects.invalid_object_tags",
+    "other": "Up to 10 tags are allowed: keys up to 128 characters, values up to 256, without the aws: prefix."
+  },
+  {
+    "id": "objects.invalid_object_object_properties_usecase",
+    "other": "Select a file rather than a folder."
+  },
+  {
+    "id": "objects.object_properties_changed",
+    "other": "The file or its properties changed. Refresh the details before saving."
+  },
+  {
+    "id": "objects.empty_property_patch",
+    "other": "Select properties to change."
+  },
+  {
+    "id": "objects.object_properties_changed_object_property_target",
+    "other": "The file changed or was deleted. Refresh the details before saving."
+  },
+  {
+    "id": "objects.object_changed_object_property_target",
+    "other": "The file changed or the verified version was deleted. Refresh its contents."
+  },
+  {
+    "id": "objects.object_properties_changed_object_property_target_tagged_target",
+    "other": "The tag modification request completed, but the file changed or was deleted during the operation. Check the result before retrying."
+  },
+  {
+    "id": "objects.object_tags_unverified",
+    "other": "The tag modification request completed, but the file state could not be verified. Refresh the details before retrying."
+  },
+  {
+    "id": "objects.copy_unsupported",
+    "other": "The storage does not support server-side part copying."
+  },
+  {
+    "id": "objects.invalid_cursor",
+    "other": "Invalid versions cursor."
+  },
+  {
+    "id": "objects.invalid_cursor_object_versions",
+    "other": "The cursor belongs to a different file."
+  },
+  {
+    "id": "objects.version_listing_failed",
+    "other": "MinIO did not return a versions list."
+  },
+  {
+    "id": "objects.version_listing_failed_object_versions",
+    "other": "MinIO returned an invalid versions continuation. Refresh the list."
+  },
+  {
+    "id": "objects.invalid_object_objects",
+    "other": "Specify a valid bucket and object key."
+  },
+  {
+    "id": "objects.destination_changed",
+    "other": "The destination file changed. Check its state and choose again whether to skip or overwrite."
+  },
+  {
+    "id": "objects.destination_changed_conditional",
+    "other": "The file changed during the operation. Check its state before retrying."
+  },
+  {
+    "id": "remotesource.source_response",
+    "other": "The source did not return a file (HTTP 200 was expected)."
+  },
+  {
+    "id": "remotesource.source_unavailable",
+    "other": "Could not retrieve the file. Check the public link and source availability."
+  },
+  {
+    "id": "remotesource.source_denied",
+    "other": "Invalid source address."
+  },
+  {
+    "id": "remotesource.sourcedns",
+    "other": "Could not resolve the source."
+  },
+  {
+    "id": "remotesource.source_denied_client",
+    "other": "Internal and service addresses cannot be used for import."
+  },
+  {
+    "id": "remotesource.too_many_redirects",
+    "other": "The source returned too many redirects."
+  },
+  {
+    "id": "runtime.account_info_too_large",
+    "other": "The permissions response exceeds the allowed size."
+  },
+  {
+    "id": "runtime.transfer_limit",
+    "other": "The transfer limit was reached. Wait for current operations to finish and retry."
+  },
+  {
+    "id": "runtime.login_rate_limit",
+    "other": "Too many connection attempts. Wait and retry."
+  },
+  {
+    "id": "runtime.too_many_requests",
+    "other": "Too many concurrent connections. Try again later."
+  },
+  {
+    "id": "runtime.login_rate_limit_admission",
+    "other": "Too many connection attempts with this key. Wait and retry."
+  },
+  {
+    "id": "runtime.archive_limit",
+    "other": "The prepared archive limit was reached. Remove completed operations and retry."
+  },
+  {
+    "id": "runtime.capability_busy",
+    "other": "Storage checks are busy. Retry the request later."
+  },
+  {
+    "id": "runtime.invite_limit",
+    "other": "The active link limit was reached. Revoke unused links."
+  },
+  {
+    "id": "runtime.invite_exists",
+    "other": "The link already exists."
+  },
+  {
+    "id": "runtime.invite_not_found",
+    "other": "The link was not found."
+  },
+  {
+    "id": "runtime.multipart_limit",
+    "other": "The managed upload limit was reached. Complete or cancel active uploads."
+  },
+  {
+    "id": "runtime.multipart_exists",
+    "other": "The upload already exists."
+  },
+  {
+    "id": "runtime.server_closing",
+    "other": "The API is shutting down. Retry the request later."
+  },
+  {
+    "id": "runtime.session_expired",
+    "other": "The session has expired. Reconnect."
+  },
+  {
+    "id": "runtime.session_limit",
+    "other": "The active session limit was reached. Close old connections or try again later."
+  },
+  {
+    "id": "runtime.share_limit",
+    "other": "The link limit was reached. Revoke unused links."
+  },
+  {
+    "id": "runtime.ticket_limit",
+    "other": "Too many file links. Try again later."
+  },
+  {
+    "id": "runtime.zip_busy",
+    "other": "Other archives are being processed. Try again later."
+  },
+  {
+    "id": "search.encoded_text",
+    "other": "Compressed text was skipped."
+  },
+  {
+    "id": "search.search_file_too_large",
+    "other": "The file exceeds the selected size."
+  },
+  {
+    "id": "search.search_object_changed",
+    "other": "The file changed during the search."
+  },
+  {
+    "id": "search.invalid_object_listing",
+    "other": "S3 returned an invalid or incomplete object listing. Check again."
+  },
+  {
+    "id": "search.invalid_search",
+    "other": "Check the search parameters."
+  },
+  {
+    "id": "search.invalid_search_prepare_file_search",
+    "other": "The size must be a non-negative integer byte count."
+  },
+  {
+    "id": "search.invalid_search_prepare_file_search_file_search",
+    "other": "The maximum size is less than the minimum."
+  },
+  {
+    "id": "search.invalid_search_prepare_file_search_file_search8edb05",
+    "other": "Specify a date in YYYY-MM-DD format."
+  },
+  {
+    "id": "search.invalid_search_prepare_file_search_file_search448466",
+    "other": "The end date is earlier than the start date."
+  },
+  {
+    "id": "selectquery.select_source_too_large",
+    "other": "Select an object no larger than 256 MiB for S3 Select."
+  },
+  {
+    "id": "selectquery.select_result_limit",
+    "other": "The S3 Select result exceeds the configured limit. Refine the query."
+  },
+  {
+    "id": "selectquery.select_query_failed",
+    "other": "The storage rejected the S3 Select query. Check the SQL and file format; the result is incomplete."
+  },
+  {
+    "id": "selectquery.select_closed",
+    "other": "The S3 Select query is already running or closed."
+  },
+  {
+    "id": "selectquery.select_result_limit_query_usecase",
+    "other": "The S3 Select result exceeded the configured limit. The data already received is incomplete."
+  },
+  {
+    "id": "selectquery.select_source_changed",
+    "other": "The file changed during S3 Select. The result is incomplete; retry the query."
+  },
+  {
+    "id": "selectquery.invalid_select_statistics",
+    "other": "The S3 Select final statistics do not match the received result. The result is incomplete."
+  },
+  {
+    "id": "selectquery.invalid_select_query",
+    "other": "Specify SQL up to 16 KiB, one CSV/JSON format, valid serialization and execution limits."
+  },
+  {
+    "id": "server.minio_history_is_unavailable",
+    "other": "MinIO history is unavailable."
+  },
+  {
+    "id": "server.server_config_changed",
+    "other": "The settings changed. Refresh the data before saving."
+  },
+  {
+    "id": "server.invalid_config_history",
+    "other": "Invalid history entry."
+  },
+  {
+    "id": "server.invalid_config_values",
+    "other": "There are no available changes to apply."
+  },
+  {
+    "id": "server.config_environment_override",
+    "other": "This parameter is set through ENV. Change it in the MinIO startup configuration."
+  },
+  {
+    "id": "server.invalid_config_value",
+    "other": "Invalid value for parameter {{.Name}}."
+  },
+  {
+    "id": "server.invalid_config_key",
+    "other": "The parameter does not exist or cannot be edited."
+  },
+  {
+    "id": "server.invalid_diagnostic",
+    "other": "Select logs or trace, 1 to 10 seconds and 1 to 200 lines."
+  },
+  {
+    "id": "server.minio_ended_the_trace_before_collection_finished",
+    "other": "MinIO ended the trace before collection finished."
+  },
+  {
+    "id": "server.minio_could_not_open_the_server_log",
+    "other": "MinIO could not open the server log."
+  },
+  {
+    "id": "server.not_implemented",
+    "other": "This server version or type does not support diagnostics."
+  },
+  {
+    "id": "server.invalid_pool_operation",
+    "other": "Unknown pool operation."
+  },
+  {
+    "id": "server.invalid_pool_operation_pool_change",
+    "other": "Select a pool operation."
+  },
+  {
+    "id": "server.confirmation_required",
+    "other": "Enter the operation confirmation text."
+  },
+  {
+    "id": "server.pools_changed",
+    "other": "The pool state changed. Refresh the data and retry the action."
+  },
+  {
+    "id": "server.pool_not_found",
+    "other": "The pool no longer exists."
+  },
+  {
+    "id": "server.pools_not_ready",
+    "other": "At least two pools and confirmed absence of rebalancing are required."
+  },
+  {
+    "id": "server.pool_busy",
+    "other": "Another pool is being decommissioned or has already been decommissioned. Finish the topology change first."
+  },
+  {
+    "id": "server.pool_busy_pool_change",
+    "other": "The pool cannot be decommissioned in its current state."
+  },
+  {
+    "id": "server.rebalance_inactive",
+    "other": "There is no confirmed active rebalance."
+  },
+  {
+    "id": "server.decommission_inactive",
+    "other": "The pool is not currently being decommissioned."
+  },
+  {
+    "id": "server.concurrent_requests0_means_automatic",
+    "other": "Concurrent requests (0 means automatic)"
+  },
+  {
+    "id": "server.cluster_response_timeout",
+    "other": "Cluster response timeout"
+  },
+  {
+    "id": "server.remote_storage_timeout",
+    "other": "Remote storage timeout"
+  },
+  {
+    "id": "server.replication_priority",
+    "other": "Replication priority"
+  },
+  {
+    "id": "server.replication_workers",
+    "other": "Replication workers"
+  },
+  {
+    "id": "server.large_object_workers",
+    "other": "Large object workers"
+  },
+  {
+    "id": "server.storage_tier_transition_workers",
+    "other": "Storage tier transition workers"
+  },
+  {
+    "id": "server.incomplete_upload_cleanup_interval",
+    "other": "Incomplete upload cleanup interval"
+  },
+  {
+    "id": "server.incomplete_upload_expiration_age",
+    "other": "Incomplete upload expiration age"
+  },
+  {
+    "id": "server.deleted_object_background_cleanup_interval",
+    "other": "Deleted object background cleanup interval"
+  },
+  {
+    "id": "server.scanner_speed",
+    "other": "Scanner speed"
+  },
+  {
+    "id": "server.object_version_count_threshold",
+    "other": "Object version count threshold"
+  },
+  {
+    "id": "server.folder_count_threshold",
+    "other": "Folder count threshold"
+  },
+  {
+    "id": "server.bit_rot_scanning",
+    "other": "Bit rot scanning"
+  },
+  {
+    "id": "server.healing_pause",
+    "other": "Healing pause"
+  },
+  {
+    "id": "server.io_operation_threshold",
+    "other": "I/O operation threshold"
+  },
+  {
+    "id": "server.drive_workers_empty_means_automatic",
+    "other": "Drive workers (empty means automatic)"
+  },
+  {
+    "id": "server.invalid_subsystem",
+    "other": "Select API, scanner or healing."
+  },
+  {
+    "id": "server.server_feature_unavailable",
+    "other": "This section is unavailable in the current MinIO configuration."
+  },
+  {
+    "id": "server.server_operation_failed",
+    "other": "MinIO rejected the operation. Refresh the state and check the server settings."
+  },
+  {
+    "id": "server.permission_unknown",
+    "other": "Could not confirm permission to modify the server."
+  },
+  {
+    "id": "server.access_denied",
+    "other": "Permission for this action is not confirmed."
+  },
+  {
+    "id": "server.config_too_large",
+    "other": "The configuration response exceeds the limit."
+  },
+  {
+    "id": "server.invalid_server_config",
+    "other": "Could not read the MinIO configuration."
+  },
+  {
+    "id": "server.object_statistics_are_unavailable_scanner_data_or",
+    "other": "Object statistics are unavailable: scanner data or permission to read it is missing."
+  },
+  {
+    "id": "server.invalid_metrics",
+    "other": "MinIO returned invalid metrics."
+  },
+  {
+    "id": "server.pool_management_is_only_available_ina",
+    "other": "Pool management is only available in a supported distributed MinIO configuration."
+  },
+  {
+    "id": "server.could_not_check_rebalancing_changes_are_blocked",
+    "other": "Could not check rebalancing. Changes are blocked."
+  },
+  {
+    "id": "server.unknown_pool_health",
+    "other": "Current node status is unavailable."
+  },
+  {
+    "id": "server.unhealthy_pools",
+    "other": "The operation is unavailable because some nodes are unreachable."
+  },
+  {
+    "id": "server.unhealthy_pools_server_pools",
+    "other": "The operation is unavailable: check drive availability and healing."
+  },
+  {
+    "id": "server.unknown_pool_health_server_pools",
+    "other": "Could not confirm the drives of the selected pool."
+  },
+  {
+    "id": "sessions.invalid_credentials",
+    "other": "Enter a valid Access Key, Secret Key and region."
+  },
+  {
+    "id": "staging.temporary_storage_full",
+    "other": "The temporary storage budget is exhausted. Wait for operations to finish and retry."
+  },
+  {
+    "id": "storage.admin_response_too_large",
+    "other": "The MinIO Admin API response exceeds the allowed size."
+  },
+  {
+    "id": "storage.conditional_delete_unavailable",
+    "other": "The server did not confirm conditional deletion support. The copy was created and the source retained."
+  },
+  {
+    "id": "storage.invalid_deletion_condition",
+    "other": "Could not obtain a safe deletion condition. The source was retained."
+  },
+  {
+    "id": "storage.delete_uncertain",
+    "other": "Deletion was not confirmed. Check the source before retrying."
+  },
+  {
+    "id": "storage.source_changed",
+    "other": "The source changed during the move and was not deleted."
+  },
+  {
+    "id": "storage.access_denied",
+    "other": "The copy was created, but MinIO denied deleting the source."
+  },
+  {
+    "id": "storage.conditional_delete_unavailable_conditional",
+    "other": "The server rejected conditional deletion. The source was retained."
+  },
+  {
+    "id": "storage.delete_uncertain_conditional",
+    "other": "The server did not confirm deletion. Check the source before retrying."
+  },
+  {
+    "id": "storage.conditional_upload_conflict",
+    "other": "The storage did not receive consistent write preconditions. Check the state before retrying the operation."
+  },
+  {
+    "id": "storage.lifecycle_too_large",
+    "other": "The Lifecycle configuration exceeds 4 MiB. No changes were made."
+  },
+  {
+    "id": "storage.copy_unconfirmed",
+    "other": "The storage did not confirm multipart upload creation."
+  },
+  {
+    "id": "storage.invalid_copy_part_size",
+    "other": "Invalid copy part size."
+  },
+  {
+    "id": "storage.object_too_large",
+    "other": "The object size exceeds the supported copy limit."
+  },
+  {
+    "id": "storage.source_changed_copy",
+    "other": "The source file changed during copying. Refresh the details before retrying."
+  },
+  {
+    "id": "storage.copy_part_unconfirmed",
+    "other": "The storage did not confirm copying the file part."
+  },
+  {
+    "id": "storage.copy_unconfirmed_copy",
+    "other": "The storage did not confirm copy completion."
+  },
+  {
+    "id": "storage.source_changed_copy_source_error",
+    "other": "The source file changed or was deleted. Refresh the details before retrying."
+  },
+  {
+    "id": "storage.diagnostic_record_too_large",
+    "other": "The MinIO diagnostic record exceeds 1 MiB. Collection was stopped."
+  },
+  {
+    "id": "storage.invalid_diagnostic_record",
+    "other": "MinIO returned an invalid diagnostic record. Collection was stopped."
+  },
+  {
+    "id": "storage.access_denied_diagnostic_probe",
+    "other": "This section is unavailable."
+  },
+  {
+    "id": "storage.probe_unavailable",
+    "other": "Could not check the section."
+  },
+  {
+    "id": "storage.metrics_too_large",
+    "other": "The metrics response exceeds 2 MiB."
+  },
+  {
+    "id": "storage.direct_upload_signing_unavailable",
+    "other": "Could not sign the required part transfer preconditions."
+  },
+  {
+    "id": "storage.invalid_multipart_part",
+    "other": "Invalid upload part signing parameters."
+  },
+  {
+    "id": "storage.invalid_object_attributes",
+    "other": "Invalid object parts page."
+  },
+  {
+    "id": "storage.no_such_version",
+    "other": "The specified object version does not exist."
+  },
+  {
+    "id": "storage.object_attributes_unsupported",
+    "other": "The storage does not support extended object attributes."
+  },
+  {
+    "id": "storage.invalid_object_attributes_response",
+    "other": "The storage returned invalid object attributes. Refresh the details before retrying the request."
+  },
+  {
+    "id": "storage.s3_response_too_large",
+    "other": "The S3 metadata response exceeds the allowed size. Refresh the state before retrying the operation."
+  },
+  {
+    "id": "storage.invalids3_listing_response",
+    "other": "S3 returned an invalid listing. Refresh the state before retrying the operation."
+  },
+  {
+    "id": "storage.s3_write_unconfirmed",
+    "other": "The storage returned an unexpected write response. Check the file state before retrying the operation."
+  },
+  {
+    "id": "storage.select_upstream_limit",
+    "other": "The S3 Select stream exceeded the allowed bounds. The result is incomplete."
+  },
+  {
+    "id": "storage.invalid_select_event",
+    "other": "S3 Select returned a damaged or incomplete event. The result is incomplete."
+  },
+  {
+    "id": "storage.access_denied_select_response",
+    "other": "Insufficient MinIO permissions for S3 Select."
+  },
+  {
+    "id": "storage.not_implemented",
+    "other": "The storage does not support S3 Select."
+  },
+  {
+    "id": "storage.select_stream_failed",
+    "other": "The storage interrupted S3 Select. The result is incomplete."
+  },
+  {
+    "id": "storage.signing_region_required",
+    "other": "The storage region is required for request signing."
+  },
+  {
+    "id": "storage.signing_network_disabled",
+    "other": "Request signing must not access the network. Check the connection region."
+  },
+  {
+    "id": "tiers.tier_operation_failed",
+    "other": "MinIO rejected the tier operation. Check remote bucket availability, key permissions and the absence of data/rules when deleting. Refresh the list before retrying."
+  },
+  {
+    "id": "tiers.tier_usage_unknown",
+    "other": "Checking tier usage requires s3:ListAllMyBuckets permission and reading Lifecycle for all buckets."
+  },
+  {
+    "id": "tiers.tier_usage_unknown_tiers",
+    "other": "Could not check Lifecycle for all buckets. The tier was not deleted."
+  },
+  {
+    "id": "tiers.tier_usage_unknown_tiers_unused_tier",
+    "other": "Could not read Lifecycle completely. The tier was not deleted."
+  },
+  {
+    "id": "tiers.tier_in_use",
+    "other": "The tier is referenced by a Lifecycle rule. Change or delete that rule first."
+  },
+  {
+    "id": "tiers.invalid_tier_name",
+    "other": "A tier name must contain 3 to 32 uppercase Latin letters, digits, _ or -, starting with a letter."
+  },
+  {
+    "id": "tiers.tier_permission_unknown",
+    "other": "Could not confirm storage tier permissions."
+  },
+  {
+    "id": "tiers.access_denied",
+    "other": "Missing admin:SetTier permission."
+  },
+  {
+    "id": "tiers.tier_not_found",
+    "other": "The tier no longer exists."
+  },
+  {
+    "id": "tiers.tier_exists",
+    "other": "A tier with this name already exists."
+  },
+  {
+    "id": "tiers.invalid_tier_type",
+    "other": "Select S3 or MinIO."
+  },
+  {
+    "id": "tiers.invalid_tier_target",
+    "other": "Check the remote bucket, prefix, region and storage class."
+  },
+  {
+    "id": "tiers.tier_endpoint_not_allowed",
+    "other": "Allow the exact remote address in the API service's MINIO_ALLOWED_ENDPOINTS. The address must be reachable from MinIO nodes."
+  },
+  {
+    "id": "tiers.tier_same_server",
+    "other": "Use a separate remote storage, not the current MinIO instance."
+  },
+  {
+    "id": "tiers.tier_changed",
+    "other": "The tier settings changed. Refresh the list."
+  },
+  {
+    "id": "tiers.tier_confirmation",
+    "other": "Enter the tier name to confirm."
+  },
+  {
+    "id": "tiers.invalid_tier_credentials",
+    "other": "Enter the remote storage Access Key and Secret Key (at least 8 characters for Secret Key)."
+  },
+  {
+    "id": "tiers.tier_credentials_unsupported",
+    "other": "Credential replacement is only available for S3/MinIO with ordinary access keys."
+  },
+  {
+    "id": "transfers.invalid_transfer",
+    "other": "Specify the source file, bucket and a valid destination path."
+  },
+  {
+    "id": "transfers.same_destination",
+    "other": "The source and destination paths are the same."
+  },
+  {
+    "id": "transfers.source_changed",
+    "other": "The source file changed. Refresh the details before retrying."
+  },
+  {
+    "id": "transfers.transfer_too_large",
+    "other": "A single operation can copy a file up to 5 GiB."
+  },
+  {
+    "id": "transfers.the_copy_was_created",
+    "other": "The copy was created."
+  },
+  {
+    "id": "transfers.the_folder_marker_was_copied_and_the",
+    "other": "The folder marker was copied and the source folder retained: objects remain inside or their presence could not be checked."
+  },
+  {
+    "id": "transfers.the_copy_was_created_but_its_state",
+    "other": "The copy was created, but its state could not be confirmed. The source was not deleted."
+  },
+  {
+    "id": "transfers.the_destination_changed_after_copying_the_source",
+    "other": "The destination changed after copying. The source was not deleted."
+  },
+  {
+    "id": "transfers.the_copy_was_created_but_the_source",
+    "other": "The copy was created, but the source state could not be verified. No deletion request was sent."
+  },
+  {
+    "id": "transfers.the_source_file_changed_after_copying_and",
+    "other": "The source file changed after copying and was not deleted."
+  },
+  {
+    "id": "transfers.object_delete_denied",
+    "other": "The copy was created, but MinIO denied deleting the source. Check permissions and file protection."
+  },
+  {
+    "id": "transfers.delete_uncertain",
+    "other": "The copy was created, but source deletion was not confirmed. Check both sides before retrying."
+  },
+  {
+    "id": "transfers.the_copy_was_created_and_source_deletion",
+    "other": "The copy was created and source deletion was confirmed."
+  },
+  {
+    "id": "transfers.the_copy_was_created_but_the_source_file_transfer",
+    "other": "The copy was created, but the source path exists after deletion. Check it before retrying."
+  },
+  {
+    "id": "transfers.the_copy_was_created_but_the_source_file_transfer_transfer",
+    "other": "The copy was created, but the source's absence could not be verified. Check the result before retrying."
+  },
+  {
+    "id": "transfers.invalid_transfer_prepare_usecase",
+    "other": "Invalid object key for transfer."
+  },
+  {
+    "id": "uploads.invalid_upload_size",
+    "other": "The file size must not exceed 5 GiB."
+  },
+  {
+    "id": "uploads.checksum_staging_unavailable",
+    "other": "Temporary storage for checksum verification is unavailable."
+  },
+  {
+    "id": "uploads.size_mismatch",
+    "other": "The uploaded file size does not match the expected size. The file was not saved."
+  },
+  {
+    "id": "uploads.interrupted",
+    "other": "The file transfer was interrupted. The file was not saved."
+  },
+  {
+    "id": "uploads.invalid_key",
+    "other": "Invalid destination path."
+  },
+  {
+    "id": "uploads.import_not_prepared",
+    "other": "Prepare the import before starting it."
+  },
+  {
+    "id": "uploads.invalid_upload_parts_response",
+    "other": "S3 returned an invalid parts list. Refresh the details before retrying the operation."
+  },
+  {
+    "id": "uploads.parts_limit",
+    "other": "Could not retrieve the complete parts list. Refresh the details."
+  },
+  {
+    "id": "uploads.invalid_upload_listing",
+    "other": "Select an upload to inspect its parts."
+  },
+  {
+    "id": "uploads.invalid_abort",
+    "other": "Select an upload and enter ОТМЕНИТЬ to confirm."
+  },
+  {
+    "id": "uploads.upload_changed",
+    "other": "The parts list changed. The upload may still be running. Refresh the list before aborting."
+  },
+  {
+    "id": "uploads.could_not_confirm_the_abort_check_the",
+    "other": "Could not confirm the abort. Check the result before retrying."
+  },
+  {
+    "id": "uploads.the_abort_was_confirmed_the_completed_object",
+    "other": "The abort was confirmed. The completed object was not deleted."
+  },
+  {
+    "id": "uploads.the_upload_is_still_available_check_its",
+    "other": "The upload is still available. Check its parts before aborting again."
+  },
+  {
+    "id": "uploads.invalid_upload_listing_incomplete_uploads_usecase",
+    "other": "Select a bucket and check the path prefix."
+  },
+  {
+    "id": "uploads.invalid_upload_cursor",
+    "other": "MinIO did not advance the listing position. Retry the request."
+  },
+  {
+    "id": "uploads.invalid_checksum",
+    "other": "Check the checksum algorithm, type and base64 value."
+  },
+  {
+    "id": "uploads.unsupported_checksum_mode",
+    "other": "This upload method does not support the selected checksum mode."
+  },
+  {
+    "id": "uploads.unsupported_checksum_algorithm",
+    "other": "MD5, SHA1, SHA256, CRC32 and CRC32C are supported."
+  },
+  {
+    "id": "uploads.checksum_mismatch",
+    "other": "The uploaded file checksum does not match the expected checksum. The file was not saved."
+  },
+  {
+    "id": "uploads.invite_limit",
+    "other": "The file limit was reached or the link was revoked."
+  },
+  {
+    "id": "uploads.invalid_invite",
+    "other": "Check the folder, lifetime (up to one day), size (up to 1 GiB) and file count (up to 100)."
+  },
+  {
+    "id": "uploads.invite_denied",
+    "other": "Write permission is not confirmed for the entire selected folder."
+  },
+  {
+    "id": "uploads.missing_upload_parts",
+    "other": "Upload all parts before completing the upload."
+  },
+  {
+    "id": "uploads.thesha256composite_checksum_of_the_parts",
+    "other": "The SHA256 COMPOSITE checksum of the parts does not match the expected checksum."
+  },
+  {
+    "id": "uploads.invalid_complete_response",
+    "other": "Invalid storage response."
+  },
+  {
+    "id": "uploads.multipart_not_found",
+    "other": "The upload was not found in the current session."
+  },
+  {
+    "id": "uploads.multipart_state_conflict",
+    "other": "This action is unavailable in the current upload state. Retrieve its state."
+  },
+  {
+    "id": "uploads.access_denied",
+    "other": "No write permission for this destination."
+  },
+  {
+    "id": "uploads.conditional_completion_unverified",
+    "other": "Conditional multipart completion is unconfirmed for this connection. An administrator must verify the server and explicitly allow it in the API configuration."
+  },
+  {
+    "id": "uploads.invalid_bucket_or_file_path",
+    "other": "Invalid bucket or file path."
+  },
+  {
+    "id": "uploads.the_file_size_must_be_between0",
+    "other": "The file size must be between 0 and 5 GiB."
+  },
+  {
+    "id": "uploads.invalid_content_type",
+    "other": "Invalid content type."
+  },
+  {
+    "id": "uploads.up_to32_metadata_entries_are_allowed",
+    "other": "Up to 32 metadata entries are allowed."
+  },
+  {
+    "id": "uploads.invalid_file_metadata",
+    "other": "Invalid file metadata."
+  },
+  {
+    "id": "uploads.metadata_must_not_exceed8_kib",
+    "other": "Metadata must not exceed 8 KiB."
+  },
+  {
+    "id": "uploads.unsupported_checksum_mode_create",
+    "other": "Managed uploads support SHA256 COMPOSITE with the planned part count."
+  },
+  {
+    "id": "uploads.multipart_expired",
+    "other": "The upload has expired. Create a new upload."
+  },
+  {
+    "id": "uploads.unsupported_checksum_mode_parts",
+    "other": "The part requires SHA256 FULL_OBJECT in base64."
+  },
+  {
+    "id": "uploads.uploaded_part_size_mismatch",
+    "other": "The S3 part size does not match the plan. Abort the upload and create a new one."
+  },
+  {
+    "id": "uploads.part_checksum_unavailable",
+    "other": "The storage did not confirm the part's SHA256 checksum. Completion is blocked."
+  },
+  {
+    "id": "uploads.part_changed",
+    "other": "The part contents do not match the managed upload."
+  },
+  {
+    "id": "uploads.invalid_multipart_parts",
+    "other": "The storage returned an invalid parts list."
+  },
+  {
+    "id": "uploads.the_part_number_and_exact_size_must",
+    "other": "The part number and exact size must match the upload plan."
+  },
+  {
+    "id": "uploads.part_content_conflict",
+    "other": "The part number is already associated with different contents. Create a new upload."
+  },
+  {
+    "id": "uploads.the_storage_rejected_the_partsha256_does",
+    "other": "The storage rejected the part: SHA256 does not match the uploaded contents."
+  },
+  {
+    "id": "uploads.the_part_was_only_partially_uploaded_retrieve",
+    "other": "The part was only partially uploaded. Retrieve the state before retrying."
+  },
+  {
+    "id": "uploads.the_uploaded_partssha256_checksum_does",
+    "other": "The uploaded part's SHA256 checksum does not match the expected checksum."
+  },
+  {
+    "id": "uploads.part_content_conflict_parts",
+    "other": "The part is already associated with a different SHA256 checksum."
+  },
+  {
+    "id": "uploads.multipart_expired_parts",
+    "other": "The upload has expired."
+  },
+  {
+    "id": "uploads.invalid_upload",
+    "other": "Check the file name and size limit."
+  },
+  {
+    "id": "uploads.upload_exists",
+    "other": "A file with this name already exists. Rename it and retry the upload."
+  },
+  {
+    "id": "uploads.invalid_sourceurl",
+    "other": "Specify a public HTTPS address without a user name or password, on port 443."
+  },
+  {
+    "id": "uploads.import_too_large",
+    "other": "Import supports files up to 1 GiB."
+  },
+  {
+    "id": "uploads.incomplete_source",
+    "other": "The source interrupted the transfer. The file was not saved."
+  },
+  {
+    "id": "uploads.incomplete_source_stage_remote",
+    "other": "The source returned an incomplete file."
+  },
+  {
+    "id": "uploads.invite_permissions_unavailable",
+    "other": "Could not verify permissions to create the link."
+  },
+  {
+    "id": "uploads.incomplete_upload",
+    "other": "The file was only partially transferred. Check the state before retrying."
+  },
+  {
+    "id": "uploads.checksum_mismatch_write_usecase",
+    "other": "The storage rejected the checksum. Check the file state before retrying."
+  },
+  {
+    "id": "validation.invalid_members",
+    "other": "Select between 1 and 100 members."
+  },
+  {
+    "id": "validation.invalid_members_management",
+    "other": "Members must have valid, unique names."
+  },
+  {
+    "id": "validation.invalid_policy",
+    "other": "The policy must not exceed 20 KiB."
+  },
+  {
+    "id": "validation.invalid_policy_objects",
+    "other": "Provide policy JSON with Version 2012-10-17 and Statement."
+  },
+  {
+    "id": "common.combined",
+    "other": "{{.First}} {{.Second}}"
+  },
+  {
+    "id": "http.management_unsupported",
+    "other": "This management operation is not supported."
+  },
+  {
+    "id": "http.route_not_found",
+    "other": "The API route was not found."
+  },
+  {
+    "id": "http.resource_name_invalid",
+    "other": "A name must contain 1 to 128 characters without leading or trailing spaces, commas or slashes."
+  },
+  {
+    "id": "http.stopping",
+    "other": "API is stopping"
+  }
+]

@@ -10,7 +10,9 @@ import (
 	"time"
 
 	"github.com/minio/minio-go/v7"
+
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/storage"
 )
 
@@ -58,11 +60,11 @@ func TestOutcomeClassifiesOnlyDefiniteProtocolEvidence(t *testing.T) {
 		{"network", errors.New("SECRET network failure"), Unknown, "UpstreamUncertain"},
 		{"5xx", minio.ErrorResponse{Code: "InternalError", StatusCode: 500}, Unknown, "UpstreamUncertain"},
 		{"ambiguous5xx", minio.ErrorResponse{Code: "UnsupportedOperation", StatusCode: 503}, Unknown, "UpstreamUncertain"},
-		{"malformed", apperror.New(502, "InvalidObjectAttributesResponse", "SECRET"), Unknown, "InvalidResponse"},
-		{"known unsupported", apperror.New(501, "ObjectAttributesUnsupported", "SECRET"), Unsupported, "OperationNotImplemented"},
-		{"validated protocol unsupported", apperror.New(501, "NotImplemented", "SECRET"), Unsupported, "OperationNotImplemented"},
-		{"safe denied", apperror.New(403, "AccessDenied", "SECRET"), AccessDenied, "AccessDenied"},
-		{"generic501", apperror.New(501, "UpstreamError", "SECRET"), Unknown, "UpstreamUncertain"},
+		{"malformed", apperror.New(502, "InvalidObjectAttributesResponse", messages.Literal("SECRET")), Unknown, "InvalidResponse"},
+		{"known unsupported", apperror.New(501, "ObjectAttributesUnsupported", messages.Literal("SECRET")), Unsupported, "OperationNotImplemented"},
+		{"validated protocol unsupported", apperror.New(501, "NotImplemented", messages.Literal("SECRET")), Unsupported, "OperationNotImplemented"},
+		{"safe denied", apperror.New(403, "AccessDenied", messages.Literal("SECRET")), AccessDenied, "AccessDenied"},
+		{"generic501", apperror.New(501, "UpstreamError", messages.Literal("SECRET")), Unknown, "UpstreamUncertain"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			now := time.Date(2026, 10, 21, 10, 0, 0, 0, time.UTC)

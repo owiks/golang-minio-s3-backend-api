@@ -21,6 +21,12 @@ func Load() (Config, error) { return LoadEnv(os.Getenv) }
 // Errors contain variable names only; environment values can include secrets.
 func LoadEnv(getenv func(string) string) (Config, error) {
 	c := Default()
+	if raw := strings.TrimSpace(getenv("API_LANGUAGE")); raw != "" {
+		if raw != "auto" && raw != "en" && raw != "ru" {
+			return Config{}, errors.New("invalid API_LANGUAGE")
+		}
+		c.Language = raw
+	}
 	if raw := strings.TrimSpace(getenv("API_LISTEN")); raw != "" {
 		if _, _, err := net.SplitHostPort(raw); err != nil {
 			return Config{}, errors.New("invalid API_LISTEN")

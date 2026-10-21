@@ -8,6 +8,7 @@ import (
 	"unicode/utf8"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 const MaxGzipInput int64 = 32 << 20
@@ -16,7 +17,7 @@ const MaxGzipText int64 = 8 << 20
 func DecodeGzipText(ctx context.Context, data []byte) (string, error) {
 	z, e := gzip.NewReader(bytes.NewReader(data))
 	if e != nil {
-		return "", apperror.New(415, "InvalidGzip", "Файл не является корректным GZip.")
+		return "", apperror.New(415, "InvalidGzip", messages.ArchivesInvalidGzip)
 	}
 	defer z.Close()
 	decoded, e := io.ReadAll(io.LimitReader(&CancelReader{Ctx: ctx, R: z}, MaxGzipText+1))
@@ -24,16 +25,16 @@ func DecodeGzipText(ctx context.Context, data []byte) (string, error) {
 		if ctx.Err() != nil {
 			return "", ctx.Err()
 		}
-		return "", apperror.New(415, "InvalidGzip", "Не удалось распаковать GZip: повреждён поток или контрольная сумма.")
+		return "", apperror.New(415, "InvalidGzip", messages.ArchivesInvalidGzipGzipView)
 	}
 	if int64(len(decoded)) > MaxGzipText {
-		return "", apperror.New(413, "GzipTextTooLarge", "После распаковки файл превышает 8 МиБ.")
+		return "", apperror.New(413, "GzipTextTooLarge", messages.ArchivesGzipTextTooLarge)
 	}
 	if bytes.Count(decoded, []byte{'\n'}) >= 200000 {
-		return "", apperror.New(413, "GzipTooManyLines", "После распаковки файл содержит больше 200 000 строк.")
+		return "", apperror.New(413, "GzipTooManyLines", messages.ArchivesGzipTooManyLines)
 	}
 	if !utf8.Valid(decoded) || bytes.IndexByte(decoded, 0) >= 0 {
-		return "", apperror.New(415, "NotUTF8Text", "После распаковки нужен текст UTF-8 без нулевых байтов.")
+		return "", apperror.New(415, "NotUTF8Text", messages.ArchivesNotUTF8Text)
 	}
 	return string(decoded), nil
 }

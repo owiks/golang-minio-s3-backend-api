@@ -7,6 +7,7 @@ import (
 	"unicode/utf8"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	validationsvc "minio-web/api/src/services/validation"
 )
 
@@ -22,19 +23,19 @@ func ArchiveFilename(value string) (string, error) {
 		value += ".zip"
 	}
 	if len(value) > 180 || !utf8.ValidString(value) || strings.ContainsAny(value, `/\:*?"<>|`) || strings.ContainsFunc(value, unicode.IsControl) || value == ".zip" || strings.HasPrefix(value, ".") {
-		return "", apperror.New(400, "InvalidArchiveName", "Укажите имя ZIP до 180 байт, без слешей, управляющих символов и знаков : * ? \" < > |.")
+		return "", apperror.New(400, "InvalidArchiveName", messages.ArchivesInvalidArchiveName)
 	}
 	return value, nil
 }
 func ArchivePaths(items []ArchiveItem, base string) ([]string, error) {
 	if len(base) > 1024 || !utf8.ValidString(base) || base != "" && !strings.HasSuffix(base, "/") {
-		return nil, apperror.New(400, "InvalidArchiveBase", "Начало пути должно обозначать целую папку.")
+		return nil, apperror.New(400, "InvalidArchiveBase", messages.ArchivesInvalidArchiveBasePaths)
 	}
 	paths := make([]string, len(items))
 	seen := map[string]bool{}
 	for i, item := range items {
 		if !strings.HasPrefix(item.Key, base) {
-			return nil, apperror.New(400, "InvalidArchiveBase", "Выбранные файлы находятся вне указанной папки.")
+			return nil, apperror.New(400, "InvalidArchiveBase", messages.ArchivesInvalidArchiveBasePathsArchivePaths)
 		}
 		name := strings.TrimPrefix(item.Key, base)
 		if !SafeArchivePath(name) || !SafeArchivePath(item.Key) {
@@ -42,7 +43,7 @@ func ArchivePaths(items []ArchiveItem, base string) ([]string, error) {
 			continue
 		}
 		if seen[name] {
-			return nil, apperror.New(400, "ArchivePathConflict", "В архиве совпали пути файлов. Выберите пути от корня бакета.")
+			return nil, apperror.New(400, "ArchivePathConflict", messages.ArchivesArchivePathConflict)
 		}
 		seen[name] = true
 		paths[i] = name

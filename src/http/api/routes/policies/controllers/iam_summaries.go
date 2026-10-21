@@ -13,6 +13,6 @@ func HandlePolicySummaries(app *runtimesvc.State, w http.ResponseWriter, r *http
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, rows)
+	httpcommon.WriteJSON(w, r, 200, rows)
 	return nil
 }

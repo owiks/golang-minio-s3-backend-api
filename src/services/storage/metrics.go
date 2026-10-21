@@ -9,6 +9,7 @@ import (
 	"github.com/minio/madmin-go/v3"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/telemetry"
 )
 
@@ -33,7 +34,7 @@ func (t boundedMetricsTransport) RoundTrip(r *http.Request) (*http.Response, err
 		return nil, e
 	}
 	if len(data) > 2*1024*1024 {
-		return nil, apperror.New(502, "MetricsTooLarge", "Ответ метрик превышает 2 МиБ.")
+		return nil, apperror.New(502, "MetricsTooLarge", messages.StorageMetricsTooLarge)
 	}
 	if t.Data != nil {
 		*t.Data = data

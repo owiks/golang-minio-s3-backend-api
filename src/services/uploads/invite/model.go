@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/securetoken"
 )
 
@@ -77,7 +78,7 @@ func (g *UploadInvite) Stop() {
 	}
 }
 func expired() error {
-	return apperror.New(410, "InviteExpired", "Ссылка недействительна или истекла.")
+	return apperror.New(410, "InviteExpired", messages.FoldersFolderShareExpired)
 }
 
 // A reservation is finished exactly once. Successful completion updates the
@@ -97,7 +98,7 @@ func (g *UploadInvite) BeginWrite(parent context.Context) (*WriteLease, error) {
 		return nil, expired()
 	}
 	if g.uploaded+len(g.active) >= g.maxFiles {
-		return nil, apperror.New(409, "InviteLimit", "Лимит файлов исчерпан или ссылка отозвана.")
+		return nil, apperror.New(409, "InviteLimit", messages.UploadsInviteLimit)
 	}
 	id := securetoken.New()
 	ctx, cancel := context.WithDeadline(parent, g.expires)

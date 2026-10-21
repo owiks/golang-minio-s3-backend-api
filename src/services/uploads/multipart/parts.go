@@ -15,6 +15,7 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/uploads/integrity"
 )
 
@@ -26,7 +27,7 @@ func partChecksum(s integrity.Spec) (integrity.Spec, error) {
 		return s, err
 	}
 	if s.Algorithm != "SHA256" || s.Type != "FULL_OBJECT" {
-		return s, apperror.New(422, "UnsupportedChecksumMode", "Часть требует SHA256 FULL_OBJECT в base64.")
+		return s, apperror.New(422, "UnsupportedChecksumMode", messages.UploadsUnsupportedChecksumModeParts)
 	}
 	return s, nil
 }
@@ -51,14 +52,14 @@ func (o *Operation) serverParts(ctx context.Context, c Client) (result []Part, e
 				return nil, invalidParts()
 			}
 			if p.Size != o.partSize(p.PartNumber) {
-				return nil, apperror.New(409, "UploadedPartSizeMismatch", "Размер принятой S3 части не соответствует плану. Отмените загрузку и создайте новую.")
+				return nil, apperror.New(409, "UploadedPartSizeMismatch", messages.UploadsUploadedPartSizeMismatch)
 			}
 			spec, err := partChecksum(integrity.Spec{Algorithm: "SHA256", Encoding: "base64", Type: "FULL_OBJECT", Scope: "PART", Value: p.ChecksumSHA256})
 			if err != nil {
-				return nil, apperror.New(409, "PartChecksumUnavailable", "Хранилище не подтвердило SHA256 части. Завершение запрещено.")
+				return nil, apperror.New(409, "PartChecksumUnavailable", messages.UploadsPartChecksumUnavailable)
 			}
 			if expected := o.sealed[p.PartNumber]; expected == "" || expected != spec.Value {
-				return nil, apperror.New(409, "PartChanged", "Содержимое части не соответствует управляемой загрузке.")
+				return nil, apperror.New(409, "PartChanged", messages.UploadsPartChanged)
 			}
 			parts = append(parts, Part{Number: p.PartNumber, Size: p.Size, ETag: p.ETag, Checksum: spec.Value})
 			last = p.PartNumber
@@ -75,7 +76,7 @@ func (o *Operation) serverParts(ctx context.Context, c Client) (result []Part, e
 }
 
 func invalidParts() error {
-	return apperror.New(502, "InvalidMultipartParts", "Хранилище вернуло некорректный список частей.")
+	return apperror.New(502, "InvalidMultipartParts", messages.UploadsInvalidMultipartParts)
 }
 
 func Inspect(ctx context.Context, store Store, c Client, id string) (Snapshot, error) {
@@ -128,7 +129,7 @@ func PutPart(ctx context.Context, store Store, c Client, id string, n int, size 
 		defer func() { stop(); _ = closer.Close() }()
 	}
 	if n < 1 || n > o.count || size != o.partSize(n) {
-		return Snapshot{}, invalid("InvalidPartSize", "Номер и точный размер части должны соответствовать плану загрузки.")
+		return Snapshot{}, invalid("InvalidPartSize", messages.UploadsThePartNumberAndExactSizeMust)
 	}
 	if err = canWrite(c, o.bucket, o.key); err != nil {
 		return Snapshot{}, err
@@ -141,7 +142,7 @@ func PutPart(ctx context.Context, store Store, c Client, id string, n int, size 
 		return Snapshot{}, transitionError()
 	}
 	if previous != "" && previous != spec.Value {
-		return Snapshot{}, apperror.New(409, "PartContentConflict", "Номер части уже закреплён за другим содержимым. Создайте новую загрузку.")
+		return Snapshot{}, apperror.New(409, "PartContentConflict", messages.UploadsPartContentConflict)
 	}
 	parts, err := o.serverParts(ctx, c)
 	if err != nil {
@@ -164,15 +165,15 @@ func PutPart(ctx context.Context, store Store, c Client, id string, n int, size 
 	observe(ctx, c, "part", o.bucket, o.key, err)
 	if err != nil {
 		if code := minio.ToErrorResponse(err).Code; code == "BadDigest" || code == "XAmzContentSHA256Mismatch" || code == "ContentSHA256Mismatch" {
-			return Snapshot{}, invalid("ChecksumMismatch", "Хранилище отклонило часть: SHA256 не совпадает с переданным содержимым.")
+			return Snapshot{}, invalid("ChecksumMismatch", messages.UploadsTheStorageRejectedThePartSHA256Does)
 		}
 		return Snapshot{}, err
 	}
 	if reader.left != 0 {
-		return Snapshot{}, invalid("IncompleteUpload", "Часть передана не полностью. Получите состояние перед повтором.")
+		return Snapshot{}, invalid("IncompleteUpload", messages.UploadsThePartWasOnlyPartiallyUploadedRetrieve)
 	}
 	if base64.StdEncoding.EncodeToString(reader.hash.Sum(nil)) != spec.Value {
-		return Snapshot{}, invalid("ChecksumMismatch", "SHA256 переданной части не совпадает с ожидаемой.")
+		return Snapshot{}, invalid("ChecksumMismatch", messages.UploadsTheUploadedPartSSHA256ChecksumDoes)
 	}
 	parts, err = o.serverParts(ctx, c)
 	if err != nil {
@@ -227,7 +228,7 @@ func SignPart(ctx context.Context, store Store, c Client, id string, n int, requ
 	ctx, cancel := o.actionContext(ctx)
 	defer cancel()
 	if n < 1 || n > o.count {
-		return SignedPart{}, invalid("InvalidPartNumber", "Некорректный номер части.")
+		return SignedPart{}, invalid("InvalidPartNumber", messages.HttpInvalidPartNumber)
 	}
 	if err = canWrite(c, o.bucket, o.key); err != nil {
 		return SignedPart{}, err
@@ -238,12 +239,12 @@ func SignPart(ctx context.Context, store Store, c Client, id string, n int, requ
 		return SignedPart{}, transitionError()
 	}
 	if old := o.sealed[n]; old != "" && old != spec.Value {
-		return SignedPart{}, apperror.New(409, "PartContentConflict", "Часть уже закреплена за другим SHA256.")
+		return SignedPart{}, apperror.New(409, "PartContentConflict", messages.UploadsPartContentConflictParts)
 	}
 	expires := minTime(time.Now().Add(SignedTTL), o.expires)
 	duration := time.Until(expires).Truncate(time.Second)
 	if duration < time.Second {
-		return SignedPart{}, apperror.New(410, "MultipartExpired", "Срок загрузки истёк.")
+		return SignedPart{}, apperror.New(410, "MultipartExpired", messages.UploadsMultipartExpiredParts)
 	}
 	u, err := c.PresignMultipartPart(ctx, o.bucket, o.key, o.uploadID, n, spec.Value, duration)
 	if err != nil {

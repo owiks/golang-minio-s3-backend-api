@@ -12,6 +12,7 @@ import (
 	"minio-web/api/src/services/apperror"
 	endpoints "minio-web/api/src/services/endpoint"
 	"minio-web/api/src/services/iam"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/result"
 	validationsvc "minio-web/api/src/services/validation"
 )
@@ -63,15 +64,15 @@ type tierChange struct{ Name, Type, Endpoint, Bucket, Prefix, Region, StorageCla
 
 func mutateTier(ctx context.Context, allowedEndpoints map[string]bool, s CreateTierClient, operation tierOperation, body tierChange) (result.Success, error) {
 	if !validationsvc.ValidName(body.Name) || body.Name == "." || body.Name == ".." || (operation == createTier && !validationsvc.TierNamePattern.MatchString(body.Name)) {
-		return result.Success{}, apperror.New(400, "InvalidTierName", "Имя уровня: 3–32 символа, заглавные латинские буквы, цифры, _ и -. Начните с буквы.")
+		return result.Success{}, apperror.New(400, "InvalidTierName", messages.TiersInvalidTierName)
 	}
 	if e := s.RefreshActionPolicy(ctx); e != nil {
-		return result.Success{}, apperror.New(403, "TierPermissionUnknown", "Не удалось подтвердить права на уровни хранения.")
+		return result.Success{}, apperror.New(403, "TierPermissionUnknown", messages.TiersTierPermissionUnknown)
 	}
 	policy := s.ActionPolicySnapshot()
 	allowed := policy.Allows(s.ActorName(), iam.Query{Action: "admin:SetTier"})
 	if !allowed {
-		return result.Success{}, apperror.New(403, "AccessDenied", "Нет права admin:SetTier.")
+		return result.Success{}, apperror.New(403, "AccessDenied", messages.TiersAccessDenied)
 	}
 	items, e := s.ListTiers(ctx)
 	if e != nil {
@@ -86,7 +87,7 @@ func mutateTier(ctx context.Context, allowedEndpoints map[string]bool, s CreateT
 	}
 	if operation == verifyTier {
 		if existing == nil {
-			return result.Success{}, apperror.New(404, "TierNotFound", "Уровень больше не существует.")
+			return result.Success{}, apperror.New(404, "TierNotFound", messages.TiersTierNotFound)
 		}
 		if e = s.VerifyTier(ctx, body.Name); e != nil {
 			return result.Success{}, TierError(e)
@@ -95,13 +96,13 @@ func mutateTier(ctx context.Context, allowedEndpoints map[string]bool, s CreateT
 	}
 	if operation == createTier {
 		if existing != nil {
-			return result.Success{}, apperror.New(409, "TierExists", "Уровень с таким именем уже существует.")
+			return result.Success{}, apperror.New(409, "TierExists", messages.TiersTierExists)
 		}
 		if body.Type != "s3" && body.Type != "minio" {
-			return result.Success{}, apperror.New(400, "InvalidTierType", "Выберите S3 или MinIO.")
+			return result.Success{}, apperror.New(400, "InvalidTierType", messages.TiersInvalidTierType)
 		}
 		if s3utils.CheckValidBucketNameStrict(body.Bucket) != nil || len(body.Prefix) > 1024 || len(body.Region) > 128 || len(body.StorageClass) > 128 || strings.ContainsFunc(body.Prefix+body.Region+body.StorageClass, unicode.IsControl) {
-			return result.Success{}, apperror.New(400, "InvalidTierTarget", "Проверьте удалённый бакет, префикс, регион и класс хранения.")
+			return result.Success{}, apperror.New(400, "InvalidTierTarget", messages.TiersInvalidTierTarget)
 		}
 		u, e := endpoints.Parse(body.Endpoint)
 		if e != nil {
@@ -110,21 +111,21 @@ func mutateTier(ctx context.Context, allowedEndpoints map[string]bool, s CreateT
 		// The remote server performs future connections itself. Require an explicit
 		// allowlist entry: a one-time DNS check in this API cannot pin its future IPs.
 		if !allowedEndpoints[u.String()] {
-			return result.Success{}, apperror.New(400, "TierEndpointNotAllowed", "Разрешите точный удалённый адрес в MINIO_ALLOWED_ENDPOINTS сервиса API. Адрес должен быть доступен с узлов MinIO.")
+			return result.Success{}, apperror.New(400, "TierEndpointNotAllowed", messages.TiersTierEndpointNotAllowed)
 		}
 		if u.String() == s.PublicEndpoint().String() || u.String() == s.InternalEndpoint().String() {
-			return result.Success{}, apperror.New(400, "TierSameServer", "Используйте отдельное удалённое хранилище, не текущий MinIO.")
+			return result.Success{}, apperror.New(400, "TierSameServer", messages.TiersTierSameServer)
 		}
 		body.Endpoint = u.String()
 	} else {
 		if existing == nil {
-			return result.Success{}, apperror.New(404, "TierNotFound", "Уровень больше не существует.")
+			return result.Success{}, apperror.New(404, "TierNotFound", messages.TiersTierNotFound)
 		}
 		if body.Revision == "" || body.Revision != TierSummary(existing).Revision {
-			return result.Success{}, apperror.New(409, "TierChanged", "Настройки уровня изменились. Обновите список.")
+			return result.Success{}, apperror.New(409, "TierChanged", messages.TiersTierChanged)
 		}
 		if body.Confirmation != body.Name {
-			return result.Success{}, apperror.New(400, "TierConfirmation", "Введите имя уровня для подтверждения.")
+			return result.Success{}, apperror.New(400, "TierConfirmation", messages.TiersTierConfirmation)
 		}
 	}
 	if operation == removeTier {
@@ -136,11 +137,11 @@ func mutateTier(ctx context.Context, allowedEndpoints map[string]bool, s CreateT
 		}
 	} else {
 		if len(body.AccessKey) < 3 || len(body.AccessKey) > 256 || len(body.SecretKey) < 8 || len(body.SecretKey) > 1024 || strings.ContainsFunc(body.AccessKey+body.SecretKey, unicode.IsControl) {
-			return result.Success{}, apperror.New(400, "InvalidTierCredentials", "Введите Access Key и Secret Key удалённого хранилища (Secret Key от 8 символов).")
+			return result.Success{}, apperror.New(400, "InvalidTierCredentials", messages.TiersInvalidTierCredentials)
 		}
 		if operation == updateTier {
 			if !TierSummary(existing).Editable {
-				return result.Success{}, apperror.New(400, "TierCredentialsUnsupported", "Замена ключей доступна только для S3/MinIO с обычными ключами доступа.")
+				return result.Success{}, apperror.New(400, "TierCredentialsUnsupported", messages.TiersTierCredentialsUnsupported)
 			}
 			e = s.EditTier(ctx, body.Name, madmin.TierCreds{AccessKey: body.AccessKey, SecretKey: body.SecretKey})
 		} else {

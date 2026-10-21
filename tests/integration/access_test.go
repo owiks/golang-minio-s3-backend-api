@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	apihttp "minio-web/api/src/http/api"
-	accesssvc "minio-web/api/src/services/access"
+	"minio-web/api/src/http/presentation"
 	objectssvc "minio-web/api/src/services/objects"
 	runtimesvc "minio-web/api/src/services/runtime"
 	"minio-web/api/src/services/securetoken"
@@ -26,11 +26,11 @@ func TestNavigationAccessIntegration(t *testing.T) {
 	srv := httptest.NewServer(apihttp.NewHandler(app))
 	defer srv.Close()
 	root := loginTest(t, srv.URL, "minio-web-test", "minio-web-test-secret")
-	snapshot := func(c *apiClient) ([]objectssvc.BucketRow, accesssvc.NavigationAccess) {
+	snapshot := func(c *apiClient) ([]objectssvc.BucketRow, presentation.NavigationAccess) {
 		t.Helper()
 		var v struct {
-			Buckets []objectssvc.BucketRow     `json:"buckets"`
-			Access  accesssvc.NavigationAccess `json:"access"`
+			Buckets []objectssvc.BucketRow        `json:"buckets"`
+			Access  presentation.NavigationAccess `json:"access"`
 		}
 		if err := json.Unmarshal(c.call("GET", "access", nil, 200), &v); err != nil {
 			t.Fatal(err)

@@ -12,23 +12,24 @@ import (
 	"testing"
 
 	"github.com/minio/minio-go/v7"
+
 	selectcontroller "minio-web/api/src/http/api/routes/selectquery/controllers"
-	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/result"
+	"minio-web/api/src/http/presentation"
+	"minio-web/api/src/http/stream"
 	"minio-web/api/src/services/runtime"
 	"minio-web/api/src/services/selectquery"
 	"minio-web/api/src/services/telemetry"
 	"minio-web/api/tests/testsession"
 )
 
-func readSelectEvents(t *testing.T, data []byte) ([]byte, *selectquery.Result, *apperror.Error) {
+func readSelectEvents(t *testing.T, data []byte) ([]byte, *selectquery.Result, *presentation.Error) {
 	t.Helper()
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	var output bytes.Buffer
 	var final *selectquery.Result
-	var failure *apperror.Error
+	var failure *presentation.Error
 	for {
-		var event result.StreamEvent[selectquery.Result]
+		var event stream.Event[selectquery.Result]
 		err := decoder.Decode(&event)
 		if err == io.EOF {
 			break

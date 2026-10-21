@@ -55,11 +55,11 @@ func TestIAMHTTPRevisionFollowsCommandEffectNotError(t *testing.T) {
 					switch {
 					case strings.HasSuffix(r.URL.Path, "/user-info"):
 						if tc.response == "preflight" {
-							httpcommon.WriteJSON(w, 403, map[string]string{"Code": "AccessDenied"})
+							httpcommon.WriteJSON(w, r, 403, map[string]string{"Code": "AccessDenied"})
 						} else if tc.method == "GET" {
-							httpcommon.WriteJSON(w, 200, map[string]any{"status": "enabled"})
+							httpcommon.WriteJSON(w, r, 200, map[string]any{"status": "enabled"})
 						} else {
-							httpcommon.WriteJSON(w, 404, map[string]string{"Code": "XMinioAdminNoSuchUser"})
+							httpcommon.WriteJSON(w, r, 404, map[string]string{"Code": "XMinioAdminNoSuchUser"})
 						}
 					case strings.HasSuffix(r.URL.Path, "/info-canned-policy"):
 						_, _ = w.Write(policy)
@@ -72,7 +72,7 @@ func TestIAMHTTPRevisionFollowsCommandEffectNotError(t *testing.T) {
 				commands.Add(1)
 				_, _ = io.Copy(io.Discard, r.Body)
 				if tc.response == "denied" {
-					httpcommon.WriteJSON(w, 403, map[string]string{"Code": "XMinioAdminAccessDenied", "Message": "PRIVATE-UPSTREAM"})
+					httpcommon.WriteJSON(w, r, 403, map[string]string{"Code": "XMinioAdminAccessDenied", "Message": "PRIVATE-UPSTREAM"})
 					return
 				}
 				applied.Add(1)
@@ -85,7 +85,7 @@ func TestIAMHTTPRevisionFollowsCommandEffectNotError(t *testing.T) {
 					}
 					_ = conn.Close()
 				case "proxy":
-					httpcommon.WriteJSON(w, 502, map[string]string{"Code": "InternalError", "Message": "PRIVATE-UPSTREAM"})
+					httpcommon.WriteJSON(w, r, 502, map[string]string{"Code": "InternalError", "Message": "PRIVATE-UPSTREAM"})
 				case "oversized":
 					w.(http.Flusher).Flush()
 					_, _ = w.Write(bytes.Repeat([]byte("x"), (8<<20)+1))

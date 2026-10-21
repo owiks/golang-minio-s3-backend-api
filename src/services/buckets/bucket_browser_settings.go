@@ -13,6 +13,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/sse"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 type CorsRule struct {
@@ -24,11 +25,11 @@ type CorsRule struct {
 	MaxAge  int      `json:"maxAge"`
 }
 type BrowserSetting struct {
-	Rules     []CorsRule `json:"rules,omitempty"`
-	Algorithm string     `json:"algorithm,omitempty"`
-	KeyID     string     `json:"keyId,omitempty"`
-	Writable  bool       `json:"writable"`
-	Warning   string     `json:"warning,omitempty"`
+	Rules     []CorsRule   `json:"rules,omitempty"`
+	Algorithm string       `json:"algorithm,omitempty"`
+	KeyID     string       `json:"keyId,omitempty"`
+	Writable  bool         `json:"writable"`
+	Warning   messages.Ref `json:"warning,omitempty"`
 }
 type BrowserSettingState struct {
 	Value      BrowserSetting     `json:"-"`
@@ -92,7 +93,7 @@ func ReadBrowserSetting(ctx context.Context, s ReadBrowserSettingsClient, bucket
 		state.Value.Writable = false
 	}
 	if !state.Value.Writable {
-		state.Value.Warning = "Настройка содержит параметры, которые текущий SDK не может сохранить без потерь. Доступен только просмотр."
+		state.Value.Warning = messages.BucketsThisSettingContainsParametersThatTheCurrent
 	}
 	return state, nil
 }
@@ -110,7 +111,7 @@ func BrowserSettingField(state BrowserSettingState, err error) DetailField {
 }
 func ValidateCorsRule(r CorsRule) error {
 	invalid := func() error {
-		return apperror.New(400, "InvalidCORS", "Проверьте CORS: укажите origins, методы GET/HEAD/PUT/POST/DELETE, корректные заголовки и неотрицательный Max-Age.")
+		return apperror.New(400, "InvalidCORS", messages.BucketsInvalidCORS)
 	}
 	if len(r.ID) > 255 || strings.ContainsFunc(r.ID, unicode.IsControl) || len(r.Origins) == 0 || len(r.Origins) > 100 || len(r.Methods) == 0 || len(r.Methods) > 5 || len(r.Headers) > 100 || len(r.Expose) > 100 || r.MaxAge < 0 || r.MaxAge > 2147483647 {
 		return invalid()

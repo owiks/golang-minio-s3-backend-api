@@ -1,11 +1,12 @@
 package controllers
 
 import (
+	"net/http"
+
 	httpcommon "minio-web/api/src/http/api/common"
 	httpvalidation "minio-web/api/src/http/validation"
 	"minio-web/api/src/services/identities"
 	runtimesvc "minio-web/api/src/services/runtime"
-	"net/http"
 )
 
 func HandleListUsers(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -13,7 +14,7 @@ func HandleListUsers(app *runtimesvc.State, w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 
@@ -22,7 +23,7 @@ func HandleGetUser(app *runtimesvc.State, w http.ResponseWriter, r *http.Request
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 
@@ -34,7 +35,7 @@ func HandleCreateUser(app *runtimesvc.State, w http.ResponseWriter, r *http.Requ
 	if err := identities.CreateUser(r.Context(), runtimesvc.NewClients(s), b); err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, httpcommon.Success{OK: true})
+	httpcommon.WriteJSON(w, r, 200, httpcommon.Success{OK: true})
 	return nil
 }
 
@@ -46,7 +47,7 @@ func HandleSetUserStatus(app *runtimesvc.State, w http.ResponseWriter, r *http.R
 	if err := identities.SetUserStatus(r.Context(), runtimesvc.NewClients(s), s.ActorName(), name, b); err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, httpcommon.Success{OK: true})
+	httpcommon.WriteJSON(w, r, 200, httpcommon.Success{OK: true})
 	return nil
 }
 
@@ -57,6 +58,6 @@ func HandleDeleteUser(app *runtimesvc.State, w http.ResponseWriter, r *http.Requ
 	if err := identities.DeleteUser(r.Context(), runtimesvc.NewClients(s), s.ActorName(), name); err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, httpcommon.Success{OK: true})
+	httpcommon.WriteJSON(w, r, 200, httpcommon.Success{OK: true})
 	return nil
 }

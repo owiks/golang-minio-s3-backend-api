@@ -7,13 +7,14 @@ import (
 	httpvalidation "minio-web/api/src/http/validation"
 	"minio-web/api/src/services/apperror"
 	searchsvc "minio-web/api/src/services/files"
+	"minio-web/api/src/services/messages"
 	runtimesvc "minio-web/api/src/services/runtime"
 	searchtypes "minio-web/api/src/services/search"
 )
 
 func HandleContentSearch(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
 	if r.Method != "POST" {
-		return apperror.New(405, "MethodNotAllowed", "Метод не поддерживается.")
+		return apperror.New(405, "MethodNotAllowed", messages.HttpMethodNotAllowed)
 	}
 
 	var body searchtypes.ContentSearchBody
@@ -24,6 +25,6 @@ func HandleContentSearch(app *runtimesvc.State, w http.ResponseWriter, r *http.R
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }

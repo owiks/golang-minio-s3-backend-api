@@ -11,6 +11,7 @@ import (
 
 	"minio-web/api/src/services/apperror"
 	"minio-web/api/src/services/iam"
+	"minio-web/api/src/services/messages"
 )
 
 const MaxActionAccountResponse = 4 * 1024 * 1024
@@ -53,7 +54,7 @@ func (s *Session) ActionAccountInfo(ctx context.Context) (madmin.AccountInfo, *i
 		return madmin.AccountInfo{}, iam.ActionAccountIssue(err, status)
 	}
 	if len(raw) > MaxActionAccountResponse {
-		return madmin.AccountInfo{}, iam.ActionAccountIssue(apperror.New(502, "AccountInfoTooLarge", "Ответ проверки прав превышает допустимый размер."), status)
+		return madmin.AccountInfo{}, iam.ActionAccountIssue(apperror.New(502, "AccountInfoTooLarge", messages.RuntimeAccountInfoTooLarge), status)
 	}
 	var identity struct {
 		AccountName string

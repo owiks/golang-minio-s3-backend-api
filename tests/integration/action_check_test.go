@@ -16,6 +16,7 @@ import (
 
 	httpcommon "minio-web/api/src/http/api/common"
 	accesscontroller "minio-web/api/src/http/api/routes/access/controllers"
+	"minio-web/api/src/http/presentation"
 	accesssvc "minio-web/api/src/services/access"
 	"minio-web/api/src/services/iam"
 	runtimesvc "minio-web/api/src/services/runtime"
@@ -46,7 +47,7 @@ func TestActionCheckRunsBeforeInventoryCanExhaustDeadline(t *testing.T) {
 			if accounts.Add(1) == 2 {
 				close(both)
 			}
-			httpcommon.WriteJSON(w, 200, map[string]any{"AccountName": "fixture-user", "Policy": actionCheckPolicy, "Buckets": []map[string]any{{"name": "fixture-bucket", "access": map[string]bool{"read": true}}}})
+			httpcommon.WriteJSON(w, r, 200, map[string]any{"AccountName": "fixture-user", "Policy": actionCheckPolicy, "Buckets": []map[string]any{{"name": "fixture-bucket", "access": map[string]bool{"read": true}}}})
 			return
 		}
 		if r.URL.Path == "/" {
@@ -59,7 +60,7 @@ func TestActionCheckRunsBeforeInventoryCanExhaustDeadline(t *testing.T) {
 			fmt.Fprint(w, `<ListAllMyBucketsResult><Buckets><Bucket><Name>fixture-bucket</Name></Bucket></Buckets></ListAllMyBucketsResult>`)
 			return
 		}
-		httpcommon.WriteJSON(w, 501, map[string]string{"Code": "NotImplemented"})
+		httpcommon.WriteJSON(w, r, 501, map[string]string{"Code": "NotImplemented"})
 	})
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
@@ -87,14 +88,14 @@ func TestActionCheckReasonsRemainClosedAndDoNotExposeUpstreamData(t *testing.T) 
 			var fail atomic.Bool
 			s := actionCheckSession(t, func(w http.ResponseWriter, r *http.Request) {
 				if !fail.Load() {
-					httpcommon.WriteJSON(w, 200, map[string]any{"AccountName": "fixture-user", "Policy": actionCheckPolicy})
+					httpcommon.WriteJSON(w, r, 200, map[string]any{"AccountName": "fixture-user", "Policy": actionCheckPolicy})
 					return
 				}
 				if strings.HasSuffix(r.URL.Path, "/accountinfo") && tc.Status == 200 {
-					httpcommon.WriteJSON(w, 200, map[string]any{"AccountName": tc.Owner, "Policy": tc.Policy})
+					httpcommon.WriteJSON(w, r, 200, map[string]any{"AccountName": tc.Owner, "Policy": tc.Policy})
 					return
 				}
-				httpcommon.WriteJSON(w, 403, map[string]string{"Code": "AccessDenied", "Message": "SECRET-UPSTREAM-DATA"})
+				httpcommon.WriteJSON(w, r, 403, map[string]string{"Code": "AccessDenied", "Message": "SECRET-UPSTREAM-DATA"})
 			})
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
@@ -117,7 +118,7 @@ func TestActionCheckReasonsRemainClosedAndDoNotExposeUpstreamData(t *testing.T) 
 			var reply struct {
 				Allowed []bool
 				Known   bool
-				Issue   *iam.ActionCheckIssue
+				Issue   *presentation.ActionCheckIssue
 			}
 			if err := json.Unmarshal(w.Body.Bytes(), &reply); err != nil {
 				t.Fatal(err)

@@ -9,6 +9,7 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 func SharePrefix(prefix string) bool {
@@ -21,7 +22,7 @@ func ScopedObjectPage(ctx context.Context, s FolderDeleteItemsClient, bucket, pr
 
 func ParseShareRange(raw string, size int64) (int64, int64, error) {
 	bad := func() (int64, int64, error) {
-		return 0, 0, apperror.New(416, "InvalidRange", "Недоступный диапазон файла.")
+		return 0, 0, apperror.New(416, "InvalidRange", messages.FoldersInvalidRange)
 	}
 	if size <= 0 || !strings.HasPrefix(raw, "bytes=") || strings.Contains(raw, ",") {
 		return bad()

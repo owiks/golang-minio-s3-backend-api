@@ -10,7 +10,8 @@ import (
 	"minio-web/api/src/services/apperror"
 	"minio-web/api/src/services/archives/zipread"
 	"minio-web/api/src/services/coordination"
-	"minio-web/api/src/services/objects/state"
+	"minio-web/api/src/services/messages"
+	objectstate "minio-web/api/src/services/objects/state"
 	"minio-web/api/src/services/staging"
 )
 
@@ -64,7 +65,7 @@ func (cache *ZIPCache) Open(ctx context.Context, s zipread.ZIPSource, bucket, ke
 	cache.mu.Lock()
 	if cache.closed {
 		cache.mu.Unlock()
-		return nil, apperror.New(503, "ServerClosing", "API завершает работу. Повторите запрос позже.")
+		return nil, apperror.New(503, "ServerClosing", messages.RuntimeServerClosing)
 	}
 	// A request may have authenticated before logout while another lease keeps
 	// this entry alive. Hits and new publications use the same session fence.
@@ -105,7 +106,7 @@ func (cache *ZIPCache) Open(ctx context.Context, s zipread.ZIPSource, bucket, ke
 	defer cache.mu.Unlock()
 	if cache.closed {
 		entry.Close()
-		return nil, apperror.New(503, "ServerClosing", "API завершает работу. Повторите запрос позже.")
+		return nil, apperror.New(503, "ServerClosing", messages.RuntimeServerClosing)
 	}
 	if !cache.hasSession(s.SessionID()) {
 		entry.Close()
@@ -113,7 +114,7 @@ func (cache *ZIPCache) Open(ctx context.Context, s zipread.ZIPSource, bucket, ke
 	}
 	if actual != rev {
 		entry.Close()
-		return nil, apperror.New(409, "ZIPChanged", "Архив изменился. Обновите список.")
+		return nil, apperror.New(409, "ZIPChanged", messages.ArchivesZIPChangedReader)
 	}
 	if cached := cache.entries[id]; cached != nil {
 		entry.Close()
@@ -131,7 +132,7 @@ func (cache *ZIPCache) Open(ctx context.Context, s zipread.ZIPSource, bucket, ke
 		}
 		if oldest == nil {
 			entry.Close()
-			return nil, apperror.New(429, "ZIPBusy", "Сейчас обрабатываются другие архивы. Повторите позже.")
+			return nil, apperror.New(429, "ZIPBusy", messages.RuntimeZIPBusy)
 		}
 		oldest.Close()
 		delete(cache.entries, oldestID)

@@ -7,7 +7,8 @@ import (
 
 	"minio-web/api/src/services/apperror"
 	"minio-web/api/src/services/coordination"
-	"minio-web/api/src/services/objects/write"
+	"minio-web/api/src/services/messages"
+	objectwrite "minio-web/api/src/services/objects/write"
 	"minio-web/api/src/services/result"
 	validationsvc "minio-web/api/src/services/validation"
 )
@@ -15,7 +16,7 @@ import (
 func InspectUploadInvite(ctx context.Context, store UploadInviteReader, token string) (InviteInfo, error) {
 	g := store.Get(token)
 	if g == nil {
-		return InviteInfo{}, apperror.New(404, "InviteExpired", "Ссылка недействительна или истекла.")
+		return InviteInfo{}, apperror.New(404, "InviteExpired", messages.FoldersFolderShareExpired)
 	}
 	view, err := g.Inspect()
 	if err != nil {
@@ -28,14 +29,14 @@ func InspectUploadInvite(ctx context.Context, store UploadInviteReader, token st
 func ReceiveFile(ctx context.Context, store UploadInviteReader, admission coordination.TransferAdmission, token string, name, contentType string, size, contentLength int64, source io.Reader) (result.Success, error) {
 	g := store.Get(token)
 	if g == nil {
-		return result.Success{}, apperror.New(404, "InviteExpired", "Ссылка недействительна или истекла.")
+		return result.Success{}, apperror.New(404, "InviteExpired", messages.FoldersFolderShareExpired)
 	}
 	view, err := g.Inspect()
 	if err != nil {
 		return result.Success{}, err
 	}
 	if size < 0 || size > view.MaxSize || contentLength != size || name == "" || strings.ContainsAny(name, "/\\") || !validationsvc.ValidFileKey(view.Prefix+name) {
-		return result.Success{}, apperror.New(400, "InvalidUpload", "Проверьте имя файла и ограничение размера.")
+		return result.Success{}, apperror.New(400, "InvalidUpload", messages.UploadsInvalidUpload)
 	}
 	lease, err := g.BeginWrite(ctx)
 	if err != nil {
@@ -55,7 +56,7 @@ func ReceiveFile(ctx context.Context, store UploadInviteReader, admission coordi
 	_, err = g.Writer().PutObject(uploadCtx, view.Bucket, view.Prefix+name, io.LimitReader(source, view.MaxSize+1), size, opts)
 	if err != nil {
 		if mapped := apperror.Public(objectwrite.FileWriteError(err)); mapped.Code == "DestinationChanged" {
-			return result.Success{}, apperror.New(409, "UploadExists", "Файл с таким именем уже существует. Переименуйте его и повторите загрузку.")
+			return result.Success{}, apperror.New(409, "UploadExists", messages.UploadsUploadExists)
 		}
 		return result.Success{}, objectwrite.FileWriteError(err)
 	}

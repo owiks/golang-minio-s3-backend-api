@@ -11,12 +11,13 @@ import (
 	"minio-web/api/src/http/api/common"
 	httpvalidation "minio-web/api/src/http/validation"
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/runtime"
 	"minio-web/api/src/services/uploads/integrity"
 	"minio-web/api/src/services/uploads/multipart"
 )
 
-func writeSnapshot(w http.ResponseWriter, s multipart.Snapshot, created bool) {
+func writeSnapshot(w http.ResponseWriter, r *http.Request, s multipart.Snapshot, created bool) {
 	status := 200
 	if created {
 		status = 201
@@ -24,7 +25,7 @@ func writeSnapshot(w http.ResponseWriter, s multipart.Snapshot, created bool) {
 	if multipart.IsUncertain(s) {
 		status = 202
 	}
-	common.WriteJSON(w, status, s)
+	common.WriteJSON(w, r, status, s)
 }
 
 func HandleCreate(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session) error {
@@ -36,21 +37,21 @@ func HandleCreate(app *runtime.State, w http.ResponseWriter, r *http.Request, s 
 	if err != nil {
 		return err
 	}
-	writeSnapshot(w, value, true)
+	writeSnapshot(w, r, value, true)
 	return nil
 }
 
 func operation(rest string) (string, int, error) {
 	parts := strings.Split(rest, "/")
 	if len(parts) == 0 || len(parts[0]) != 43 {
-		return "", 0, apperror.New(400, "InvalidMultipartID", "Некорректный идентификатор загрузки.")
+		return "", 0, apperror.New(400, "InvalidMultipartID", messages.HttpInvalidMultipartID)
 	}
 	n := 0
 	if len(parts) >= 3 && parts[1] == "parts" {
 		var err error
 		n, err = strconv.Atoi(parts[2])
 		if err != nil || n < 1 || n > multipart.MaxParts {
-			return "", 0, apperror.New(400, "InvalidPartNumber", "Некорректный номер части.")
+			return "", 0, apperror.New(400, "InvalidPartNumber", messages.HttpInvalidPartNumber)
 		}
 	}
 	return parts[0], n, nil
@@ -65,7 +66,7 @@ func HandleInspect(app *runtime.State, w http.ResponseWriter, r *http.Request, s
 	if err != nil {
 		return err
 	}
-	writeSnapshot(w, value, false)
+	writeSnapshot(w, r, value, false)
 	return nil
 }
 func HandlePart(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session, rest string) error {
@@ -75,7 +76,7 @@ func HandlePart(app *runtime.State, w http.ResponseWriter, r *http.Request, s *r
 	}
 	size, err := strconv.ParseInt(r.Header.Get("X-Upload-Size"), 10, 64)
 	if err != nil || size < 0 || size > multipart.PartSize || r.ContentLength != size {
-		return apperror.New(400, "InvalidPartSize", "Размер тела должен совпадать с X-Upload-Size и планом части.")
+		return apperror.New(400, "InvalidPartSize", messages.HttpInvalidPartSize)
 	}
 	r.Body = &partBody{ReadCloser: http.MaxBytesReader(w, r.Body, multipart.PartSize), interrupt: func() { _ = http.NewResponseController(w).SetReadDeadline(time.Now()) }}
 	spec := integrity.Spec{Algorithm: "SHA256", Encoding: "base64", Value: r.Header.Get("X-Part-Checksum-SHA256"), Type: "FULL_OBJECT", Scope: "PART"}
@@ -83,7 +84,7 @@ func HandlePart(app *runtime.State, w http.ResponseWriter, r *http.Request, s *r
 	if err != nil {
 		return err
 	}
-	writeSnapshot(w, value, false)
+	writeSnapshot(w, r, value, false)
 	return nil
 }
 
@@ -115,7 +116,7 @@ func HandleSign(app *runtime.State, w http.ResponseWriter, r *http.Request, s *r
 	if err != nil {
 		return err
 	}
-	common.WriteJSON(w, 200, value)
+	common.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleComplete(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session, rest string) error {
@@ -127,7 +128,7 @@ func HandleComplete(app *runtime.State, w http.ResponseWriter, r *http.Request, 
 	if err != nil {
 		return err
 	}
-	writeSnapshot(w, value, false)
+	writeSnapshot(w, r, value, false)
 	return nil
 }
 func HandleAbort(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session, rest string) error {
@@ -139,6 +140,6 @@ func HandleAbort(app *runtime.State, w http.ResponseWriter, r *http.Request, s *
 	if err != nil {
 		return err
 	}
-	writeSnapshot(w, value, false)
+	writeSnapshot(w, r, value, false)
 	return nil
 }

@@ -5,6 +5,9 @@ import (
 	"net/http"
 	"time"
 
+	"minio-web/api/src/http/api/common"
+	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/telemetry"
 )
 
@@ -71,9 +74,7 @@ func Observe(w http.ResponseWriter, r *http.Request, operation string, metrics *
 			} else {
 				telemetry.Failure(ctx, "Panic")
 				if rw.status == 0 {
-					rw.Header().Set("Content-Type", "application/json; charset=utf-8")
-					rw.WriteHeader(500)
-					_, _ = rw.Write([]byte("{\"error\":{\"code\":\"InternalError\",\"message\":\"Внутренняя ошибка API.\"}}\n"))
+					common.WriteJSON(rw, r, 500, map[string]any{"error": &apperror.Error{Code: "InternalError", Message: messages.InternalError}})
 				}
 			}
 		}

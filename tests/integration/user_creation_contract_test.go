@@ -40,9 +40,9 @@ func TestUserCreationRequiresExplicitAcknowledgementHTTP(t *testing.T) {
 			s := actionCheckSession(t, func(w http.ResponseWriter, r *http.Request) {
 				if r.Method == "GET" {
 					if tc.exists {
-						httpcommon.WriteJSON(w, 200, map[string]string{"status": "disabled"})
+						httpcommon.WriteJSON(w, r, 200, map[string]string{"status": "disabled"})
 					} else {
-						httpcommon.WriteJSON(w, 404, map[string]string{"Code": "XMinioAdminNoSuchUser"})
+						httpcommon.WriteJSON(w, r, 404, map[string]string{"Code": "XMinioAdminNoSuchUser"})
 					}
 					return
 				}

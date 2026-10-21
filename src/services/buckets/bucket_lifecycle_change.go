@@ -8,6 +8,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/lifecycle"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 type LifecycleChangeRequest struct {
@@ -24,7 +25,7 @@ func ChangeLifecycle(ctx context.Context, s ChangeLifecycleClient, bucket string
 		return DetailField{}, err
 	}
 	if body.Revision == "" || body.Revision != state.View.Revision {
-		return DetailField{}, apperror.New(409, "BucketSettingChanged", "Правила Lifecycle изменились. Загрузите актуальные правила перед сохранением.")
+		return DetailField{}, apperror.New(409, "BucketSettingChanged", messages.BucketsBucketSettingChangedBucketLifecycleChange)
 	}
 	if !state.View.Writable {
 		return DetailField{}, apperror.New(409, "LifecycleUnsupported", state.View.Warning)
@@ -33,17 +34,17 @@ func ChangeLifecycle(ctx context.Context, s ChangeLifecycleClient, bucket string
 	index := -1
 	if operation != "create" {
 		if body.Index == nil || *body.Index < 0 || *body.Index >= len(cfg.Rules) {
-			return DetailField{}, apperror.New(404, "LifecycleRuleNotFound", "Правило больше не существует. Обновите список.")
+			return DetailField{}, apperror.New(404, "LifecycleRuleNotFound", messages.BucketsLifecycleRuleNotFound)
 		}
 		index = *body.Index
 	}
 	switch operation {
 	case "create", "update":
 		if body.Rule == nil {
-			return DetailField{}, apperror.New(400, "InvalidLifecycleRule", "Передайте параметры правила.")
+			return DetailField{}, apperror.New(400, "InvalidLifecycleRule", messages.BucketsInvalidLifecycleRule)
 		}
 		if operation == "create" && len(cfg.Rules) >= 1000 {
-			return DetailField{}, apperror.New(400, "LifecycleLimit", "В бакете допускается не более 1000 правил Lifecycle.")
+			return DetailField{}, apperror.New(400, "LifecycleLimit", messages.BucketsLifecycleLimit)
 		}
 		old := lifecycle.Rule{}
 		if index >= 0 {
@@ -55,7 +56,7 @@ func ChangeLifecycle(ctx context.Context, s ChangeLifecycleClient, bucket string
 		}
 		for i, rule := range cfg.Rules {
 			if i != index && rule.ID == updated.ID {
-				return DetailField{}, apperror.New(409, "LifecycleDuplicateID", "Правило с таким именем уже существует.")
+				return DetailField{}, apperror.New(409, "LifecycleDuplicateID", messages.BucketsCORSDuplicateID)
 			}
 		}
 		if index < 0 {
@@ -65,7 +66,7 @@ func ChangeLifecycle(ctx context.Context, s ChangeLifecycleClient, bucket string
 		}
 	case "toggle":
 		if body.Enabled == nil {
-			return DetailField{}, apperror.New(400, "InvalidLifecycleRule", "Укажите состояние правила.")
+			return DetailField{}, apperror.New(400, "InvalidLifecycleRule", messages.BucketsInvalidLifecycleRuleBucketLifecycleChange)
 		}
 		cfg.Rules[index].Status = "Disabled"
 		if *body.Enabled {
@@ -77,26 +78,26 @@ func ChangeLifecycle(ctx context.Context, s ChangeLifecycleClient, bucket string
 			expected = fmt.Sprintf("Правило %d", index+1)
 		}
 		if body.Confirmation != expected {
-			return DetailField{}, apperror.New(400, "ConfirmationRequired", "Подтвердите удаление выбранного правила.")
+			return DetailField{}, apperror.New(400, "ConfirmationRequired", messages.BucketsConfirmationRequiredBucketLifecycleChange)
 		}
 		cfg.Rules = append(cfg.Rules[:index], cfg.Rules[index+1:]...)
 	default:
-		return DetailField{}, apperror.New(405, "MethodNotAllowed", "Этот способ изменения Lifecycle не поддерживается.")
+		return DetailField{}, apperror.New(405, "MethodNotAllowed", messages.BucketsMethodNotAllowed)
 	}
 	status, err := s.WriteLifecycleConfig(ctx, bucket, cfg)
 	if err != nil {
 		switch minio.ToErrorResponse(err).Code {
 		case "InvalidArgument", "InvalidRequest", "InvalidLifecycleConfiguration", "MalformedXML":
-			return DetailField{}, apperror.New(400, "InvalidLifecycleRule", "MinIO отклонил правило Lifecycle. Проверьте сроки, условия и совместимость действий с настройками бакета.")
+			return DetailField{}, apperror.New(400, "InvalidLifecycleRule", messages.BucketsInvalidLifecycleRuleBucketLifecycleChangeChangeLifecycle)
 		}
 		return DetailField{}, err
 	}
 	// The SDK's empty-config DELETE does not itself validate HTTP status.
 	if status < 200 || status >= 300 {
 		if status == 403 {
-			return DetailField{}, apperror.New(403, "AccessDenied", "Недостаточно прав MinIO для изменения правил Lifecycle.")
+			return DetailField{}, apperror.New(403, "AccessDenied", messages.BucketsAccessDenied)
 		}
-		return DetailField{}, apperror.New(502, "LifecycleWriteFailed", "MinIO не подтвердил изменение правил. Обновите список.")
+		return DetailField{}, apperror.New(502, "LifecycleWriteFailed", messages.BucketsLifecycleWriteFailed)
 	}
 	stored, readErr := ReadLifecycle(ctx, s, bucket)
 	return LifecycleField(stored, readErr), nil

@@ -5,13 +5,14 @@ import (
 	"time"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 func closingError() error {
-	return apperror.New(503, "ServerClosing", "API завершает работу. Повторите запрос позже.")
+	return apperror.New(503, "ServerClosing", messages.RuntimeServerClosing)
 }
 func expiredSessionError() error {
-	return apperror.New(401, "SessionExpired", "Сессия истекла. Подключитесь заново.")
+	return apperror.New(401, "SessionExpired", messages.RuntimeSessionExpired)
 }
 func (app *State) Close() {
 	app.closeOnce.Do(func() {

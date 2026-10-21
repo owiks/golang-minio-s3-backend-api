@@ -11,6 +11,7 @@ import (
 
 	"minio-web/api/src/services/apperror"
 	identitiessvc "minio-web/api/src/services/identities"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/revision"
 	validationsvc "minio-web/api/src/services/validation"
 )
@@ -57,14 +58,14 @@ func serviceKeyDetail(ctx context.Context, s ServiceKeyReader, key string) (Acce
 func keyDetail(s EnsureMutableClient, key string, info madmin.InfoServiceAccountResp, err error) (AccessKeyDetails, error) {
 	if err != nil {
 		if identitiessvc.Missing(err, "XMinioInvalidIAMCredentials") {
-			return AccessKeyDetails{}, apperror.New(404, "AccessKeyNotFound", "Ключ больше не существует или недоступен этому подключению. Обновите список.")
+			return AccessKeyDetails{}, apperror.New(404, "AccessKeyNotFound", messages.KeysAccessKeyNotFound)
 		}
 		return AccessKeyDetails{}, err
 	}
 	policy := json.RawMessage("null")
 	if !info.ImpliedPolicy {
 		if !json.Valid([]byte(info.Policy)) || bytes.Equal(bytes.TrimSpace([]byte(info.Policy)), []byte("null")) {
-			return AccessKeyDetails{}, apperror.New(502, "UnreadableAccessKeyPolicy", "MinIO не вернул политику ключа. Настройки нельзя менять, пока политика не прочитана.")
+			return AccessKeyDetails{}, apperror.New(502, "UnreadableAccessKeyPolicy", messages.KeysUnreadableAccessKeyPolicy)
 		}
 		policy = json.RawMessage(info.Policy)
 	}
@@ -87,19 +88,19 @@ type KeyInput struct {
 
 func ValidateKeyInput(b KeyInput) error {
 	if b.Name != "" && !KeyNamePattern.MatchString(b.Name) {
-		return apperror.New(400, "InvalidKeyName", "Имя ключа: до 32 латинских букв, цифр, дефисов и подчёркиваний. Первый символ — буква.")
+		return apperror.New(400, "InvalidKeyName", messages.KeysInvalidKeyName)
 	}
 	if len(b.Description) > 256 {
-		return apperror.New(400, "InvalidKeyDescription", "Описание должно занимать не более 256 байт UTF-8.")
+		return apperror.New(400, "InvalidKeyDescription", messages.KeysInvalidKeyDescription)
 	}
 	if b.Parent != "" && !validationsvc.ValidName(b.Parent) {
-		return apperror.New(400, "InvalidParent", "Укажите корректного пользователя-владельца.")
+		return apperror.New(400, "InvalidParent", messages.KeysInvalidParent)
 	}
 	if err := ValidateKeyExpiration(b.Expiration); err != nil {
 		return err
 	}
 	if len(b.Policy) == 0 {
-		return apperror.New(400, "InvalidPolicy", "Укажите политику или null для наследования прав пользователя.")
+		return apperror.New(400, "InvalidPolicy", messages.KeysInvalidPolicy)
 	}
 	if !bytes.Equal(bytes.TrimSpace(b.Policy), []byte("null")) {
 		if err := validationsvc.ValidateDocument(b.Policy); err != nil {
@@ -114,17 +115,17 @@ func ValidateKeyInput(b KeyInput) error {
 		if len(statement) > 0 && statement[0] == '{' {
 			rules = []json.RawMessage{statement}
 		} else if json.Unmarshal(statement, &rules) != nil {
-			return apperror.New(400, "InvalidPolicy", "Statement должен содержать правило или список правил доступа.")
+			return apperror.New(400, "InvalidPolicy", messages.KeysInvalidPolicyAccessKeys)
 		}
 		if len(rules) == 0 {
-			return apperror.New(400, "InvalidPolicy", "Добавьте хотя бы одно правило. Для полного запрета используйте правило с Effect: Deny.")
+			return apperror.New(400, "InvalidPolicy", messages.KeysInvalidPolicyAccessKeysValidateKeyInput)
 		}
 	}
 	return nil
 }
 func ValidateKeyExpiration(value *time.Time) error {
 	if value != nil && (value.Before(time.Now().Add(15*time.Minute)) || value.After(time.Now().Add(365*24*time.Hour))) {
-		return apperror.New(400, "InvalidExpiration", "Выберите срок от 15 минут до 365 дней. Для бессрочного ключа выберите «Без срока».")
+		return apperror.New(400, "InvalidExpiration", messages.KeysInvalidExpiration)
 	}
 	return nil
 }

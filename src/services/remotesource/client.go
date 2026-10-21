@@ -12,6 +12,7 @@ import (
 
 	"minio-web/api/src/services/apperror"
 	endpoints "minio-web/api/src/services/endpoint"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/uploads/source"
 )
 
@@ -36,7 +37,7 @@ func (c *Client) Open(ctx context.Context, raw string) (source.File, error) {
 	}
 	if resp.StatusCode != http.StatusOK {
 		resp.Body.Close()
-		return source.File{}, apperror.New(502, "SourceResponse", "Источник не вернул файл (ожидается HTTP 200).")
+		return source.File{}, apperror.New(502, "SourceResponse", messages.RemotesourceSourceResponse)
 	}
 	return source.File{Body: resp.Body, Size: resp.ContentLength, ContentType: resp.Header.Get("Content-Type")}, nil
 }
@@ -52,7 +53,7 @@ func unavailable(ctx context.Context, err error) error {
 	if errors.As(err, &safe) {
 		return safe
 	}
-	return apperror.NewWithCause(502, "SourceUnavailable", "Не удалось получить файл. Проверьте публичную ссылку и доступность источника.", err)
+	return apperror.NewWithCause(502, "SourceUnavailable", messages.RemotesourceSourceUnavailable, err)
 }
 
 func PublicIP(ip net.IP) bool {
@@ -75,7 +76,7 @@ func PublicIP(ip net.IP) bool {
 func dialPublic(ctx context.Context, network, address string, lookup func(context.Context, string) ([]net.IPAddr, error), dial func(context.Context, string, string) (net.Conn, error)) (net.Conn, error) {
 	host, port, err := net.SplitHostPort(address)
 	if err != nil || port != "443" {
-		return nil, apperror.New(400, "SourceDenied", "Недопустимый адрес источника.")
+		return nil, apperror.New(400, "SourceDenied", messages.RemotesourceSourceDenied)
 	}
 	ips, err := lookup(ctx, host)
 	if err != nil {
@@ -85,14 +86,14 @@ func dialPublic(ctx context.Context, network, address string, lookup func(contex
 		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 			return nil, err
 		}
-		return nil, apperror.NewWithCause(502, "SourceDNS", "Не удалось найти источник.", err)
+		return nil, apperror.NewWithCause(502, "SourceDNS", messages.RemotesourceSourceDNS, err)
 	}
 	if len(ips) == 0 {
-		return nil, apperror.New(502, "SourceDNS", "Не удалось найти источник.")
+		return nil, apperror.New(502, "SourceDNS", messages.RemotesourceSourceDNS)
 	}
 	for _, ip := range ips {
 		if !PublicIP(ip.IP) {
-			return nil, apperror.New(400, "SourceDenied", "Внутренние и служебные адреса нельзя использовать для импорта.")
+			return nil, apperror.New(400, "SourceDenied", messages.RemotesourceSourceDeniedClient)
 		}
 	}
 	var last error
@@ -116,7 +117,7 @@ func newHTTPClient() *http.Client {
 		r.Header.Del("Authorization")
 		r.Header.Del("Cookie")
 		if len(via) >= 5 {
-			return apperror.New(400, "TooManyRedirects", "Источник вернул слишком много перенаправлений.")
+			return apperror.New(400, "TooManyRedirects", messages.RemotesourceTooManyRedirects)
 		}
 		_, e := source.ParseURL(r.URL.String())
 		return e

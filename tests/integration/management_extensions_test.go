@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
-	"minio-web/api/tests/testsession"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -20,6 +19,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
 	apihttp "minio-web/api/src/http/api"
+	"minio-web/api/src/http/presentation"
 	"minio-web/api/src/services/apperror"
 	batchsvc "minio-web/api/src/services/batch"
 	bucketssvc "minio-web/api/src/services/buckets"
@@ -27,6 +27,7 @@ import (
 	runtimesvc "minio-web/api/src/services/runtime"
 	"minio-web/api/src/services/securetoken"
 	serversvc "minio-web/api/src/services/server"
+	"minio-web/api/tests/testsession"
 )
 
 func TestCORSS3RoundTrip(t *testing.T) {
@@ -190,7 +191,7 @@ func TestManagementExtensionsIntegration(t *testing.T) {
 	base := "admin/object-versions/"
 	_, holdErr := client.GetObjectLegalHold(ctx, bucket, key, minio.GetObjectLegalHoldOptions{VersionID: firstID})
 	t.Logf("unset hold code: %s", minio.ToErrorResponse(holdErr).Code)
-	var fields map[string]bucketssvc.DetailField
+	var fields map[string]presentation.DetailField
 	get := func() {
 		json.Unmarshal(root.call("GET", base+"protection?"+q.Encode(), nil, 200), &fields)
 		if fields["hold"].Error != "" || fields["retention"].Error != "" {
@@ -231,7 +232,7 @@ func TestManagementExtensionsIntegration(t *testing.T) {
 		}
 	}()
 	compQ := url.Values{"bucket": {bucket}, "key": {"compliance"}, "version": {comp.VersionID}}
-	var compFields map[string]bucketssvc.DetailField
+	var compFields map[string]presentation.DetailField
 	json.Unmarshal(root.call("GET", base+"protection?"+compQ.Encode(), nil, 200), &compFields)
 	root.call("PUT", base+"retention?"+compQ.Encode(), map[string]any{"revision": compFields["retention"].Revision, "mode": "", "confirmation": comp.VersionID}, 403)
 	// One denied protection field must not hide the other field.
@@ -247,7 +248,7 @@ func TestManagementExtensionsIntegration(t *testing.T) {
 	root.call("POST", "admin/policies", map[string]any{"acknowledgeNonAtomicCreate": true, "name": policy, "document": doc}, 200)
 	root.call("POST", "admin/bindings", map[string]any{"user": user, "policy": policy}, 200)
 	limited := loginTest(t, srv.URL, user, "Protection-fixture-secret-123")
-	var independent map[string]bucketssvc.DetailField
+	var independent map[string]presentation.DetailField
 	json.Unmarshal(limited.call("GET", base+"protection?"+q.Encode(), nil, 200), &independent)
 	if independent["retention"].Revision == "" || independent["hold"].Error == "" {
 		t.Fatal(independent)
@@ -310,7 +311,7 @@ func TestExtensionPermissionsIntegration(t *testing.T) {
 	limited := loginTest(t, srv.URL, user, "Extension-fixture-secret-123")
 	for _, kind := range []string{"encryption"} {
 		base := "admin/buckets/" + bucket + "/" + kind
-		var field bucketssvc.DetailField
+		var field presentation.DetailField
 		json.Unmarshal(limited.call("GET", base, nil, 200), &field)
 		if kind == "cors" {
 			limited.call("POST", base, map[string]any{"revision": field.Revision, "rule": bucketssvc.CorsRule{Origins: []string{"*"}, Methods: []string{"GET"}}}, 403)

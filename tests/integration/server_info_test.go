@@ -12,6 +12,7 @@ import (
 	"github.com/minio/madmin-go/v3"
 
 	apihttp "minio-web/api/src/http/api"
+	"minio-web/api/src/http/presentation"
 	runtimesvc "minio-web/api/src/services/runtime"
 	"minio-web/api/src/services/securetoken"
 	serversvc "minio-web/api/src/services/server"
@@ -55,7 +56,7 @@ func TestServerDiagnosticsIntegration(t *testing.T) {
 	srv := httptest.NewServer(apihttp.NewHandler(app))
 	defer srv.Close()
 	root := loginTest(t, srv.URL, "minio-web-test", "minio-web-test-secret")
-	var snapshot serversvc.ServerSnapshot
+	var snapshot presentation.ServerSnapshot
 	if err := json.Unmarshal(root.call("GET", "admin/server-info", nil, 200), &snapshot); err != nil {
 		t.Fatal(err)
 	}

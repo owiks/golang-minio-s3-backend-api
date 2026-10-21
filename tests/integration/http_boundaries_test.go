@@ -3,7 +3,6 @@ package integration
 import (
 	"encoding/json"
 	"fmt"
-	"minio-web/api/tests/testsession"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -15,6 +14,7 @@ import (
 	search "minio-web/api/src/http/api/routes/search/controllers"
 	"minio-web/api/src/services/apperror"
 	objecttypes "minio-web/api/src/services/objects"
+	"minio-web/api/tests/testsession"
 )
 
 func TestSearchQueryLimitPrecedesUnicodeCaseFolding(t *testing.T) {

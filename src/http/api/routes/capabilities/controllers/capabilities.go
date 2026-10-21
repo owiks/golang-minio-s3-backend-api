@@ -16,6 +16,6 @@ func HandleCapabilities(app *runtime.State, w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, http.StatusOK, value)
+	httpcommon.WriteJSON(w, r, http.StatusOK, value)
 	return nil
 }

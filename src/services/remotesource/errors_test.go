@@ -3,11 +3,13 @@ package remotesource
 import (
 	"context"
 	"errors"
-	"minio-web/api/src/services/apperror"
 	"net"
 	"net/http"
 	"strings"
 	"testing"
+
+	"minio-web/api/src/services/apperror"
+	"minio-web/api/tests/testmessage"
 )
 
 type errorTransport struct{ cause error }
@@ -21,7 +23,7 @@ func TestOpenPreservesSafeCauseAndCancellation(t *testing.T) {
 		t.Fatal("DNS cause lost", err)
 	}
 	safe := apperror.Public(err)
-	if strings.Contains(safe.Message, "PRIVATE") || strings.Contains(safe.Message, "token=") {
+	if strings.Contains(testmessage.Russian(safe.Message), "PRIVATE") || strings.Contains(testmessage.Russian(safe.Message), "token=") {
 		t.Fatal("private error leaked", safe)
 	}
 	ctx, cancel := context.WithCancel(context.Background())

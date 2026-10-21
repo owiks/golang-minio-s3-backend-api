@@ -12,18 +12,19 @@ import (
 
 	"minio-web/api/src/services/apperror"
 	"minio-web/api/src/services/iam"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/revision"
 	validationsvc "minio-web/api/src/services/validation"
 )
 
 type ConfigField struct {
-	Key       string   `json:"key"`
-	Label     string   `json:"label"`
-	Kind      string   `json:"kind"`
-	Value     string   `json:"value"`
-	Env       string   `json:"env,omitempty"`
-	Effective string   `json:"effective"`
-	Options   []string `json:"options,omitempty"`
+	Key       string       `json:"key"`
+	Label     messages.Ref `json:"label"`
+	Kind      string       `json:"kind"`
+	Value     string       `json:"value"`
+	Env       string       `json:"env,omitempty"`
+	Effective string       `json:"effective"`
+	Options   []string     `json:"options,omitempty"`
 }
 
 // Definitions are constructed per call: neither fields nor nested Options share
@@ -32,29 +33,29 @@ func configDefinitions(sub string) []ConfigField {
 	switch sub {
 	case "api":
 		return []ConfigField{
-			{Key: "requests_max", Label: "Одновременные запросы (0 — автоматически)", Kind: "number"},
-			{Key: "cluster_deadline", Label: "Ожидание ответа кластера", Kind: "duration"},
-			{Key: "remote_transport_deadline", Label: "Ожидание удалённого хранилища", Kind: "duration"},
-			{Key: "replication_priority", Label: "Приоритет репликации", Kind: "select", Options: []string{"auto", "fast", "slow"}},
-			{Key: "replication_max_workers", Label: "Обработчики репликации", Kind: "number"},
-			{Key: "replication_max_lrg_workers", Label: "Обработчики крупных объектов", Kind: "number"},
-			{Key: "transition_workers", Label: "Обработчики переноса между уровнями", Kind: "number"},
-			{Key: "stale_uploads_cleanup_interval", Label: "Интервал очистки прерванных загрузок", Kind: "duration"},
-			{Key: "stale_uploads_expiry", Label: "Возраст прерванных загрузок для очистки", Kind: "duration"},
-			{Key: "delete_cleanup_interval", Label: "Интервал фоновой очистки удалений", Kind: "duration"},
+			{Key: "requests_max", Label: messages.ServerConcurrentRequests0MeansAutomatic, Kind: "number"},
+			{Key: "cluster_deadline", Label: messages.ServerClusterResponseTimeout, Kind: "duration"},
+			{Key: "remote_transport_deadline", Label: messages.ServerRemoteStorageTimeout, Kind: "duration"},
+			{Key: "replication_priority", Label: messages.ServerReplicationPriority, Kind: "select", Options: []string{"auto", "fast", "slow"}},
+			{Key: "replication_max_workers", Label: messages.ServerReplicationWorkers, Kind: "number"},
+			{Key: "replication_max_lrg_workers", Label: messages.ServerLargeObjectWorkers, Kind: "number"},
+			{Key: "transition_workers", Label: messages.ServerStorageTierTransitionWorkers, Kind: "number"},
+			{Key: "stale_uploads_cleanup_interval", Label: messages.ServerIncompleteUploadCleanupInterval, Kind: "duration"},
+			{Key: "stale_uploads_expiry", Label: messages.ServerIncompleteUploadExpirationAge, Kind: "duration"},
+			{Key: "delete_cleanup_interval", Label: messages.ServerDeletedObjectBackgroundCleanupInterval, Kind: "duration"},
 		}
 	case "scanner":
 		return []ConfigField{
-			{Key: "speed", Label: "Скорость сканера", Kind: "select", Options: []string{"slowest", "slow", "default", "fast", "fastest"}},
-			{Key: "alert_excess_versions", Label: "Порог числа версий объекта", Kind: "number"},
-			{Key: "alert_excess_folders", Label: "Порог числа папок", Kind: "number"},
+			{Key: "speed", Label: messages.ServerScannerSpeed, Kind: "select", Options: []string{"slowest", "slow", "default", "fast", "fastest"}},
+			{Key: "alert_excess_versions", Label: messages.ServerObjectVersionCountThreshold, Kind: "number"},
+			{Key: "alert_excess_folders", Label: messages.ServerFolderCountThreshold, Kind: "number"},
 		}
 	case "heal":
 		return []ConfigField{
-			{Key: "bitrotscan", Label: "Проверка повреждений", Kind: "select", Options: []string{"off", "on"}},
-			{Key: "max_sleep", Label: "Пауза восстановления", Kind: "duration"},
-			{Key: "max_io", Label: "Порог операций ввода-вывода", Kind: "number"},
-			{Key: "drive_workers", Label: "Обработчики диска (пусто — автоматически)", Kind: "number"},
+			{Key: "bitrotscan", Label: messages.ServerBitRotScanning, Kind: "select", Options: []string{"off", "on"}},
+			{Key: "max_sleep", Label: messages.ServerHealingPause, Kind: "duration"},
+			{Key: "max_io", Label: messages.ServerIOOperationThreshold, Kind: "number"},
+			{Key: "drive_workers", Label: messages.ServerDriveWorkersEmptyMeansAutomatic, Kind: "number"},
 		}
 	default:
 		return nil
@@ -63,7 +64,7 @@ func configDefinitions(sub string) []ConfigField {
 
 func validateConfigSubsystem(sub string) error {
 	if configDefinitions(sub) == nil {
-		return apperror.New(400, "InvalidSubsystem", "Выберите API, сканер или восстановление.")
+		return apperror.New(400, "InvalidSubsystem", messages.ServerInvalidSubsystem)
 	}
 	return nil
 }
@@ -78,7 +79,7 @@ type ServerConfigView struct {
 	Fields       []ConfigField       `json:"fields"`
 	Revision     string              `json:"revision"`
 	History      []ConfigHistoryView `json:"history"`
-	HistoryError string              `json:"historyError,omitempty"`
+	HistoryError messages.Ref        `json:"historyError,omitempty"`
 }
 
 func ServerOperationError(err error) error {
@@ -95,21 +96,21 @@ func ServerOperationError(err error) error {
 		code = native.Code
 	}
 	if code == "XMinioAdminNotImplemented" || code == "NotImplemented" || code == "XMinioAdminVersionMismatch" || strings.Contains(err.Error(), "unknown subsystem:") {
-		return apperror.NewWithCause(501, "ServerFeatureUnavailable", "Этот раздел недоступен в текущей конфигурации MinIO.", err)
+		return apperror.NewWithCause(501, "ServerFeatureUnavailable", messages.ServerServerFeatureUnavailable, err)
 	}
 	if p.Status != 502 {
 		return p
 	}
-	return apperror.NewWithCause(502, "ServerOperationFailed", "MinIO отклонил операцию. Обновите состояние и проверьте настройки сервера.", err)
+	return apperror.NewWithCause(502, "ServerOperationFailed", messages.ServerServerOperationFailed, err)
 }
 func RequireServerAction(ctx context.Context, s RequireServerActionClient, actions ...string) error {
 	if e := s.RefreshActionPolicy(ctx); e != nil {
-		return apperror.New(403, "PermissionUnknown", "Не удалось подтвердить права на изменение сервера.")
+		return apperror.New(403, "PermissionUnknown", messages.ServerPermissionUnknown)
 	}
 	policy := s.ActionPolicySnapshot()
 	for _, a := range actions {
 		if !policy.Allows(s.ActorName(), iam.Query{Action: a}) {
-			return apperror.New(403, "AccessDenied", "Нет подтверждённого права на это действие.")
+			return apperror.New(403, "AccessDenied", messages.ServerAccessDenied)
 		}
 	}
 	return nil
@@ -139,11 +140,11 @@ func ConfigValueValid(field ConfigField, value string) bool {
 }
 func ConfigFields(raw, sub string) ([]ConfigField, error) {
 	if len(raw) > 256*1024 {
-		return nil, apperror.New(502, "ConfigTooLarge", "Ответ конфигурации превышает лимит.")
+		return nil, apperror.New(502, "ConfigTooLarge", messages.ServerConfigTooLarge)
 	}
 	parsed, e := madmin.ParseServerConfigOutput(raw)
 	if e != nil {
-		return nil, apperror.New(502, "InvalidServerConfig", "Не удалось прочитать конфигурацию MinIO.")
+		return nil, apperror.New(502, "InvalidServerConfig", messages.ServerInvalidServerConfig)
 	}
 	fields := []ConfigField{}
 	for _, p := range parsed {
@@ -180,7 +181,16 @@ func ReadServerConfig(ctx context.Context, s ReadServerConfigClient, sub string)
 	if e != nil {
 		return v, e
 	}
-	b, _ := json.Marshal(v.Fields)
+	// Presentation labels must not participate in write preconditions.
+	fields := make([]struct {
+		Key, Kind, Value, Env, Effective string
+		Options                          []string
+	}, len(v.Fields))
+	for i, field := range v.Fields {
+		fields[i].Key, fields[i].Kind, fields[i].Value = field.Key, field.Kind, field.Value
+		fields[i].Env, fields[i].Effective, fields[i].Options = field.Env, field.Effective, field.Options
+	}
+	b, _ := json.Marshal(fields)
 	v.Revision = revision.Of(b)
 	return v, nil
 }

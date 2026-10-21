@@ -4,6 +4,8 @@ import (
 	"strings"
 
 	"github.com/minio/minio-go/v7"
+
+	"minio-web/api/src/services/messages"
 )
 
 type StoredChecksum struct {
@@ -16,7 +18,7 @@ type ChecksumInfo struct {
 	ETag      string           `json:"etag"`
 	Version   string           `json:"version"`
 	Checksums []StoredChecksum `json:"checksums"`
-	Warning   string           `json:"warning,omitempty"`
+	Warning   messages.Ref     `json:"warning,omitempty"`
 }
 
 // Return algorithm values without exposing a shared registry or hash instance.

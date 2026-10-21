@@ -13,6 +13,7 @@ import (
 
 	accesssvc "minio-web/api/src/services/access"
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	objectssvc "minio-web/api/src/services/objects"
 )
 
@@ -36,7 +37,7 @@ func ListBuckets(ctx context.Context, s ListBucketsClient) ([]objectssvc.BucketR
 func ListObjects(ctx context.Context, s ListObjectsClient, input ObjectListOptions) (objectssvc.ObjectPage, error) {
 	bucket, prefix := input.Bucket, input.Prefix
 	if bucket == "" || len(prefix) > 1024 || len(input.Token) > 8192 {
-		return objectssvc.ObjectPage{}, apperror.New(400, "InvalidListing", "Некорректные параметры списка объектов.")
+		return objectssvc.ObjectPage{}, apperror.New(400, "InvalidListing", messages.FilesInvalidListing)
 	}
 	page, err := s.ListObjectPage(ctx, bucket, prefix, input.Token, "/", 200)
 	if err != nil {
@@ -84,7 +85,7 @@ func GetPreview(ctx context.Context, s GetPreviewClient, bucket, key string) (ob
 	}
 	kind, mime := objectssvc.PreviewKind(k)
 	if kind == "unsupported" || kind == "audio" || kind == "video" {
-		return objectssvc.PreviewData{}, apperror.New(415, "UnsupportedPreview", "Для этого формата нет файлового предпросмотра.")
+		return objectssvc.PreviewData{}, apperror.New(415, "UnsupportedPreview", messages.FilesUnsupportedPreview)
 	}
 	limit := int64(20 * 1024 * 1024)
 	if kind == "text" {
@@ -95,7 +96,7 @@ func GetPreview(ctx context.Context, s GetPreviewClient, bucket, key string) (ob
 		return objectssvc.PreviewData{}, err
 	}
 	if info.Size > limit {
-		return objectssvc.PreviewData{}, apperror.New(413, "PreviewTooLarge", "Лимит предпросмотра: 1 МБ для текста, 20 МБ для изображений и PDF.")
+		return objectssvc.PreviewData{}, apperror.New(413, "PreviewTooLarge", messages.FilesPreviewTooLarge)
 	}
 	// A range starting at byte zero is invalid for an empty S3 object.
 	// Read the bounded object with an ETag condition instead; a concurrent
@@ -110,12 +111,12 @@ func GetPreview(ctx context.Context, s GetPreviewClient, bucket, key string) (ob
 	data, err := io.ReadAll(io.LimitReader(obj, limit+1))
 	if err != nil {
 		if code := minio.ToErrorResponse(err).Code; code == "PreconditionFailed" || code == "ConditionalRequestConflict" {
-			return objectssvc.PreviewData{}, apperror.New(409, "ObjectChanged", "Файл изменился. Повторите просмотр.")
+			return objectssvc.PreviewData{}, apperror.New(409, "ObjectChanged", messages.FilesObjectChanged)
 		}
 		return objectssvc.PreviewData{}, err
 	}
 	if int64(len(data)) > limit || int64(len(data)) != info.Size {
-		return objectssvc.PreviewData{}, apperror.New(409, "ObjectChanged", "Файл изменился или передан не полностью. Повторите просмотр.")
+		return objectssvc.PreviewData{}, apperror.New(409, "ObjectChanged", messages.FilesObjectChangedObjectsUsecase)
 	}
 	return objectssvc.PreviewData{ContentType: mime, Data: data}, nil
 }
@@ -131,7 +132,7 @@ func GetObjectLink(ctx context.Context, s GetObjectLinkClient, bucket, key strin
 	if mode == "media" {
 		kind, mime := objectssvc.PreviewKind(k)
 		if kind != "audio" && kind != "video" {
-			return ObjectLink{}, apperror.New(400, "UnsupportedMedia", "Файл не является поддерживаемым аудио или видео.")
+			return ObjectLink{}, apperror.New(400, "UnsupportedMedia", messages.FilesUnsupportedMedia)
 		}
 		expires = 3600
 		params.Set("response-content-type", mime)
@@ -141,11 +142,11 @@ func GetObjectLink(ctx context.Context, s GetObjectLinkClient, bucket, key strin
 
 			duration := input.ExpiresIn
 			if duration < 1 || duration > 604800 {
-				return ObjectLink{}, apperror.New(400, "InvalidLifetime", "Срок ссылки должен быть от 1 секунды до 7 дней.")
+				return ObjectLink{}, apperror.New(400, "InvalidLifetime", messages.FilesInvalidLifetime)
 			}
 			expires = duration
 		} else if mode != "download" {
-			return ObjectLink{}, apperror.New(400, "InvalidMode", "Некорректный тип ссылки.")
+			return ObjectLink{}, apperror.New(400, "InvalidMode", messages.FilesInvalidMode)
 		}
 		name := path.Base(k)
 		name = strings.Map(func(c rune) rune {

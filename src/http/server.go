@@ -12,6 +12,10 @@ import (
 
 	"minio-web/api/src/config"
 	httpapi "minio-web/api/src/http/api"
+	"minio-web/api/src/http/middleware"
+	"minio-web/api/src/http/presentation"
+	"minio-web/api/src/http/requestctx"
+	"minio-web/api/src/services/messages"
 )
 
 var (
@@ -69,7 +73,7 @@ func serve(ctx context.Context, handler *httpapi.Handler, listener net.Listener,
 	srv.BaseContext = func(net.Listener) context.Context { return requestContext }
 	srv.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !requests.begin() {
-			http.Error(w, "API is stopping", http.StatusServiceUnavailable)
+			writeStoppingResponse(w, r, handler.Config().Language)
 			return
 		}
 		defer requests.active.Done()
@@ -101,6 +105,13 @@ func serve(ctx context.Context, handler *httpapi.Handler, listener net.Listener,
 	}
 	logger.Info("API stopped")
 	return nil
+}
+
+func writeStoppingResponse(w http.ResponseWriter, r *http.Request, mode string) {
+	r = middleware.LocalizeRequest(r, mode, nil)
+	presentation.LanguageHeaders(r.Context(), w.Header())
+	// Preserve the existing status, plain-text envelope and trailing newline.
+	http.Error(w, requestctx.Localizer(r.Context()).Render(messages.HTTPStopping), http.StatusServiceUnavailable)
 }
 
 type requestGroup struct {

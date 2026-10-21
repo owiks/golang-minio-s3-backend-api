@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sync"
 
+	"minio-web/api/src/http/presentation"
 	"minio-web/api/src/services/apperror"
 	"minio-web/api/src/services/result"
 	"minio-web/api/src/services/telemetry"
@@ -20,6 +21,7 @@ func WriteNDJSON[T any](parent context.Context, w http.ResponseWriter, run func(
 	defer InterruptOnCancel(ctx, w)()
 	w.Header().Set("Content-Type", "application/x-ndjson; charset=utf-8")
 	w.Header().Set("X-Accel-Buffering", "no")
+	presentation.LanguageHeaders(ctx, w.Header())
 	encoder := json.NewEncoder(w)
 	controller := http.NewResponseController(w)
 	var mu sync.Mutex
@@ -39,7 +41,12 @@ func WriteNDJSON[T any](parent context.Context, w http.ResponseWriter, run func(
 			telemetry.Error(ctx, event.Error)
 			telemetry.Outcome(ctx, "error", event.Error.Code)
 		}
-		if encoder.Encode(event) != nil || controller.Flush() != nil {
+		wire := Event[any]{Progress: event.Progress, Data: event.Data, Error: presentation.Problem(ctx, event.Error)}
+		if event.Result != nil {
+			rendered := presentation.Render(ctx, event.Result)
+			wire.Result = &rendered
+		}
+		if encoder.Encode(wire) != nil || controller.Flush() != nil {
 			failed, writeFailed = true, true
 			telemetry.Outcome(ctx, "cancelled", "StreamWriteFailed")
 			cancel()

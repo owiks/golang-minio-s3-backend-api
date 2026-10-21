@@ -13,6 +13,8 @@ import (
 	"github.com/minio/minio-go/v7/pkg/tags"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
+	"minio-web/api/tests/testmessage"
 )
 
 // Each fake implements only its own setting's read/write port. Passing these
@@ -129,7 +131,7 @@ func TestTypedSettingChangesPreserveFailureAndReadbackContract(t *testing.T) {
 			t.Run(kind+"/"+scenario, func(t *testing.T) {
 				ctx, cancel := context.WithCancel(context.Background())
 				defer cancel()
-				failure := apperror.New(403, "AccessDenied", "denied")
+				failure := apperror.New(403, "AccessDenied", messages.Literal("denied"))
 				calls := &settingCalls{t: t, ctx: ctx, failure: failure}
 				switch scenario {
 				case "read-failure":
@@ -174,16 +176,15 @@ func TestTypedSettingChangesPreserveFailureAndReadbackContract(t *testing.T) {
 				wantCalls := []string{"read:1", "write", "read:2"}
 				switch scenario {
 				case "success":
-					if err != nil || value.Error != "" || value.Revision == "" || value.Value == nil {
+					if err != nil || !messages.Empty(value.Error) || value.Revision == "" || value.Value == nil {
 						t.Fatal("successful write lost readback", value, err)
 					}
 				case "readback-failure":
-					if err != nil || value.Value != nil || value.Revision != "" || value.ErrorCode != "AccessDenied" || value.Error != "denied" {
+					if err != nil || value.Value != nil || value.Revision != "" || value.ErrorCode != "AccessDenied" || testmessage.English(value.Error) != "denied" {
 						t.Fatal("acknowledged write became retryable or stale value leaked", value, err)
 					}
-					raw, _ := json.Marshal(value)
-					if string(raw) != `{"error":"denied","errorCode":"AccessDenied"}` {
-						t.Fatal("field error wire format changed", string(raw))
+					if _, marshalErr := json.Marshal(value); !errors.Is(marshalErr, messages.ErrUnrendered) {
+						t.Fatal("domain message must require HTTP projection", marshalErr)
 					}
 				case "write-failure":
 					wantCalls = []string{"read:1", "write"}

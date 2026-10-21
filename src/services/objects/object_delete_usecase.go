@@ -7,7 +7,8 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/objects/state"
+	"minio-web/api/src/services/messages"
+	objectstate "minio-web/api/src/services/objects/state"
 	"minio-web/api/src/services/result"
 )
 
@@ -17,7 +18,7 @@ func InspectDeletion(ctx context.Context, s StreamClient, bucket, key string) (D
 		return DeletionInfo{}, err
 	}
 	if strings.HasSuffix(key, "/") {
-		return DeletionInfo{}, apperror.New(400, "InvalidDelete", "Выберите один файл. Удаление папок и отдельных версий этим запросом не выполняется.")
+		return DeletionInfo{}, apperror.New(400, "InvalidDelete", messages.HttpInvalidDelete)
 	}
 
 	current, err := ReadDeletion(ctx, s, bucket, key)
@@ -33,14 +34,14 @@ func DeleteObject(ctx context.Context, s DeleteObjectClient, bucket, key string,
 		return result.Success{}, err
 	}
 	if strings.HasSuffix(key, "/") {
-		return result.Success{}, apperror.New(400, "InvalidDelete", "Выберите один файл. Удаление папок и отдельных версий этим запросом не выполняется.")
+		return result.Success{}, apperror.New(400, "InvalidDelete", messages.HttpInvalidDelete)
 	}
 
 	if body.Confirmation != key {
-		return result.Success{}, apperror.New(400, "ConfirmationRequired", "Для удаления подтвердите точный ключ файла.")
+		return result.Success{}, apperror.New(400, "ConfirmationRequired", messages.ObjectsConfirmationRequired)
 	}
 	if body.Revision == "" {
-		return result.Success{}, apperror.New(400, "RevisionRequired", "Перед удалением обновите сведения о файле.")
+		return result.Success{}, apperror.New(400, "RevisionRequired", messages.ObjectsRevisionRequired)
 	}
 
 	current, err := ReadDeletion(ctx, s, bucket, key)
@@ -49,7 +50,7 @@ func DeleteObject(ctx context.Context, s DeleteObjectClient, bucket, key string,
 	}
 
 	if body.Revision != objectstate.DeletionRevision(current) {
-		return result.Success{}, apperror.New(409, "ObjectChanged", "Файл изменился после открытия окна. Обновите сведения и проверьте файл перед удалением.")
+		return result.Success{}, apperror.New(409, "ObjectChanged", messages.ObjectsObjectChangedObjectDeleteUsecase)
 	}
 	// Ordinary S3 deletion only: never target a version, force deletion, recursively
 	// remove a prefix, or bypass GOVERNANCE. MinIO enforces the caller's rights.
@@ -57,7 +58,7 @@ func DeleteObject(ctx context.Context, s DeleteObjectClient, bucket, key string,
 	if err != nil {
 		switch minio.ToErrorResponse(err).Code {
 		case "AccessDenied", "InvalidRequest", "ObjectLocked":
-			return result.Success{}, apperror.New(403, "ObjectDeleteDenied", "MinIO запретил удаление. Проверьте право s3:DeleteObject, политику бакета и защиту объекта.")
+			return result.Success{}, apperror.New(403, "ObjectDeleteDenied", messages.ObjectsObjectDeleteDenied)
 		}
 		return result.Success{}, err
 	}

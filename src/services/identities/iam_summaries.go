@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 type GroupSummaryDetails struct {
@@ -21,7 +22,7 @@ type GroupSummaryDetails struct {
 type GroupSummary struct {
 	Name    string               `json:"name"`
 	Details *GroupSummaryDetails `json:"details"`
-	Error   string               `json:"error,omitempty"`
+	Error   messages.Ref         `json:"error,omitempty"`
 }
 type PolicyDefinition struct {
 	Version       string   `json:"version"`
@@ -41,12 +42,12 @@ type PolicyAssignments struct {
 type PolicySummary struct {
 	Name             string             `json:"name"`
 	Definition       *PolicyDefinition  `json:"definition"`
-	DefinitionError  string             `json:"definitionError,omitempty"`
+	DefinitionError  messages.Ref       `json:"definitionError,omitempty"`
 	Assignments      *PolicyAssignments `json:"assignments"`
-	AssignmentsError string             `json:"assignmentsError,omitempty"`
+	AssignmentsError messages.Ref       `json:"assignmentsError,omitempty"`
 	CreatedAt        *time.Time         `json:"createdAt"`
 	UpdatedAt        *time.Time         `json:"updatedAt"`
-	DatesError       string             `json:"datesError,omitempty"`
+	DatesError       messages.Ref       `json:"datesError,omitempty"`
 }
 
 func KnownTime(value time.Time) *time.Time {
@@ -98,7 +99,7 @@ func PolicyStrings(raw json.RawMessage) ([]string, error) {
 		return []string{}, nil
 	}
 	if bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
-		return nil, apperror.New(502, "InvalidPolicyDefinition", "Не удалось прочитать правила политики.")
+		return nil, apperror.New(502, "InvalidPolicyDefinition", messages.BucketsInvalidPolicyDefinition)
 	}
 	var single string
 	if json.Unmarshal(raw, &single) == nil {
@@ -106,7 +107,7 @@ func PolicyStrings(raw json.RawMessage) ([]string, error) {
 	}
 	var values []string
 	if json.Unmarshal(raw, &values) != nil || values == nil {
-		return nil, apperror.New(502, "InvalidPolicyDefinition", "Не удалось прочитать правила политики.")
+		return nil, apperror.New(502, "InvalidPolicyDefinition", messages.BucketsInvalidPolicyDefinition)
 	}
 	return values, nil
 }
@@ -116,14 +117,14 @@ func SummarizePolicy(raw json.RawMessage) (*PolicyDefinition, error) {
 		Statement json.RawMessage `json:"Statement"`
 	}
 	if json.Unmarshal(raw, &doc) != nil || doc.Version == "" {
-		return nil, apperror.New(502, "InvalidPolicyDefinition", "Не удалось прочитать правила политики.")
+		return nil, apperror.New(502, "InvalidPolicyDefinition", messages.BucketsInvalidPolicyDefinition)
 	}
 	statements := bytes.TrimSpace(doc.Statement)
 	var rules []json.RawMessage
 	if len(statements) > 0 && statements[0] == '{' {
 		rules = []json.RawMessage{statements}
 	} else if json.Unmarshal(statements, &rules) != nil || rules == nil {
-		return nil, apperror.New(502, "InvalidPolicyDefinition", "Не удалось прочитать правила политики.")
+		return nil, apperror.New(502, "InvalidPolicyDefinition", messages.BucketsInvalidPolicyDefinition)
 	}
 	result := &PolicyDefinition{Version: doc.Version, Statements: len(rules), Actions: []string{}, NotActions: []string{}, Resources: []string{}, NotResources: []string{}}
 	for _, raw := range rules {
@@ -136,7 +137,7 @@ func SummarizePolicy(raw json.RawMessage) (*PolicyDefinition, error) {
 			Condition   map[string]json.RawMessage `json:"Condition"`
 		}
 		if json.Unmarshal(raw, &rule) != nil {
-			return nil, apperror.New(502, "InvalidPolicyDefinition", "Не удалось прочитать правила политики.")
+			return nil, apperror.New(502, "InvalidPolicyDefinition", messages.BucketsInvalidPolicyDefinition)
 		}
 		switch rule.Effect {
 		case "Allow":
@@ -144,7 +145,7 @@ func SummarizePolicy(raw json.RawMessage) (*PolicyDefinition, error) {
 		case "Deny":
 			result.Deny++
 		default:
-			return nil, apperror.New(502, "InvalidPolicyDefinition", "Сервер вернул правило с неизвестным Effect.")
+			return nil, apperror.New(502, "InvalidPolicyDefinition", messages.IdentitiesInvalidPolicyDefinition)
 		}
 		for _, field := range []struct {
 			Raw    json.RawMessage `json:"-"`

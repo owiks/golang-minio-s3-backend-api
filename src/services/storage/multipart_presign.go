@@ -13,6 +13,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/s3utils"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 // PresignMultipartPart signs only UploadPart for a previously controlled upload.
@@ -45,11 +46,11 @@ func (c *S3Client) PresignMultipartPart(ctx context.Context, bucket, key, upload
 	// Anonymous and V2 SDK credentials do not produce the required V4 header
 	// binding. A syntactically valid URL alone is insufficient for this contract.
 	if signed == nil || signed.Query().Get("X-Amz-Signature") == "" || signed.Query().Get("X-Amz-SignedHeaders") != "host;x-amz-checksum-sha256" {
-		return nil, apperror.New(http.StatusConflict, "DirectUploadSigningUnavailable", "Не удалось подписать обязательные условия передачи части.")
+		return nil, apperror.New(http.StatusConflict, "DirectUploadSigningUnavailable", messages.StorageDirectUploadSigningUnavailable)
 	}
 	return signed, nil
 }
 
 func invalidMultipartSignature() error {
-	return apperror.New(http.StatusBadRequest, "InvalidMultipartPart", "Некорректные параметры подписи части загрузки.")
+	return apperror.New(http.StatusBadRequest, "InvalidMultipartPart", messages.StorageInvalidMultipartPart)
 }

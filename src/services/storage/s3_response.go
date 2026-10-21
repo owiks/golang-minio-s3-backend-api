@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 const (
@@ -87,7 +88,7 @@ func (t s3ResponseTransport) RoundTrip(r *http.Request) (*http.Response, error) 
 	body := response.Body
 	defer body.Close()
 	tooLarge := func() error {
-		return apperror.New(502, "S3ResponseTooLarge", "Ответ метаданных S3 превышает допустимый размер. Обновите состояние перед повтором операции.")
+		return apperror.New(502, "S3ResponseTooLarge", messages.StorageS3ResponseTooLarge)
 	}
 	if response.ContentLength > limit {
 		return nil, tooLarge()
@@ -152,7 +153,7 @@ func s3ListingRoot(method string, u *url.URL, status int) string {
 
 func validateS3Listing(data []byte, expected string) error {
 	invalid := func() error {
-		return apperror.New(502, "InvalidS3ListingResponse", "S3 вернул некорректный список. Обновите состояние перед повтором операции.")
+		return apperror.New(502, "InvalidS3ListingResponse", messages.StorageInvalidS3ListingResponse)
 	}
 	d := xml.NewDecoder(bytes.NewReader(data))
 	depth, seen := 0, false

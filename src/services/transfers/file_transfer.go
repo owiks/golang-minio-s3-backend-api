@@ -8,9 +8,10 @@ import (
 
 	"minio-web/api/src/services/apperror"
 	folderssvc "minio-web/api/src/services/folders"
+	"minio-web/api/src/services/messages"
 	objectssvc "minio-web/api/src/services/objects"
-	"minio-web/api/src/services/objects/state"
-	"minio-web/api/src/services/objects/write"
+	objectstate "minio-web/api/src/services/objects/state"
+	objectwrite "minio-web/api/src/services/objects/write"
 	"minio-web/api/src/services/telemetry"
 )
 
@@ -27,10 +28,10 @@ type FileTransferRequest struct {
 }
 
 type TransferResult struct {
-	Copied  bool   `json:"copied"`
-	Moved   bool   `json:"moved"`
-	Message string `json:"message"`
-	Code    string `json:"code,omitempty"`
+	Copied  bool         `json:"copied"`
+	Moved   bool         `json:"moved"`
+	Message messages.Ref `json:"message"`
+	Code    string       `json:"code,omitempty"`
 }
 
 func Transfer(ctx context.Context, s TransferClient, body FileTransferRequest) (result TransferResult, err error) {
@@ -45,10 +46,10 @@ func Transfer(ctx context.Context, s TransferClient, body FileTransferRequest) (
 	}()
 
 	if body.SourceBucket == "" || body.DestinationBucket == "" || !ValidTransferMapping(body.SourceKey, body.DestinationKey, body.SourcePrefix, body.DestinationPrefix, body.SourceBucket == body.DestinationBucket) {
-		return TransferResult{}, apperror.New(400, "InvalidTransfer", "Укажите исходный файл, бакет и корректный путь назначения.")
+		return TransferResult{}, apperror.New(400, "InvalidTransfer", messages.TransfersInvalidTransfer)
 	}
 	if body.SourceBucket == body.DestinationBucket && body.SourceKey == body.DestinationKey {
-		return TransferResult{}, apperror.New(400, "SameDestination", "Исходный путь и назначение совпадают.")
+		return TransferResult{}, apperror.New(400, "SameDestination", messages.TransfersSameDestination)
 	}
 	source, err := s.StatObject(ctx, body.SourceBucket, body.SourceKey, minio.StatObjectOptions{})
 	if err != nil {
@@ -56,10 +57,10 @@ func Transfer(ctx context.Context, s TransferClient, body FileTransferRequest) (
 	}
 	snapshot := objectstate.DeletionSnapshot{ETag: source.ETag, Size: source.Size, Modified: source.LastModified, Version: source.VersionID}
 	if body.SourceRevision == "" || body.SourceRevision != objectstate.DeletionRevision(snapshot) {
-		return TransferResult{}, apperror.New(409, "SourceChanged", "Исходный файл изменился. Обновите сведения перед повтором.")
+		return TransferResult{}, apperror.New(409, "SourceChanged", messages.TransfersSourceChanged)
 	}
 	if source.Size > objectwrite.MaxFileSize {
-		return TransferResult{}, apperror.New(400, "TransferTooLarge", "За одну операцию можно скопировать файл размером до 5 ГиБ.")
+		return TransferResult{}, apperror.New(400, "TransferTooLarge", messages.TransfersTransferTooLarge)
 	}
 	target, err := objectwrite.DestinationState(ctx, s, body.DestinationBucket, body.DestinationKey)
 	if err != nil {
@@ -99,29 +100,29 @@ func Transfer(ctx context.Context, s TransferClient, body FileTransferRequest) (
 	}
 
 	if !body.Move {
-		return TransferResult{Copied: true, Moved: false, Message: "Копия создана."}, nil
+		return TransferResult{Copied: true, Moved: false, Message: messages.TransfersTheCopyWasCreated}, nil
 	}
 	// A marker is removed only after its children; listing happens before the
 	// final snapshots so it cannot lengthen the check-to-delete window.
 	if source.Size == 0 && strings.HasSuffix(body.SourceKey, "/") {
 		children, checkErr := folderssvc.FolderMarkerHasChildren(ctx, s, body.SourceBucket, body.SourceKey)
 		if checkErr != nil || children {
-			return TransferResult{Copied: true, Code: "FolderNotEmpty", Message: "Запись папки скопирована, исходная папка сохранена: внутри остались объекты или их наличие не удалось проверить."}, nil
+			return TransferResult{Copied: true, Code: "FolderNotEmpty", Message: messages.TransfersTheFolderMarkerWasCopiedAndThe}, nil
 		}
 	}
 	destination, destErr := s.StatObject(ctx, body.DestinationBucket, body.DestinationKey, minio.StatObjectOptions{})
 	if destErr != nil {
-		return TransferResult{Copied: true, Code: "TransferVerificationFailed", Message: "Копия создана, но её состояние не удалось подтвердить. Исходник не удалялся."}, nil
+		return TransferResult{Copied: true, Code: "TransferVerificationFailed", Message: messages.TransfersTheCopyWasCreatedButItsState}, nil
 	}
 	if destination.ETag != copied.ETag || destination.VersionID != copied.VersionID || destination.Size != source.Size {
-		return TransferResult{Copied: true, Code: "DestinationChanged", Message: "Назначение изменилось после копирования. Исходник не удалялся."}, nil
+		return TransferResult{Copied: true, Code: "DestinationChanged", Message: messages.TransfersTheDestinationChangedAfterCopyingTheSource}, nil
 	}
 	current, readErr := objectssvc.ReadDeletion(ctx, s, body.SourceBucket, body.SourceKey)
 	if readErr != nil {
-		return TransferResult{Copied: true, Code: "TransferVerificationFailed", Message: "Копия создана, но состояние исходника не удалось проверить. Запрос удаления не отправлялся."}, nil
+		return TransferResult{Copied: true, Code: "TransferVerificationFailed", Message: messages.TransfersTheCopyWasCreatedButTheSource}, nil
 	}
 	if objectstate.DeletionRevision(current) != body.SourceRevision {
-		return TransferResult{Copied: true, Code: "SourceChanged", Message: "Исходный файл изменился после копирования и не удалён."}, nil
+		return TransferResult{Copied: true, Code: "SourceChanged", Message: messages.TransfersTheSourceFileChangedAfterCopyingAnd}, nil
 	}
 	if s.ConditionalDeleteSupported() {
 		err = s.RemoveConditional(ctx, body.SourceBucket, body.SourceKey, source.ETag)
@@ -134,9 +135,9 @@ func Transfer(ctx context.Context, s TransferClient, body FileTransferRequest) (
 		if err != nil {
 			switch minio.ToErrorResponse(err).Code {
 			case "AccessDenied", "InvalidRequest", "ObjectLocked":
-				err = apperror.New(403, "ObjectDeleteDenied", "Копия создана, MinIO запретил удаление исходника. Проверьте права и защиту файла.")
+				err = apperror.New(403, "ObjectDeleteDenied", messages.TransfersObjectDeleteDenied)
 			default:
-				err = apperror.New(502, "DeleteUncertain", "Копия создана, результат удаления исходника не подтверждён. Проверьте обе стороны перед повтором.")
+				err = apperror.New(502, "DeleteUncertain", messages.TransfersDeleteUncertain)
 			}
 		}
 	}
@@ -148,10 +149,10 @@ func Transfer(ctx context.Context, s TransferClient, body FileTransferRequest) (
 	// retained the source, a writer recreated it, or verification was denied.
 	_, verifyErr := s.StatObject(ctx, body.SourceBucket, body.SourceKey, minio.StatObjectOptions{})
 	if minio.ToErrorResponse(verifyErr).Code == "NoSuchKey" {
-		return TransferResult{Copied: true, Moved: true, Message: "Копия создана, удаление исходника подтверждено."}, nil
+		return TransferResult{Copied: true, Moved: true, Message: messages.TransfersTheCopyWasCreatedAndSourceDeletion}, nil
 	}
 	if verifyErr == nil {
-		return TransferResult{Copied: true, Code: "SourceStillExists", Message: "Копия создана, но исходный путь после удаления существует. Проверьте его перед повтором."}, nil
+		return TransferResult{Copied: true, Code: "SourceStillExists", Message: messages.TransfersTheCopyWasCreatedButTheSourceFileTransfer}, nil
 	}
-	return TransferResult{Copied: true, Code: "DeleteUncertain", Message: "Копия создана, но отсутствие исходника проверить не удалось. Проверьте результат перед повтором."}, nil
+	return TransferResult{Copied: true, Code: "DeleteUncertain", Message: messages.TransfersTheCopyWasCreatedButTheSourceFileTransferTransfer}, nil
 }

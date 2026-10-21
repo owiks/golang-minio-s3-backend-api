@@ -6,9 +6,11 @@ require (
 	github.com/minio/madmin-go/v3 v3.0.110
 	github.com/minio/minio-go/v7 v7.4.1
 	github.com/minio/pkg/v3 v3.1.3
+	github.com/nicksnyder/go-i18n/v2 v2.6.1
 	github.com/prometheus/client_model v0.6.2
 	github.com/prometheus/common v0.63.0
 	go.yaml.in/yaml/v3 v3.0.5
+	golang.org/x/text v0.42.0
 )
 
 require (
@@ -45,7 +47,6 @@ require (
 	golang.org/x/net v0.60.0 // indirect
 	golang.org/x/sync v0.23.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
-	golang.org/x/text v0.42.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/ini.v1 v1.67.3 // indirect
 )

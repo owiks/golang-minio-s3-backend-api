@@ -16,6 +16,7 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
+	"minio-web/api/src/http/presentation"
 	"minio-web/api/src/services/apperror"
 	"minio-web/api/src/services/iam"
 	objectssvc "minio-web/api/src/services/objects"
@@ -63,7 +64,7 @@ func TestObjectPropertiesIntegration(t *testing.T) {
 		t.Fatal(err)
 	}
 	route := "objects/properties?" + url.Values{"bucket": {bucket}, "key": {key}}.Encode()
-	var before objectssvc.ObjectProperties
+	var before presentation.ObjectProperties
 	_ = json.Unmarshal(c.call("GET", route, nil, 200), &before)
 	c.call("PUT", route, map[string]any{"revision": before.Revision, "headers": map[string]string{"Content-Type": "application/json", "Cache-Control": "public, max-age=60"}, "metadata": map[string]string{"added": "yes", "content-type": "custom only"}, "metadataMode": "merge", "tags": map[string]string{"env": "test"}, "tagsMode": "merge"}, 200)
 	object, err := client.GetObject(ctx, bucket, key, minio.GetObjectOptions{})
@@ -79,14 +80,14 @@ func TestObjectPropertiesIntegration(t *testing.T) {
 	if err != nil || info.ContentType != "application/json" || info.UserMetadata["Keep"] != "original" && info.UserMetadata["keep"] != "original" || info.Metadata.Get("Content-Language") != "ru" || info.Metadata.Get("Content-Disposition") != "attachment" {
 		t.Fatalf("properties lost: %+v %v", info, err)
 	}
-	var after objectssvc.ObjectProperties
+	var after presentation.ObjectProperties
 	_ = json.Unmarshal(c.call("GET", route, nil, 200), &after)
 	if after.Tags["owner"] != "team" || after.Tags["env"] != "test" || after.Metadata["keep"] != "original" || after.Metadata["content-type"] != "custom only" {
 		t.Fatal(after)
 	}
 	c.call("PUT", route, map[string]any{"revision": before.Revision, "tags": map[string]string{"bad": "stale"}}, 409)
 	c.call("PUT", route, map[string]any{"revision": after.Revision, "tags": map[string]string{"owner": ""}, "tagsMode": "remove"}, 200)
-	var tagged objectssvc.ObjectProperties
+	var tagged presentation.ObjectProperties
 	_ = json.Unmarshal(c.call("GET", route, nil, 200), &tagged)
 	if _, ok := tagged.Tags["owner"]; ok || tagged.Tags["env"] != "test" {
 		t.Fatal(tagged)
@@ -109,7 +110,7 @@ func TestObjectChecksumIntegration(t *testing.T) {
 		t.Fatal(err)
 	}
 	route := "objects/checksum?" + url.Values{"bucket": {bucket}, "key": {key}}.Encode()
-	var summary objectssvc.ChecksumInfo
+	var summary presentation.ChecksumInfo
 	if err := json.Unmarshal(c.call("GET", route, nil, 200), &summary); err != nil || summary.Size != int64(len(data)) || summary.ETag == "" || summary.Checksums == nil {
 		t.Fatal("summary DTO changed", summary, err)
 	}
@@ -126,7 +127,7 @@ func TestObjectChecksumIntegration(t *testing.T) {
 					Status string `json:"status"`
 					Bytes  int64  `json:"bytes"`
 				} `json:"result"`
-				Error *apperror.Error `json:"error"`
+				Error *presentation.Error `json:"error"`
 			}
 			err := decoder.Decode(&event)
 			if err == io.EOF {
@@ -312,12 +313,12 @@ func TestObjectToolsLeastPrivilegeIntegration(t *testing.T) {
 	}
 	route := "objects/properties?" + url.Values{"bucket": {bucket}, "key": {key}}.Encode()
 	tagger := limited([]string{"s3:GetObject", "s3:GetObjectTagging", "s3:PutObjectTagging"})
-	var before objectssvc.ObjectProperties
+	var before presentation.ObjectProperties
 	if err := json.Unmarshal(tagger.call("GET", route, nil, 200), &before); err != nil {
 		t.Fatal(err)
 	}
 	tagger.call("PUT", route, map[string]any{"revision": before.Revision, "tags": map[string]string{"owner": "ops"}, "tagsMode": "merge"}, 200)
-	var after objectssvc.ObjectProperties
+	var after presentation.ObjectProperties
 	if err := json.Unmarshal(tagger.call("GET", route, nil, 200), &after); err != nil {
 		t.Fatal(err)
 	}
@@ -334,7 +335,7 @@ func TestObjectToolsLeastPrivilegeIntegration(t *testing.T) {
 		t.Fatalf("current checksum failed: %s", raw)
 	}
 	versionOnly := limited([]string{"s3:GetObject", "s3:GetObjectVersionTagging", "s3:PutObjectVersionTagging"})
-	var unavailable objectssvc.ObjectProperties
+	var unavailable presentation.ObjectProperties
 	if err := json.Unmarshal(versionOnly.call("GET", route, nil, 200), &unavailable); err != nil || unavailable.TagsError == "" || unavailable.Version == "" {
 		t.Fatal("native tagging denial hidden", unavailable, err)
 	}
@@ -344,7 +345,7 @@ func TestObjectToolsLeastPrivilegeIntegration(t *testing.T) {
 		t.Fatal("denied tagging changed the checked version", actual, err)
 	}
 	reader := limited([]string{"s3:GetObject"})
-	var readonly objectssvc.ObjectProperties
+	var readonly presentation.ObjectProperties
 	if err := json.Unmarshal(reader.call("GET", route, nil, 200), &readonly); err != nil || readonly.TagsError == "" {
 		t.Fatal("unavailable tags hidden", readonly, err)
 	}

@@ -1,15 +1,16 @@
 package buckets
 
 import (
-	httpvalidation "minio-web/api/src/http/validation"
 	"net/http"
 	"strings"
 
 	"minio-web/api/src/http/api/routes"
 	"minio-web/api/src/http/api/routes/buckets/controllers"
+	httpvalidation "minio-web/api/src/http/validation"
 	"minio-web/api/src/services/apperror"
 	bucketsdto "minio-web/api/src/services/buckets"
 	bucketssvc "minio-web/api/src/services/buckets"
+	"minio-web/api/src/services/messages"
 	objectsdto "minio-web/api/src/services/objects"
 	resultdto "minio-web/api/src/services/result"
 	"minio-web/api/src/services/runtime"
@@ -26,7 +27,7 @@ func GetRoutes() []routes.APIRoute {
 					Controller: "HandleBucketUsage",
 					Response:   bucketsdto.UsageReply{}, Handler: func(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session, rest string) error {
 						if r.Method != "GET" {
-							return apperror.New(405, "MethodNotAllowed", "Операция управления не поддерживается.")
+							return apperror.New(405, "MethodNotAllowed", messages.ManagementUnsupported)
 						}
 						return controllers.HandleBucketUsage(app, w, r, s)
 					}},

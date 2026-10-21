@@ -13,8 +13,8 @@ import (
 
 	apihttp "minio-web/api/src/http/api"
 	httpcommon "minio-web/api/src/http/api/common"
+	"minio-web/api/src/http/presentation"
 	accesssvc "minio-web/api/src/services/access"
-	"minio-web/api/src/services/apperror"
 	"minio-web/api/src/services/iam"
 	runtimesvc "minio-web/api/src/services/runtime"
 )
@@ -63,7 +63,7 @@ func TestAccessHTTPDeadlineWhileQueuedPreservesPolicyAndRevision(t *testing.T) {
 	var requests atomic.Int32
 	s := actionCheckSession(t, func(w http.ResponseWriter, r *http.Request) {
 		requests.Add(1)
-		httpcommon.WriteJSON(w, 200, map[string]any{"AccountName": "fixture-user", "Policy": actionCheckPolicy})
+		httpcommon.WriteJSON(w, r, 200, map[string]any{"AccountName": "fixture-user", "Policy": actionCheckPolicy})
 	})
 	client := runtimesvc.NewClients(s)
 	if issue := client.RefreshActionPolicy(context.Background()); issue != nil {
@@ -103,7 +103,7 @@ func TestAccessHTTPDeadlineWhileQueuedPreservesPolicyAndRevision(t *testing.T) {
 		<-done
 		t.Fatal("HTTP deadline still waits for the access lock owner")
 	}
-	var result struct{ Error apperror.Error }
+	var result struct{ Error presentation.Error }
 	if w.Code != 504 || json.Unmarshal(w.Body.Bytes(), &result) != nil || result.Error.Code != "Timeout" {
 		t.Fatal("cancelled queue returned a successful snapshot or wrong error", w.Code, w.Body.String())
 	}

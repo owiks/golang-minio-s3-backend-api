@@ -28,7 +28,7 @@ func TestS3FallbackConfirmsNamesWithoutCachedLocation(t *testing.T) {
 					return
 				}
 				if strings.HasPrefix(r.URL.Path, "/minio/admin/") {
-					httpcommon.WriteJSON(w, 501, map[string]string{"Code": "NotImplemented"})
+					httpcommon.WriteJSON(w, r, 501, map[string]string{"Code": "NotImplemented"})
 					return
 				}
 				w.Header().Set("Content-Type", "application/xml")

@@ -14,6 +14,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
 	apihttp "minio-web/api/src/http/api"
+	"minio-web/api/src/http/presentation"
 	keyssvc "minio-web/api/src/services/keys"
 	runtimesvc "minio-web/api/src/services/runtime"
 	"minio-web/api/src/services/securetoken"
@@ -246,7 +247,7 @@ func TestAccessKeysIntegration(t *testing.T) {
 	root.call("DELETE", "admin/access-keys/"+key, map[string]any{"confirmation": "wrong"}, 400)
 	root.call("DELETE", "admin/access-keys/"+key, map[string]any{"confirmation": key}, 200)
 	root.call("GET", "admin/access-keys/"+key, nil, 404)
-	var snapshot serversvc.ServerSnapshot
+	var snapshot presentation.ServerSnapshot
 	raw = root.call("GET", "admin/server-info", nil, 200)
 	if json.Unmarshal(raw, &snapshot) != nil || len(snapshot.Nodes) == 0 || len(snapshot.Drives) == 0 || snapshot.Nodes[0].Version == "" {
 		t.Fatal("missing actual nodes/drives", string(raw))

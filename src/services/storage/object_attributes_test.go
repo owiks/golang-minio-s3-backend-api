@@ -19,7 +19,9 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/tests/testmessage"
 )
 
 const attributesModified = "Tue, 20 Oct 2026 10:00:00 GMT"
@@ -246,7 +248,7 @@ func TestObjectAttributesRejectsMalformedDocumentsAndParts(t *testing.T) {
 			if !IsInvalidObjectAttributes(err) || calls != 1 || !closed || !reflect.DeepEqual(page, ObjectAttributesPage{}) {
 				t.Fatal("invalid metadata accepted, retried or partially returned", page, err, calls, closed)
 			}
-			if strings.Contains(apperror.Public(err).Message, "PRIVATE-UPSTREAM") {
+			if strings.Contains(testmessage.Russian(apperror.Public(err).Message), "PRIVATE-UPSTREAM") {
 				t.Fatal("raw upstream content leaked")
 			}
 		})

@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/minio/madmin-go/v3"
+
+	"minio-web/api/src/services/messages"
 )
 
 type serverInfoReader struct {
@@ -52,7 +54,7 @@ func TestServerInfoWithIndependentReader(t *testing.T) {
 				t.Fatal("server information lost")
 			}
 			if optionalFailure {
-				if result.Usage != nil || result.UsageError == "" {
+				if result.Usage != nil || messages.Empty(result.UsageError) {
 					t.Fatal("scanner error must stay optional")
 				}
 			} else if result.Usage == nil || result.Usage.Objects != 12 || result.Usage.Size != 1024 {

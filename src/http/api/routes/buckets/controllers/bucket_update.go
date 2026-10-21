@@ -7,6 +7,7 @@ import (
 	httpvalidation "minio-web/api/src/http/validation"
 	"minio-web/api/src/services/apperror"
 	bucketssvc "minio-web/api/src/services/buckets"
+	"minio-web/api/src/services/messages"
 	runtimesvc "minio-web/api/src/services/runtime"
 )
 
@@ -33,11 +34,11 @@ func HandleUpdateBucketSetting(app *runtimesvc.State, w http.ResponseWriter, r *
 		}
 		value, err = bucketssvc.TagsChange(r.Context(), runtimesvc.NewClients(s), bucket, body)
 	default:
-		return apperror.New(405, "MethodNotAllowed", "Эта настройка не поддерживается.")
+		return apperror.New(405, "MethodNotAllowed", messages.HttpMethodNotAllowedBucketUpdate)
 	}
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }

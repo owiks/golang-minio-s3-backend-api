@@ -1,11 +1,12 @@
 package controllers
 
 import (
+	"net/http"
+
 	httpcommon "minio-web/api/src/http/api/common"
 	httpvalidation "minio-web/api/src/http/validation"
 	runtimesvc "minio-web/api/src/services/runtime"
 	serversvc "minio-web/api/src/services/server"
-	"net/http"
 )
 
 func HandleReadServerConfig(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -13,7 +14,7 @@ func HandleReadServerConfig(app *runtimesvc.State, w http.ResponseWriter, r *htt
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleSaveServerConfig(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -25,7 +26,7 @@ func HandleSaveServerConfig(app *runtimesvc.State, w http.ResponseWriter, r *htt
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleReadServerPools(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -33,7 +34,7 @@ func HandleReadServerPools(app *runtimesvc.State, w http.ResponseWriter, r *http
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleChangeServerPools(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -48,6 +49,6 @@ func HandleChangeServerPools(app *runtimesvc.State, w http.ResponseWriter, r *ht
 	if err := serversvc.ChangePools(r.Context(), runtimesvc.NewClients(s), command); err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, httpcommon.Success{OK: true})
+	httpcommon.WriteJSON(w, r, 200, httpcommon.Success{OK: true})
 	return nil
 }

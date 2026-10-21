@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/result"
 	"minio-web/api/src/services/telemetry"
 	"minio-web/api/src/services/upstream"
@@ -81,7 +82,7 @@ func TestNDJSONEnvelopeHeadersAndSingleTerminalEvent(t *testing.T) {
 		if send(result.StreamEvent[completion]{Progress: &result.Progress{Bytes: 4, Total: 4}}) {
 			t.Fatal("progress sent after completion")
 		}
-		return apperror.New(409, "LateFailure", "must not append a second terminal event")
+		return apperror.New(409, "LateFailure", messages.Literal("must not append a second terminal event"))
 	})
 	want := "{\"progress\":{\"bytes\":0,\"total\":4}}\n{\"result\":{\"ok\":true}}\n"
 	if w.Code != 200 || w.Body.String() != want || w.writes != 2 || w.flushes != 2 || w.Header().Get("Content-Type") != "application/x-ndjson; charset=utf-8" || w.Header().Get("X-Accel-Buffering") != "no" {
@@ -93,7 +94,7 @@ func TestNDJSONEnvelopeHeadersAndSingleTerminalEvent(t *testing.T) {
 }
 
 func TestNDJSONSafeTerminalErrorAndDomainOutcome(t *testing.T) {
-	for _, cause := range []error{apperror.New(409, "DestinationChanged", "Файл изменился."), errors.New("PRIVATE-UPSTREAM-CREDENTIALS")} {
+	for _, cause := range []error{apperror.New(409, "DestinationChanged", messages.Literal("Файл изменился.")), errors.New("PRIVATE-UPSTREAM-CREDENTIALS")} {
 		w := &eventWriter{ResponseRecorder: httptest.NewRecorder()}
 		ctx, trace := telemetry.Start(context.Background(), "test")
 		WriteNDJSON(ctx, w, func(ctx context.Context, send func(result.StreamEvent[completion]) bool) error {
@@ -134,7 +135,7 @@ func TestNDJSONWriteAndFlushFailuresCancelWithoutRetry(t *testing.T) {
 				if send(result.StreamEvent[completion]{Result: &completion{OK: true}}) {
 					t.Fatal("write retried")
 				}
-				return apperror.New(502, "AnotherFailure", "failed")
+				return apperror.New(502, "AnotherFailure", messages.Literal("failed"))
 			})
 			wantFlushes := 0
 			if where == "flush" {

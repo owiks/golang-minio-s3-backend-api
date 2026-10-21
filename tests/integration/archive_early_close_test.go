@@ -8,7 +8,7 @@ import (
 	"time"
 
 	archivescontroller "minio-web/api/src/http/api/routes/archives/controllers"
-	"minio-web/api/src/services/archives/plan"
+	archiveplan "minio-web/api/src/services/archives/plan"
 	runtimesvc "minio-web/api/src/services/runtime"
 	"minio-web/api/tests/testsession"
 )

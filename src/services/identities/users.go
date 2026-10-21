@@ -7,6 +7,7 @@ import (
 	"github.com/minio/madmin-go/v3"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/validation"
 )
 
@@ -67,24 +68,24 @@ func GetUser(ctx context.Context, admin UserAdmin, actor, name string) (UserDeta
 }
 func CreateUser(ctx context.Context, admin UserAdmin, b CreateUserRequest) error {
 	if !validation.ValidName(b.Name) || len(b.Name) < 3 || len(b.SecretKey) < 8 || len(b.SecretKey) > 256 {
-		return apperror.New(400, "InvalidUser", "Имя пользователя: 3–128 символов. Пароль: 8–256 символов.")
+		return apperror.New(400, "InvalidUser", messages.IdentitiesInvalidUser)
 	}
 	if _, err := admin.GetUserInfo(ctx, b.Name); err == nil {
-		return apperror.New(409, "AlreadyExists", "Пользователь уже существует. Его пароль не изменён.")
+		return apperror.New(409, "AlreadyExists", messages.IdentitiesAlreadyExistsUsers)
 	} else if !Missing(err, "XMinioAdminNoSuchUser") {
 		return err
 	}
 	if !b.AcknowledgeNonAtomicCreate {
-		return apperror.New(400, "UserCreateAcknowledgementRequired", "Подтвердите риск одновременного создания: если другой клиент займёт это имя после проверки, MinIO может заменить его пароль и включить пользователя.")
+		return apperror.New(400, "UserCreateAcknowledgementRequired", messages.IdentitiesUserCreateAcknowledgementRequired)
 	}
 	return admin.AddUser(ctx, b.Name, b.SecretKey)
 }
 func SetUserStatus(ctx context.Context, admin UserAdmin, actor, name string, b StatusRequest) error {
 	if b.Enabled == nil {
-		return apperror.New(400, "InvalidStatus", "Укажите enabled.")
+		return apperror.New(400, "InvalidStatus", messages.IdentitiesInvalidStatus)
 	}
 	if name == actor && !*b.Enabled {
-		return apperror.New(409, "CurrentUser", "Нельзя отключить пользователя текущего подключения.")
+		return apperror.New(409, "CurrentUser", messages.IdentitiesCurrentUser)
 	}
 	status := madmin.AccountDisabled
 	if *b.Enabled {
@@ -94,7 +95,7 @@ func SetUserStatus(ctx context.Context, admin UserAdmin, actor, name string, b S
 }
 func DeleteUser(ctx context.Context, admin UserAdmin, actor, name string) error {
 	if name == actor {
-		return apperror.New(409, "CurrentUser", "Нельзя удалить пользователя текущего подключения.")
+		return apperror.New(409, "CurrentUser", messages.IdentitiesCurrentUserUsers)
 	}
 	return admin.RemoveUser(ctx, name)
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/minio/madmin-go/v3"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/storage"
 )
 
@@ -17,7 +18,7 @@ type DiagnosticOptions struct {
 }
 
 func InvalidDiagnostic() error {
-	return apperror.New(400, "InvalidDiagnostic", "Выберите журнал или трассировку, 1–10 секунд и 1–200 строк.")
+	return apperror.New(400, "InvalidDiagnostic", messages.ServerInvalidDiagnostic)
 }
 
 func ReadDiagnostics(parent context.Context, client ReadDiagnosticsClient, options DiagnosticOptions) (DiagnosticsReport, error) {
@@ -39,7 +40,7 @@ func ReadDiagnostics(parent context.Context, client ReadDiagnosticsClient, optio
 			defer stream.Close()
 			report, err = collectDiagnostics(ctx, stream, options.Limit, func(v madmin.ServiceTraceInfo) (DiagnosticRow, bool, error) {
 				return TraceRow(v.Trace), true, v.Err
-			}, "MinIO завершил трассировку до окончания сбора.")
+			}, messages.ServerMinIOEndedTheTraceBeforeCollectionFinished)
 		}
 	} else {
 		var stream storage.DiagnosticStream[madmin.LogInfo]
@@ -58,7 +59,7 @@ func ReadDiagnostics(parent context.Context, client ReadDiagnosticsClient, optio
 					row.API = DiagnosticToken(v.API.Name)
 				}
 				return row, true, nil
-			}, "MinIO не смог открыть журнал сервера.")
+			}, messages.ServerMinIOCouldNotOpenTheServerLog)
 		}
 	}
 	// A collection interval ending normally is success; cancellation of the
@@ -73,7 +74,7 @@ func ReadDiagnostics(parent context.Context, client ReadDiagnosticsClient, optio
 	return report, nil
 }
 
-func collectDiagnostics[T any](ctx context.Context, stream storage.DiagnosticStream[T], limit int, row func(T) (DiagnosticRow, bool, error), closedMessage string) (DiagnosticsReport, error) {
+func collectDiagnostics[T any](ctx context.Context, stream storage.DiagnosticStream[T], limit int, row func(T) (DiagnosticRow, bool, error), closedMessage messages.Ref) (DiagnosticsReport, error) {
 	report := DiagnosticsReport{Rows: []DiagnosticRow{}}
 	var err error
 loop:
@@ -108,9 +109,9 @@ loop:
 	}
 	switch stream.Status() {
 	case 403:
-		return report, apperror.New(403, "AccessDenied", "Недостаточно прав MinIO для этой операции.")
+		return report, apperror.New(403, "AccessDenied", messages.ApperrorInsufficientMinIOPermissionsForThisOperation)
 	case 404, 501:
-		return report, apperror.New(501, "NotImplemented", "Диагностика не поддерживается версией или типом сервера.")
+		return report, apperror.New(501, "NotImplemented", messages.ServerNotImplemented)
 	}
 	return report, err
 }

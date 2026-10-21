@@ -8,8 +8,9 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	objectssvc "minio-web/api/src/services/objects"
-	"minio-web/api/src/services/objects/state"
+	objectstate "minio-web/api/src/services/objects/state"
 	"minio-web/api/src/services/result"
 )
 
@@ -42,7 +43,7 @@ func InspectFolderObject(ctx context.Context, s InspectFolderObjectClient, bucke
 	}
 
 	if key == "" || len(key) > 1024 || !utf8.ValidString(key) || !strings.HasPrefix(key, prefix) {
-		return FolderObjectInfo{}, apperror.New(400, "InvalidFolderDelete", "Объект не относится к выбранной папке.")
+		return FolderObjectInfo{}, apperror.New(400, "InvalidFolderDelete", messages.FoldersInvalidFolderDelete)
 	}
 
 	snapshot, err := objectssvc.ReadDeletion(ctx, s, bucket, key)
@@ -59,14 +60,14 @@ func DeleteFolderObject(ctx context.Context, s DeleteFolderObjectClient, bucket,
 	}
 
 	if key == "" || len(key) > 1024 || !utf8.ValidString(key) || !strings.HasPrefix(key, prefix) {
-		return result.Success{}, apperror.New(400, "InvalidFolderDelete", "Объект не относится к выбранной папке.")
+		return result.Success{}, apperror.New(400, "InvalidFolderDelete", messages.FoldersInvalidFolderDelete)
 	}
 
 	if body.Confirmation != prefix {
-		return result.Success{}, apperror.New(400, "ConfirmationRequired", "Подтвердите точный путь удаляемой папки.")
+		return result.Success{}, apperror.New(400, "ConfirmationRequired", messages.FoldersConfirmationRequired)
 	}
 	if body.Revision == "" {
-		return result.Success{}, apperror.New(400, "RevisionRequired", "Сначала проверьте объект перед удалением.")
+		return result.Success{}, apperror.New(400, "RevisionRequired", messages.FoldersRevisionRequired)
 	}
 
 	snapshot, err := objectssvc.ReadDeletion(ctx, s, bucket, key)
@@ -75,7 +76,7 @@ func DeleteFolderObject(ctx context.Context, s DeleteFolderObjectClient, bucket,
 	}
 
 	if body.Revision != objectstate.DeletionRevision(snapshot) {
-		return result.Success{}, apperror.New(409, "ObjectChanged", "Объект изменился после проверки и не удалён. Перечитайте содержимое папки перед повтором.")
+		return result.Success{}, apperror.New(409, "ObjectChanged", messages.FoldersObjectChanged)
 	}
 	if snapshot.Size == 0 && strings.HasSuffix(key, "/") {
 		children, err := FolderMarkerHasChildren(ctx, s, bucket, key)
@@ -83,14 +84,14 @@ func DeleteFolderObject(ctx context.Context, s DeleteFolderObjectClient, bucket,
 			return result.Success{}, err
 		}
 		if children {
-			return result.Success{}, apperror.New(409, "FolderNotEmpty", "Запись папки сохранена: внутри остались объекты. Проверьте ошибки или перечитайте папку.")
+			return result.Success{}, apperror.New(409, "FolderNotEmpty", messages.FoldersFolderNotEmpty)
 		}
 	}
 	// Match ordinary file deletion: never pass VersionID, ForceDelete or GovernanceBypass.
 	if err := s.RemoveObject(ctx, bucket, key, minio.RemoveObjectOptions{}); err != nil {
 		switch minio.ToErrorResponse(err).Code {
 		case "AccessDenied", "InvalidRequest", "ObjectLocked":
-			return result.Success{}, apperror.New(403, "ObjectDeleteDenied", "MinIO запретил удаление. Проверьте права, политику бакета и защиту объекта.")
+			return result.Success{}, apperror.New(403, "ObjectDeleteDenied", messages.FoldersObjectDeleteDenied)
 		}
 		return result.Success{}, err
 	}

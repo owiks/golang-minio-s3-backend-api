@@ -10,24 +10,26 @@ import (
 	"time"
 
 	"minio-web/api/src/services/apperror"
-	"minio-web/api/src/services/objects/state"
+	"minio-web/api/src/services/messages"
+	objectstate "minio-web/api/src/services/objects/state"
 )
 
 func TestArchiveSnapshotDoesNotAliasPlanOrExposeConditions(t *testing.T) {
-	config := Config{Created: time.Now(), Items: []ArchiveItem{{Key: "file", Size: 4, Sent: 2, State: "pending", Info: objectstate.DeletionSnapshot{ETag: "private-condition"}}, {Key: "unavailable", State: "pending"}}, Issues: map[string]string{"missing": "not found"}, AllowPartial: true}
+	config := Config{Created: time.Now(), Items: []ArchiveItem{{Key: "file", Size: 4, Sent: 2, State: "pending", Info: objectstate.DeletionSnapshot{ETag: "private-condition"}}, {Key: "unavailable", State: "pending"}}, Issues: map[string]messages.Ref{"missing": messages.Literal("not found")}, AllowPartial: true}
 	plan := New(config)
 	config.Items[0].Key = "constructor-alias"
-	config.Issues["missing"] = "constructor-alias"
+	config.Issues["missing"] = messages.Literal("constructor-alias")
 	snapshot := plan.Snapshot("ticket")
 	if snapshot.Count != 1 || snapshot.Size != 4 || snapshot.Sent != 2 || !snapshot.ExpiresAt.Equal(config.Created.Add(time.Hour)) {
 		t.Fatal("snapshot totals changed")
 	}
 	snapshot.Items[0].Key = "changed"
-	snapshot.Issues["missing"] = "changed"
+	snapshot.Issues["missing"] = messages.Literal("changed")
 	actual := plan.Snapshot("ticket")
-	if actual.Items[0].Key != "file" || actual.Issues["missing"] != "not found" {
+	if actual.Items[0].Key != "file" || actual.Issues["missing"] != messages.Literal("not found") {
 		t.Fatal("constructor or snapshot aliases plan")
 	}
+	snapshot.Issues = nil
 	raw, err := json.Marshal(snapshot)
 	if err != nil || strings.Contains(string(raw), "private-condition") || strings.Contains(string(raw), "Cancel") {
 		t.Fatal("private state serialized", err)
@@ -86,7 +88,7 @@ func TestConcurrentArchiveStartAndProgress(t *testing.T) {
 		t.Fatal("progress/completion lost", outcome, code)
 	}
 	plan.Cancel("ticket")
-	plan.FailItem(0, "late")
+	plan.FailItem(0, messages.Literal("late"))
 	plan.AddSent(0, 10)
 	if snap := plan.Snapshot(""); !snap.Finished || snap.Cancelled || snap.Items[0].State != "done" || snap.Sent != 1600 {
 		t.Fatal("late mutation changed completed plan", snap)

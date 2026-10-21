@@ -93,6 +93,7 @@ Access Key и Secret Key передаются при создании сесси
 | `API_BIND` | `127.0.0.1` | Адрес публикации Docker-порта. |
 | `API_PORT` | `8081` | Порт на Docker-хосте. |
 | `API_LISTEN` | `:8081` | Listener при запуске Go напрямую; для локальной разработки — `127.0.0.1:8081`. |
+| `API_LANGUAGE` | `auto` | Язык сообщений API: `auto` учитывает `Accept-Language`, `en` и `ru` задают язык принудительно. Без подходящего заголовка используется английский. |
 | `APP_ORIGIN` | пусто | Разрешённый origin клиента: схема, хост и порт. Без значения проверяется origin самого API. |
 | `MINIO_ALLOWED_ENDPOINTS` | пусто | Разрешённые внутренние/HTTP endpoints через запятую. |
 | `MINIO_ENDPOINT_OVERRIDES` | пусто | JSON-соответствие публичных endpoints внутренним адресам; разрешает перечисленные исходные endpoints. |
@@ -112,6 +113,15 @@ IAM-права. Включайте их после проверки соотве
 `API_TRUSTED_PROXIES` отвечает за определение адреса клиента для rate limit.
 
 ## HTTP API
+
+При `API_LANGUAGE=auto` язык сообщений задаётся заголовком запроса:
+
+```sh
+curl -i -H 'Accept-Language: ru-RU, en;q=0.8' http://127.0.0.1:8081/api/sessions/expired/access
+```
+
+Без подходящего заголовка сообщения приходят на английском. Язык указан
+в `Content-Language`; коды ошибок и содержимое файлов от него не зависят.
 
 `POST /api/sessions` принимает `endpoint`, `accessKey`, `secretKey`, необязательные
 `region` и `sessionToken`. Регион по умолчанию — `us-east-1`.

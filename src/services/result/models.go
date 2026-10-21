@@ -1,4 +1,4 @@
-// Package result contains small wire envelopes shared by independent use cases.
+// Package result contains small result envelopes shared by independent use cases.
 package result
 
 import "minio-web/api/src/services/apperror"

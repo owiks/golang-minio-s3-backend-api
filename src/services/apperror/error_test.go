@@ -7,15 +7,17 @@ import (
 	"io"
 	"testing"
 
-	"minio-web/api/src/services/upstream"
-
 	"github.com/minio/madmin-go/v3"
 	"github.com/minio/minio-go/v7"
+
+	"minio-web/api/src/services/messages"
+	"minio-web/api/src/services/upstream"
+	"minio-web/api/tests/testmessage"
 )
 
 func TestErrorsNeverExposeUpstreamDetails(t *testing.T) {
-	for _, err := range []error{&Error{Status: 400, Code: "Invalid", Message: "safe"}, madmin.ErrorResponse{Code: "AccessDenied", Message: "SECRET-TOKEN"}, minio.ErrorResponse{Code: "SignatureDoesNotMatch", Message: "SECRET-TOKEN"}, io.ErrUnexpectedEOF} {
-		data, _ := json.Marshal(Public(err))
+	for _, err := range []error{&Error{Status: 400, Code: "Invalid", Message: messages.Literal("safe")}, madmin.ErrorResponse{Code: "AccessDenied", Message: "SECRET-TOKEN"}, minio.ErrorResponse{Code: "SignatureDoesNotMatch", Message: "SECRET-TOKEN"}, io.ErrUnexpectedEOF} {
+		data, _ := json.Marshal(testmessage.Public(Public(err).Code, Public(err).Message))
 		if bytes.Contains(data, []byte("SECRET-TOKEN")) {
 			t.Fatal("leaked upstream message")
 		}
@@ -28,7 +30,7 @@ func TestDiagnosticCauseSurvivesMappingWithoutChangingPublicContract(t *testing.
 	if problem.Status != 502 || problem.Code != "UpstreamError" || problem.DiagnosticCause() != (upstream.Cause{Class: "sdk", Stage: upstream.Operation}) {
 		t.Fatal("public mapping or safe cause changed", problem.DiagnosticCause())
 	}
-	wrapped := NewWithCause(502, "ServerOperationFailed", "safe", problem)
+	wrapped := NewWithCause(502, "ServerOperationFailed", messages.Literal("safe"), problem)
 	value := Public(wrapped)
 	if value.DiagnosticCause() != problem.DiagnosticCause() || Public(value) != value {
 		t.Fatal("mapping lost detached cause or changed own error identity")
@@ -38,7 +40,7 @@ func TestDiagnosticCauseSurvivesMappingWithoutChangingPublicContract(t *testing.
 	if value.DiagnosticCause().Class != "sdk" {
 		t.Fatal("diagnostic state exposed")
 	}
-	encoded, err := json.Marshal(value)
+	encoded, err := json.Marshal(testmessage.Public(value.Code, value.Message))
 	if err != nil || string(encoded) != `{"code":"ServerOperationFailed","message":"safe"}` {
 		t.Fatal("public JSON changed", string(encoded), err)
 	}
@@ -46,7 +48,7 @@ func TestDiagnosticCauseSurvivesMappingWithoutChangingPublicContract(t *testing.
 	if unknown.DiagnosticCause().Class != "unknown" {
 		t.Fatal("unverified error guessed as SDK/network failure")
 	}
-	if Public(New(400, "InvalidName", "safe")).DiagnosticCause().Valid() {
+	if Public(New(400, "InvalidName", messages.Literal("safe"))).DiagnosticCause().Valid() {
 		t.Fatal("local validation has upstream cause")
 	}
 }

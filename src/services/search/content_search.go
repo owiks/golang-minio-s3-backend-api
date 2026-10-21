@@ -9,6 +9,7 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 type TextHit struct {
@@ -26,9 +27,9 @@ type ContentMatch struct {
 	Truncated bool      `json:"truncated"`
 }
 type ContentIssue struct {
-	Key     string `json:"key"`
-	Code    string `json:"code"`
-	Message string `json:"message"`
+	Key     string       `json:"key"`
+	Code    string       `json:"code"`
+	Message messages.Ref `json:"message"`
 }
 type ContentSearchBody struct {
 	Bucket        string `json:"bucket"`
@@ -97,20 +98,20 @@ func ReadSearchText(ctx context.Context, s ReadSearchTextClient, bucket string, 
 		return "", err
 	}
 	if info.Metadata.Get("Content-Encoding") != "" {
-		return "", apperror.New(415, "EncodedText", "Сжатый текст пропущен.")
+		return "", apperror.New(415, "EncodedText", messages.SearchEncodedText)
 	}
 	data, err := io.ReadAll(io.LimitReader(object, maxSize+1))
 	if err != nil {
 		return "", err
 	}
 	if int64(len(data)) > maxSize {
-		return "", apperror.New(413, "SearchFileTooLarge", "Файл превышает выбранный размер.")
+		return "", apperror.New(413, "SearchFileTooLarge", messages.SearchSearchFileTooLarge)
 	}
 	if int64(len(data)) != obj.Size {
-		return "", apperror.New(409, "SearchObjectChanged", "Файл изменился во время поиска.")
+		return "", apperror.New(409, "SearchObjectChanged", messages.SearchSearchObjectChanged)
 	}
 	if !utf8.Valid(data) || strings.IndexByte(string(data), 0) >= 0 {
-		return "", apperror.New(415, "NotUTF8Text", "Файл не является текстом UTF-8.")
+		return "", apperror.New(415, "NotUTF8Text", messages.FoldersInvalidText)
 	}
 	return string(data), nil
 }

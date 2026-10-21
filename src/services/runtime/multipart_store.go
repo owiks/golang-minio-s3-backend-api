@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/uploads/multipart"
 )
 
@@ -38,10 +39,10 @@ func (s *MultipartStore) Add(o *multipart.Operation) error {
 		}
 	}
 	if len(s.items) >= 256 || ownerCount >= 16 {
-		return apperror.New(429, "MultipartLimit", "Достигнут лимит управляемых загрузок. Завершите или отмените активные загрузки.")
+		return apperror.New(429, "MultipartLimit", messages.RuntimeMultipartLimit)
 	}
 	if s.items[o.ID()] != nil {
-		return apperror.New(409, "MultipartExists", "Загрузка уже существует.")
+		return apperror.New(409, "MultipartExists", messages.RuntimeMultipartExists)
 	}
 	s.items[o.ID()] = o
 	return nil

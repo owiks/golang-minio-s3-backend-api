@@ -8,6 +8,7 @@ import (
 
 	"minio-web/api/src/services/apperror"
 	"minio-web/api/src/services/capabilities"
+	"minio-web/api/src/services/messages"
 )
 
 const capabilityCacheLimit = 1024
@@ -106,7 +107,7 @@ func (v *capabilityView) Resolve(ctx context.Context, id capabilities.Identifier
 		case s.active <- struct{}{}:
 		default:
 			s.mu.Unlock()
-			return capabilities.Result{}, apperror.New(429, "CapabilityBusy", "Проверки хранилища заняты. Повторите запрос позже.")
+			return capabilities.Result{}, apperror.New(429, "CapabilityBusy", messages.RuntimeCapabilityBusy)
 		}
 		flight := &capabilityFlight{done: make(chan struct{})}
 		s.flights[key] = flight

@@ -12,6 +12,7 @@ import (
 
 	"minio-web/api/src/services/apperror"
 	bucketssvc "minio-web/api/src/services/buckets"
+	"minio-web/api/src/services/messages"
 	objectssvc "minio-web/api/src/services/objects"
 	"minio-web/api/src/services/result"
 )
@@ -35,7 +36,7 @@ func GetVersionLink(ctx context.Context, s GetObjectLinkClient, bucket, key stri
 	}
 
 	if id == "" || len(id) > 1024 || strings.ContainsFunc(id, unicode.IsControl) {
-		return result.Link{}, apperror.New(400, "InvalidVersion", "Выберите конкретную версию файла.")
+		return result.Link{}, apperror.New(400, "InvalidVersion", messages.FilesInvalidVersion)
 	}
 	q := url.Values{"versionId": {id}, "response-content-type": {"application/octet-stream"}, "response-content-disposition": {`attachment; filename="download"; filename*=UTF-8''` + url.PathEscape(path.Base(key))}}
 	u, err := s.PresignedGetObject(ctx, bucket, key, time.Minute, q)
@@ -52,7 +53,7 @@ func GetVersionProtection(ctx context.Context, s GetVersionProtectionClient, buc
 	}
 
 	if id == "" || len(id) > 1024 || strings.ContainsFunc(id, unicode.IsControl) {
-		return VersionProtection{}, apperror.New(400, "InvalidVersion", "Выберите конкретную версию файла.")
+		return VersionProtection{}, apperror.New(400, "InvalidVersion", messages.FilesInvalidVersion)
 	}
 	result := VersionProtection{}
 	for _, kind := range []string{"retention", "hold"} {
@@ -80,10 +81,10 @@ func UpdateVersionProtection(ctx context.Context, s UpdateVersionProtectionClien
 	}
 
 	if id == "" || len(id) > 1024 || strings.ContainsFunc(id, unicode.IsControl) {
-		return bucketssvc.DetailField{}, apperror.New(400, "InvalidVersion", "Выберите конкретную версию файла.")
+		return bucketssvc.DetailField{}, apperror.New(400, "InvalidVersion", messages.FilesInvalidVersion)
 	}
 	if kind != RetentionProtection && kind != LegalHoldProtection {
-		return bucketssvc.DetailField{}, apperror.New(400, "InvalidProtection", "Выберите вид защиты.")
+		return bucketssvc.DetailField{}, apperror.New(400, "InvalidProtection", messages.FilesInvalidProtection)
 	}
 	v, err := objectssvc.ReadObjectProtection(ctx, s, bucket, key, id, string(kind))
 	if err != nil {
@@ -93,12 +94,12 @@ func UpdateVersionProtection(ctx context.Context, s UpdateVersionProtectionClien
 		return bucketssvc.DetailField{}, err
 	}
 	if b.Confirmation != id {
-		return bucketssvc.DetailField{}, apperror.New(400, "ConfirmationRequired", "Подтвердите изменение выбранной версии.")
+		return bucketssvc.DetailField{}, apperror.New(400, "ConfirmationRequired", messages.FilesConfirmationRequired)
 	}
 	if kind == LegalHoldProtection {
 		status := minio.LegalHoldStatus(b.Status)
 		if !status.IsValid() {
-			return bucketssvc.DetailField{}, apperror.New(400, "InvalidHold", "Выберите ON или OFF.")
+			return bucketssvc.DetailField{}, apperror.New(400, "InvalidHold", messages.FilesInvalidHold)
 		}
 		err = s.PutObjectLegalHold(ctx, bucket, key, minio.PutObjectLegalHoldOptions{VersionID: id, Status: &status})
 	} else {
@@ -107,7 +108,7 @@ func UpdateVersionProtection(ctx context.Context, s UpdateVersionProtectionClien
 			mode := minio.RetentionMode(b.Mode)
 			date, e := time.Parse(time.RFC3339, b.Until)
 			if !mode.IsValid() || e != nil || !date.After(time.Now()) {
-				return bucketssvc.DetailField{}, apperror.New(400, "InvalidRetention", "Выберите режим и дату окончания в будущем.")
+				return bucketssvc.DetailField{}, apperror.New(400, "InvalidRetention", messages.FilesInvalidRetention)
 			}
 			opts.Mode = &mode
 			opts.RetainUntilDate = &date
@@ -116,7 +117,7 @@ func UpdateVersionProtection(ctx context.Context, s UpdateVersionProtectionClien
 	}
 	if err != nil {
 		if code := minio.ToErrorResponse(err).Code; code == "AccessDenied" || code == "InvalidRequest" || code == "ObjectLocked" {
-			return bucketssvc.DetailField{}, apperror.New(403, "ObjectProtected", "MinIO отклонил изменение: проверьте права и действующий срок защиты. Обход GOVERNANCE не используется; срок COMPLIANCE нельзя сократить.")
+			return bucketssvc.DetailField{}, apperror.New(403, "ObjectProtected", messages.FilesObjectProtected)
 		}
 		return bucketssvc.DetailField{}, err
 	}

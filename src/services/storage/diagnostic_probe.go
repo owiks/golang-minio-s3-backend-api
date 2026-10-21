@@ -8,6 +8,7 @@ import (
 	"github.com/minio/madmin-go/v3"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 // Open only the authenticated read-stream handshake, then cancel immediately.
@@ -21,9 +22,9 @@ func (t accessStreamTransport) RoundTrip(r *http.Request) (*http.Response, error
 	resp, err := t.Base.RoundTrip(r)
 	result := err
 	if err == nil && resp.StatusCode != http.StatusOK {
-		result = apperror.New(resp.StatusCode, "AccessDenied", "Раздел недоступен.")
+		result = apperror.New(resp.StatusCode, "AccessDenied", messages.StorageAccessDeniedDiagnosticProbe)
 		if resp.StatusCode != 403 {
-			result = apperror.New(resp.StatusCode, "ProbeUnavailable", "Не удалось проверить раздел.")
+			result = apperror.New(resp.StatusCode, "ProbeUnavailable", messages.StorageProbeUnavailable)
 		}
 	}
 	select {

@@ -32,7 +32,7 @@ func TestSelectPreflightErrorsDoNotStartNDJSON(t *testing.T) {
 			if err == nil || apperror.Public(err).Code != tc.code || w.Body.Len() != 0 || w.Header().Get("Content-Type") != "" {
 				t.Fatal(err, w.Body.String(), w.Header())
 			}
-			httperrors.Respond(w, err)
+			httperrors.Respond(w, r, err)
 			if w.Header().Get("Content-Type") != "application/json; charset=utf-8" {
 				t.Fatal("preflight became stream", w.Header())
 			}

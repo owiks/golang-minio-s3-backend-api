@@ -1,18 +1,20 @@
 package controllers
 
 import (
-	httpcommon "minio-web/api/src/http/api/common"
-	httpvalidation "minio-web/api/src/http/validation"
-	"minio-web/api/src/services/apperror"
-	objectssvc "minio-web/api/src/services/objects"
-	"minio-web/api/src/services/objects/write"
-	runtimesvc "minio-web/api/src/services/runtime"
-	uploadssvc "minio-web/api/src/services/uploads"
-	"minio-web/api/src/services/uploads/integrity"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	httpcommon "minio-web/api/src/http/api/common"
+	httpvalidation "minio-web/api/src/http/validation"
+	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
+	objectssvc "minio-web/api/src/services/objects"
+	objectwrite "minio-web/api/src/services/objects/write"
+	runtimesvc "minio-web/api/src/services/runtime"
+	uploadssvc "minio-web/api/src/services/uploads"
+	"minio-web/api/src/services/uploads/integrity"
 )
 
 func HandlePrepareFile(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -24,7 +26,7 @@ func HandlePrepareFile(app *runtimesvc.State, w http.ResponseWriter, r *http.Req
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleWriteFile(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -34,7 +36,7 @@ func HandleWriteFile(app *runtimesvc.State, w http.ResponseWriter, r *http.Reque
 	}
 	size, err := strconv.ParseInt(r.Header.Get("X-Upload-Size"), 10, 64)
 	if err != nil || size < 0 || size > objectwrite.MaxFileSize || r.ContentLength != size {
-		return apperror.New(400, "InvalidUploadSize", "Размер файла должен совпадать с телом запроса и не превышать 5 ГиБ.")
+		return apperror.New(400, "InvalidUploadSize", messages.HttpInvalidUploadSize)
 	}
 	r.Body = http.MaxBytesReader(w, r.Body, objectwrite.MaxFileSize)
 	var expected *integrity.Spec
@@ -47,7 +49,7 @@ func HandleWriteFile(app *runtimesvc.State, w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleListIncompleteUploads(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -56,7 +58,7 @@ func HandleListIncompleteUploads(app *runtimesvc.State, w http.ResponseWriter, r
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleInspectIncompleteUpload(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -65,7 +67,7 @@ func HandleInspectIncompleteUpload(app *runtimesvc.State, w http.ResponseWriter,
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleAbortIncompleteUpload(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -77,7 +79,7 @@ func HandleAbortIncompleteUpload(app *runtimesvc.State, w http.ResponseWriter, r
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleListUploadInvites(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -85,7 +87,7 @@ func HandleListUploadInvites(app *runtimesvc.State, w http.ResponseWriter, r *ht
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleCreateUploadInvite(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -97,7 +99,7 @@ func HandleCreateUploadInvite(app *runtimesvc.State, w http.ResponseWriter, r *h
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 201, value)
+	httpcommon.WriteJSON(w, r, 201, value)
 	return nil
 }
 func HandleRevokeUploadInvite(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
@@ -105,7 +107,7 @@ func HandleRevokeUploadInvite(app *runtimesvc.State, w http.ResponseWriter, r *h
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func setReceiveDeadlines(w http.ResponseWriter) {
@@ -118,22 +120,22 @@ func HandleInspectUploadInvite(app *runtimesvc.State, w http.ResponseWriter, r *
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }
 func HandleReceiveFile(app *runtimesvc.State, w http.ResponseWriter, r *http.Request) error {
 	if !httpcommon.SameOrigin(r, app.Config().Origin) {
-		return apperror.New(403, "OriginDenied", "Загрузка разрешена только с этой страницы.")
+		return apperror.New(403, "OriginDenied", messages.HttpOriginDeniedUploadActions)
 	}
 	size, err := strconv.ParseInt(r.Header.Get("X-Upload-Size"), 10, 64)
 	if err != nil {
-		return apperror.New(400, "InvalidUpload", "Проверьте размер файла.")
+		return apperror.New(400, "InvalidUpload", messages.HttpInvalidUpload)
 	}
 	setReceiveDeadlines(w)
 	value, err := uploadssvc.ReceiveFile(r.Context(), app.Invites, app, strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer "), r.URL.Query().Get("name"), r.Header.Get("Content-Type"), size, r.ContentLength, r.Body)
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }

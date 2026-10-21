@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 type Budget struct {
@@ -21,7 +22,7 @@ type Budget struct {
 
 func New(max int64) *Budget { return &Budget{max: max, pending: map[*File]*cleanupEntry{}} }
 func full() error {
-	return apperror.New(429, "TemporaryStorageFull", "Не хватает бюджета временного хранилища. Дождитесь завершения операций и повторите.")
+	return apperror.New(429, "TemporaryStorageFull", messages.StagingTemporaryStorageFull)
 }
 func (b *Budget) Reserve(size int64) (func(), error) {
 	b.mu.Lock()

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 // An ordinary object/part PUT has no success payload. The SDK deliberately
@@ -32,7 +33,7 @@ func validateS3WriteResult(method string, target *url.URL, requestHeaders, respo
 		known = err == nil && number >= 1 && number <= 10000
 	}
 	if known && (len(bytes.TrimSpace(data)) != 0 || strings.Trim(strings.TrimSpace(responseHeaders.Get("ETag")), `"`) == "") {
-		return apperror.New(502, "S3WriteUnconfirmed", "Хранилище вернуло неожиданный ответ записи. Проверьте состояние файла перед повтором операции.")
+		return apperror.New(502, "S3WriteUnconfirmed", messages.StorageS3WriteUnconfirmed)
 	}
 	return nil
 }

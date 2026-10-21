@@ -13,6 +13,6 @@ func HandleBucketAccess(app *runtimesvc.State, w http.ResponseWriter, r *http.Re
 	if err != nil {
 		return err
 	}
-	httpcommon.WriteJSON(w, 200, value)
+	httpcommon.WriteJSON(w, r, 200, value)
 	return nil
 }

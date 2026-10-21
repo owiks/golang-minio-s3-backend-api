@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/minio/madmin-go/v3"
+
+	"minio-web/api/src/services/messages"
 )
 
 func ReadServerInfo(ctx context.Context, s ReadServerInfoClient) (ServerSnapshot, error) {
@@ -21,7 +23,7 @@ func ReadServerInfo(ctx context.Context, s ReadServerInfoClient) (ServerSnapshot
 	if err == nil && !usage.LastUpdate.IsZero() {
 		result.Usage = &ScannerUsage{UpdatedAt: usage.LastUpdate, Buckets: usage.BucketsCount, Objects: usage.ObjectsTotalCount, Size: usage.ObjectsTotalSize}
 	} else {
-		result.UsageError = "Статистика объектов недоступна: нет данных сканера или прав на её чтение."
+		result.UsageError = messages.ServerObjectStatisticsAreUnavailableScannerDataOr
 	}
 	return result, nil
 }

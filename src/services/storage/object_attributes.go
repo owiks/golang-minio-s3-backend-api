@@ -8,7 +8,9 @@ import (
 	"time"
 
 	"github.com/minio/minio-go/v7"
+
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 )
 
 // ObjectAttributesOptions is intentionally smaller than the SDK's options: the
@@ -52,19 +54,19 @@ type attributesCapture struct {
 // field presence before SDK XML decoding can collapse absent values into zeros.
 func (c *S3Client) ReadObjectAttributes(ctx context.Context, bucket, key string, opts ObjectAttributesOptions) (ObjectAttributesPage, error) {
 	if opts.MaxParts < 1 || opts.MaxParts > 1000 || opts.PartNumberMarker < 0 || opts.PartNumberMarker > 10000 {
-		return ObjectAttributesPage{}, apperror.New(400, "InvalidObjectAttributes", "Некорректная страница частей объекта.")
+		return ObjectAttributesPage{}, apperror.New(400, "InvalidObjectAttributes", messages.StorageInvalidObjectAttributes)
 	}
 	capture := &attributesCapture{options: opts}
 	ctx = context.WithValue(ctx, attributesCaptureKey{}, capture)
 	value, err := c.Client.GetObjectAttributes(ctx, bucket, key, minio.ObjectAttributesOptions{VersionID: opts.VersionID, MaxParts: opts.MaxParts, PartNumberMarker: opts.PartNumberMarker})
 	if err != nil {
 		if minio.ToErrorResponse(err).Code == "NoSuchVersion" {
-			return ObjectAttributesPage{}, apperror.NewWithCause(404, "NoSuchVersion", "Указанная версия объекта не существует.", err)
+			return ObjectAttributesPage{}, apperror.NewWithCause(404, "NoSuchVersion", messages.StorageNoSuchVersion, err)
 		}
 		// This SDK emits an untyped error for a server that ignores ?attributes and
 		// returns an ordinary object with an ETag response header.
 		if err.Error() == "getObjectAttributes is not supported by the current endpoint version" {
-			return ObjectAttributesPage{}, apperror.New(501, "ObjectAttributesUnsupported", "Хранилище не поддерживает расширенные атрибуты объектов.")
+			return ObjectAttributesPage{}, apperror.New(501, "ObjectAttributesUnsupported", messages.StorageObjectAttributesUnsupported)
 		}
 		return ObjectAttributesPage{}, err
 	}
@@ -137,7 +139,7 @@ func partChecksums(part *minio.ObjectAttributePart) map[string]string {
 }
 
 func invalidObjectAttributes() error {
-	return apperror.New(502, "InvalidObjectAttributesResponse", "Хранилище вернуло некорректные атрибуты объекта. Обновите сведения перед повтором запроса.")
+	return apperror.New(502, "InvalidObjectAttributesResponse", messages.StorageInvalidObjectAttributesResponse)
 }
 
 // IsInvalidObjectAttributes identifies our validation failure without exposing

@@ -13,6 +13,7 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"minio-web/api/src/services/apperror"
+	"minio-web/api/src/services/messages"
 	"minio-web/api/src/services/storage"
 )
 
@@ -37,22 +38,22 @@ func ListVersions(ctx context.Context, s ListVersionsClient, bucket, key, cursor
 	if cursor != "" {
 		raw, err := base64.RawURLEncoding.DecodeString(cursor)
 		if err != nil || len(raw) > 8192 {
-			return page, apperror.New(400, "InvalidCursor", "Некорректный курсор версий.")
+			return page, apperror.New(400, "InvalidCursor", messages.ObjectsInvalidCursor)
 		}
 		var c struct{ Bucket, Key, Version, Marker string }
 		if json.Unmarshal(raw, &c) != nil || c.Bucket != bucket || c.Key != key || !validVersionMarker(c.Version, 1024) || !validVersionMarker(c.Marker, 4096) {
-			return page, apperror.New(400, "InvalidCursor", "Курсор относится к другому файлу.")
+			return page, apperror.New(400, "InvalidCursor", messages.ObjectsInvalidCursorObjectVersions)
 		}
 		keyMarker, versionMarker = c.Marker, c.Version
 	}
 	listed, err := s.ReadVersionPage(ctx, bucket, key, keyMarker, versionMarker, 50)
 	if errors.Is(err, storage.ErrInvalidVersionResponse) {
-		return page, apperror.New(502, "VersionListingFailed", "MinIO не вернул список версий.")
+		return page, apperror.New(502, "VersionListingFailed", messages.ObjectsVersionListingFailed)
 	}
 	if err != nil {
 		return page, err
 	}
-	invalid := apperror.New(502, "VersionListingFailed", "MinIO вернул некорректное продолжение списка версий. Обновите список.")
+	invalid := apperror.New(502, "VersionListingFailed", messages.ObjectsVersionListingFailedObjectVersions)
 
 	for i := range listed.Rows {
 		decoded, e := url.QueryUnescape(listed.Rows[i].Key)
