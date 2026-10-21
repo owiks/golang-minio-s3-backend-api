@@ -1,0 +1,6 @@
+* text=auto eol=lf
+
+# Keep generated contracts and bundled assets reviewable.
+swagger.generated.json linguist-generated=true
+src/http/api/doc/assets/swagger-ui-bundle.js linguist-vendored=true
+src/http/api/doc/assets/swagger-ui.css linguist-vendored=true

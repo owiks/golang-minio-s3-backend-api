@@ -1,0 +1,22 @@
+name: Предложение
+description: Предложить улучшение API или разработки.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Задача
+      description: Какой сценарий сейчас неудобен или недоступен?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Предложение
+      description: Ожидаемое поведение и пример использования.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Альтернативы и ограничения
+      description: Существующий обходной путь, требования к MinIO/S3 или совместимости, если они известны.

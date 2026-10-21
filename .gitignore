@@ -1,0 +1,43 @@
+# Generated binaries, tools and test output.
+/bin/
+/.tools/
+/coverage/
+test-results/
+*.test
+/*.out
+/*.prof
+/*.pprof
+
+# Local configuration and credentials; keep examples in Git.
+.env
+.env.*
+!.env.example
+!.env.*.example
+.aws/
+.mc/
+.ssh/
+.secrets/
+.credentials/
+/secrets/
+/credentials
+/credentials.json
+/*.pem
+/*.key
+/tmp/
+/temp/
+/*.log
+
+# Editor and Go caches.
+.git/
+.idea/
+.vscode/
+.cache/
+.go-build/
+.gocache/
+.gomodcache/
+.DS_Store
+*.swp
+*.swo
+*~
+*.orig
+*.rej

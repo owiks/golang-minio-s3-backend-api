@@ -1,0 +1,47 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+  modules-download-mode: readonly
+
+linters:
+  default: none
+  enable:
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - durationcheck
+    - errorlint
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+  settings:
+    staticcheck:
+      # Correctness diagnostics; omit style and automatic rewrite suggestions.
+      checks:
+        - SA*
+        # SDK compatibility and native fixtures deliberately exercise older APIs.
+        - -SA1019
+    errorlint:
+      errorf: true
+      errorf-multi: true
+      asserts: true
+      # Streams and panic handling deliberately compare exact sentinels; retain
+      # checks for wrapping in Errorf and assertions on concrete error types.
+      comparison: false
+  exclusions:
+    rules:
+      # Existence needs only the first object; cancellation closes the iterator.
+      - linters: [staticcheck]
+        path: 'src/services/folders/folders\.go$'
+        text: 'SA4004:'
+      # These tests assert that private session/client state cannot leak to JSON.
+      - linters: [staticcheck]
+        path: 'src/services/runtime/(service_clients|visibility)_test\.go$'
+        text: 'SA9005:'
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

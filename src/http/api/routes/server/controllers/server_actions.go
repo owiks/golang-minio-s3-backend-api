@@ -1,0 +1,53 @@
+package controllers
+
+import (
+	httpcommon "minio-web/api/src/http/api/common"
+	httpvalidation "minio-web/api/src/http/validation"
+	runtimesvc "minio-web/api/src/services/runtime"
+	serversvc "minio-web/api/src/services/server"
+	"net/http"
+)
+
+func HandleReadServerConfig(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
+	value, err := serversvc.LoadConfig(r.Context(), runtimesvc.NewClients(s), r.URL.Query().Get("subsystem"))
+	if err != nil {
+		return err
+	}
+	httpcommon.WriteJSON(w, 200, value)
+	return nil
+}
+func HandleSaveServerConfig(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
+	var body serversvc.ConfigChangeRequest
+	if err := httpvalidation.Decode(w, r, &body); err != nil {
+		return err
+	}
+	value, err := serversvc.SaveConfig(r.Context(), runtimesvc.NewClients(s), r.URL.Query().Get("subsystem"), body)
+	if err != nil {
+		return err
+	}
+	httpcommon.WriteJSON(w, 200, value)
+	return nil
+}
+func HandleReadServerPools(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
+	value, _, err := serversvc.ReadPools(r.Context(), runtimesvc.NewClients(s))
+	if err != nil {
+		return err
+	}
+	httpcommon.WriteJSON(w, 200, value)
+	return nil
+}
+func HandleChangeServerPools(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
+	var body serversvc.PoolChangeRequest
+	if err := httpvalidation.Decode(w, r, &body); err != nil {
+		return err
+	}
+	command, err := body.Command()
+	if err != nil {
+		return err
+	}
+	if err := serversvc.ChangePools(r.Context(), runtimesvc.NewClients(s), command); err != nil {
+		return err
+	}
+	httpcommon.WriteJSON(w, 200, httpcommon.Success{OK: true})
+	return nil
+}

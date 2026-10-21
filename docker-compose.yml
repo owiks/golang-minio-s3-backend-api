@@ -1,0 +1,30 @@
+services:
+  api:
+    build: .
+    ports:
+      - "${API_BIND:-127.0.0.1}:${API_PORT:-8081}:8081"
+    stop_grace_period: 45s
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    environment:
+      API_LISTEN: :8081
+      APP_ORIGIN: ${APP_ORIGIN:-}
+      API_MAX_TRANSFERS: ${API_MAX_TRANSFERS:-4}
+      API_MAX_TRANSFERS_PER_SESSION: ${API_MAX_TRANSFERS_PER_SESSION:-2}
+      API_MAX_LOGINS: ${API_MAX_LOGINS:-8}
+      API_LOGIN_BURST: ${API_LOGIN_BURST:-60}
+      API_LOGIN_REFILL: ${API_LOGIN_REFILL:-1s}
+      API_TEMPORARY_BYTES: ${API_TEMPORARY_BYTES:-2147483648}
+      API_CONDITIONAL_DELETE_ENDPOINTS: ${API_CONDITIONAL_DELETE_ENDPOINTS:-}
+      API_CONDITIONAL_COMPLETE_ENDPOINTS: ${API_CONDITIONAL_COMPLETE_ENDPOINTS:-}
+      API_TRUSTED_PROXIES: ${API_TRUSTED_PROXIES:-}
+      MINIO_ALLOWED_ENDPOINTS: ${MINIO_ALLOWED_ENDPOINTS:-}
+      MINIO_ENDPOINT_OVERRIDES: ${MINIO_ENDPOINT_OVERRIDES:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

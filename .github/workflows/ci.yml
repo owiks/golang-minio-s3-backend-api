@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  GOFLAGS: -mod=readonly
+
+jobs:
+  checks:
+    name: Go checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+      - name: Verify dependencies
+        run: make deps
+      - name: Install pinned linter
+        run: make tools
+      - name: Format, OpenAPI, lint, race tests and build
+        run: make check
+
+  integration:
+    name: Native MinIO integration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      COMPOSE: docker compose --env-file .env.example
+      FIXTURE_PROJECT: minio-s3-api-ci-native
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+      - name: Verify dependencies
+        run: make deps
+      - name: Start disposable MinIO fixtures
+        run: make fixtures-up
+      - name: Run native integration tests
+        run: make test-integration
+      # Decommission changes the fixture topology and must follow all other tests.
+      - name: Verify pool decommission
+        env:
+          MINIO_POOL_DECOMMISSION: "1"
+        run: go test -race -count=1 ./tests/integration -run '^TestServerPoolDecommissionNativeIntegration$'
+      - name: Show fixture logs on failure
+        if: failure()
+        run: docker compose --env-file .env.example -p "$FIXTURE_PROJECT" -f docker-compose.test.yml --profile tiers --profile pools logs --no-color --tail=100
+      - name: Remove disposable fixtures
+        if: always()
+        run: make fixtures-down
+
+  docker:
+    name: Docker build and startup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      COMPOSE: docker compose --env-file .env.example -p minio-s3-api-ci-docker
+      API_BIND: 127.0.0.1
+      API_PORT: "18081"
+      BASE_URL: http://127.0.0.1:18081
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Validate Compose and build production image
+        run: make docker-config docker-build
+      - name: Start production image
+        run: docker compose --env-file .env.example -p minio-s3-api-ci-docker -f docker-compose.yml up -d --no-build --wait --wait-timeout 60
+      - name: Check health endpoint
+        run: make health
+      - name: Show application logs on failure
+        if: failure()
+        run: docker compose --env-file .env.example -p minio-s3-api-ci-docker -f docker-compose.yml logs --no-color --tail=100
+      - name: Remove disposable application
+        if: always()
+        run: docker compose --env-file .env.example -p minio-s3-api-ci-docker -f docker-compose.yml down --volumes --remove-orphans

@@ -1,0 +1,60 @@
+# Isolated fixtures only. Never point tests at an existing storage.
+services:
+  minio:
+    image: minio-s3-api-test-fixture:local
+    pull_policy: build
+    build:
+      context: .
+      dockerfile: tests/fixtures/minio.Dockerfile
+    command: server /data --address :9000
+    environment:
+      MINIO_ROOT_USER: minio-web-test
+      MINIO_ROOT_PASSWORD: minio-web-test-secret
+      # Public test-only key. Never use this fixture key in real storage.
+      MINIO_KMS_SECRET_KEY: fixture-key:MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      MINIO_API_CORS_ALLOW_ORIGIN: http://127.0.0.1:4173,http://localhost:4173,http://127.0.0.1:8080,http://localhost:8080,http://127.0.0.1:5173,http://localhost:5173
+    ports:
+      - "127.0.0.1:19000:9000"
+    tmpfs:
+      - /data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:9000/minio/health/live"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+  # Optional independent target for real remote-tier integration checks.
+  tier-minio:
+    profiles: [tiers]
+    image: minio-s3-api-test-fixture:local
+    pull_policy: never
+    command: server /data --address :9000
+    environment:
+      MINIO_ROOT_USER: minio-web-test
+      MINIO_ROOT_PASSWORD: minio-web-test-secret
+    ports:
+      - "127.0.0.1:19001:9000"
+    tmpfs:
+      - /data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:9000/minio/health/live"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+  pools-minio:
+    profiles: [pools]
+    image: minio-s3-api-test-fixture:local
+    pull_policy: never
+    command: server /pool1/disk{1...4} /pool2/disk{1...4} --address :9000
+    environment:
+      MINIO_ROOT_USER: minio-web-test
+      MINIO_ROOT_PASSWORD: minio-web-test-secret
+    ports:
+      - "127.0.0.1:19002:9000"
+    tmpfs:
+      - /pool1
+      - /pool2
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:9000/minio/health/live"]
+      interval: 2s
+      timeout: 2s
+      retries: 30

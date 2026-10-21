@@ -1,0 +1,32 @@
+name: Ошибка
+description: Сообщить о воспроизводимой ошибке API.
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Не прикладывайте ключи, cookie, токены, подписанные URL или пользовательские файлы.
+  - type: textarea
+    id: environment
+    attributes:
+      label: Окружение
+      description: Commit API, версия MinIO/S3, ОС и способ запуска; версия Go при локальной сборке.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Шаги воспроизведения
+      description: Минимальный пример на тестовом хранилище с обезличенными запросами.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Ожидаемое и фактическое поведение
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Ответ API и логи
+      description: HTTP-статус, код ошибки и X-Request-ID; только обезличенные данные.
