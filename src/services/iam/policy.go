@@ -4,7 +4,6 @@ package iam
 import (
 	"bytes"
 	"encoding/json"
-	"slices"
 
 	"github.com/minio/pkg/v3/policy"
 )
@@ -16,9 +15,11 @@ type Policy struct{ layers []policy.Policy }
 // Intersect owns a detached snapshot of each layer after returning. Callers
 // must not mutate inputs during construction, but may freely change them later.
 func Intersect(layers ...policy.Policy) *Policy {
-	owned := slices.Clone(layers)
+	owned := make([]policy.Policy, len(layers))
 	for i, layer := range layers {
-		owned[i].Statements = slices.Clone(layer.Statements)
+		// Copy public state only: SDK action indexes can be stale after callers
+		// edit Statements and must not be shared by the detached snapshot.
+		owned[i] = policy.Policy{ID: layer.ID, Version: layer.Version, Statements: make([]policy.Statement, len(layer.Statements))}
 		for j, statement := range layer.Statements {
 			// SDK Clone also owns Actions/NotActions, Resources/NotResources
 			// and condition functions with their nested values (including IPs).
@@ -58,8 +59,9 @@ func Parse(raw []byte) (policy.Policy, error) {
 		}
 		statements = append(statements, statement)
 	}
-	p.Statements = statements
-	return *p, nil
+	// Filtering changes statement positions. Do not retain the SDK's private
+	// action indexes built while parsing the original document.
+	return policy.Policy{ID: p.ID, Version: p.Version, Statements: statements}, nil
 }
 
 func (p *Policy) Allows(actor string, q Query) bool {
