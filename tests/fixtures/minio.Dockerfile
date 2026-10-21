@@ -1,5 +1,5 @@
 # Test fixture only. Official release binary, independent of container registries.
-FROM alpine:3.20
+FROM alpine:3.24
 ARG TARGETARCH
 ARG MINIO_RELEASE=RELEASE.2025-09-07T16-13-09Z
 RUN apk add --no-cache ca-certificates curl \
