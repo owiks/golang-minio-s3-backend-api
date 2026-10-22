@@ -9,21 +9,26 @@ import (
 // View is deliberately separate from the persisted snapshot: checkpoints,
 // execution leases and credential ownership never become public response fields.
 type View struct {
-	ID              string     `json:"id"`
-	Kind            string     `json:"kind"`
-	State           string     `json:"state"`
-	Code            string     `json:"code,omitempty"`
-	Revision        uint64     `json:"revision"`
-	CreatedAt       time.Time  `json:"createdAt"`
-	UpdatedAt       time.Time  `json:"updatedAt"`
-	ExpiresAt       *time.Time `json:"expiresAt,omitempty"`
-	Total           int        `json:"total,omitempty"`
-	Completed       int        `json:"completed"`
-	Errors          int        `json:"errors"`
-	Items           []ItemView `json:"items,omitempty"`
-	Scan            *ScanView  `json:"scan,omitempty"`
-	CancelRequested bool       `json:"cancelRequested"`
-	Retryable       bool       `json:"retryable"`
+	ID    string `json:"id"`
+	Kind  string `json:"kind"`
+	State string `json:"state"`
+	// Phase is a coarse observed stage, not an ETA or queue position.
+	Phase         string `json:"phase"`
+	WaitingReason string `json:"waitingReason,omitempty"`
+	// Timing is omitted for legacy records whose execution was not measured.
+	Timing          *TimingView `json:"timing,omitempty"`
+	Code            string      `json:"code,omitempty"`
+	Revision        uint64      `json:"revision"`
+	CreatedAt       time.Time   `json:"createdAt"`
+	UpdatedAt       time.Time   `json:"updatedAt"`
+	ExpiresAt       *time.Time  `json:"expiresAt,omitempty"`
+	Total           int         `json:"total,omitempty"`
+	Completed       int         `json:"completed"`
+	Errors          int         `json:"errors"`
+	Items           []ItemView  `json:"items,omitempty"`
+	Scan            *ScanView   `json:"scan,omitempty"`
+	CancelRequested bool        `json:"cancelRequested"`
+	Retryable       bool        `json:"retryable"`
 }
 type ItemView struct {
 	Index  int    `json:"index"`
@@ -37,9 +42,27 @@ type ScanView struct {
 	Bytes   int64 `json:"bytes"`
 	Pages   int   `json:"pages"`
 }
+type TimingView struct {
+	StartedAt   *time.Time `json:"startedAt,omitempty"`
+	FinishedAt  *time.Time `json:"finishedAt,omitempty"`
+	WaitingMS   int64      `json:"waitingMs"`
+	ExecutionMS int64      `json:"executionMs"`
+}
 
 func publicView(s operations.Snapshot, now time.Time) View {
 	v := View{ID: s.ID, Kind: s.Kind, State: s.State, Code: s.Code, Revision: s.Revision, CreatedAt: s.CreatedAt, UpdatedAt: s.UpdatedAt, Total: len(s.Spec.Transfers), Completed: s.NextIndex, CancelRequested: s.CancelRequested, Retryable: s.Retryable() && now.Before(s.Deadline)}
+	v.Phase, v.WaitingReason = s.Phase()
+	if waiting, execution, known := s.Durations(now); known {
+		v.Timing = &TimingView{WaitingMS: waiting.Milliseconds(), ExecutionMS: execution.Milliseconds()}
+		if !s.Timing.StartedAt.IsZero() {
+			started := s.Timing.StartedAt
+			v.Timing.StartedAt = &started
+		}
+		if !s.Timing.FinishedAt.IsZero() {
+			finished := s.Timing.FinishedAt
+			v.Timing.FinishedAt = &finished
+		}
+	}
 	if !s.ExpiresAt.IsZero() {
 		expires := s.ExpiresAt
 		v.ExpiresAt = &expires

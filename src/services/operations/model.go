@@ -87,6 +87,9 @@ type Snapshot struct {
 	LeaseID         string       `json:"leaseID,omitempty"`
 	LeaseUntil      time.Time    `json:"leaseUntil,omitempty"`
 	LastServedAt    time.Time    `json:"lastServedAt"`
+	// Timing is absent in records written before execution accounting existed.
+	// Keeping it optional avoids inventing queue or execution time on restore.
+	Timing *Timing `json:"timing,omitempty"`
 }
 
 func validID(s string) bool {
@@ -123,6 +126,10 @@ func (s Snapshot) Clone() Snapshot {
 	s.Spec = s.Spec.Clone()
 	s.Items = append([]ItemResult(nil), s.Items...)
 	s.Scan.Seen = append([]string(nil), s.Scan.Seen...)
+	if s.Timing != nil {
+		timing := *s.Timing
+		s.Timing = &timing
+	}
 	return s
 }
 
@@ -151,7 +158,7 @@ func New(scope Scope, spec Spec, deadline, now time.Time) (Snapshot, error) {
 	if spec.Scan != nil {
 		kind = "scan"
 	}
-	return Snapshot{ID: securetoken.New(), Scope: scope, Spec: spec.Clone(), Kind: kind, State: Queued, Revision: 1, CreatedAt: now, UpdatedAt: now, Deadline: deadline}, nil
+	return Snapshot{ID: securetoken.New(), Scope: scope, Spec: spec.Clone(), Kind: kind, State: Queued, Revision: 1, CreatedAt: now, UpdatedAt: now, Deadline: deadline, Timing: &Timing{WaitingSince: now}}, nil
 }
 func Valid(s Snapshot) bool {
 	if !validID(s.ID) || !s.Scope.Valid() || !s.Spec.Valid() || s.Revision == 0 || s.CreatedAt.IsZero() || s.UpdatedAt.Before(s.CreatedAt) || !s.Deadline.After(s.CreatedAt) || len(s.Items) > MaxTransfers || s.NextIndex < 0 || s.NextIndex > len(s.Spec.Transfers) || len(s.Scan.Token) > 16384 || s.Scan.Pages < 0 || s.Scan.Pages > MaxScanPages || len(s.Scan.Seen) > MaxScanPages || s.Scan.Objects < 0 || s.Scan.Bytes < 0 || !safeCode(s.Code) {
@@ -167,6 +174,9 @@ func Valid(s Snapshot) bool {
 		return false
 	}
 	if s.State != Running && (s.InFlight || s.WorkerID != "" || s.LeaseID != "" || !s.LeaseUntil.IsZero()) {
+		return false
+	}
+	if !validTiming(s) {
 		return false
 	}
 	if s.Terminal() && !s.ExpiresAt.Equal(s.UpdatedAt.Add(Retention)) || !s.Terminal() && !s.ExpiresAt.IsZero() {
@@ -220,6 +230,7 @@ func safeCode(s string) bool {
 }
 func tokenHash(s string) string { h := sha256.Sum256([]byte(s)); return hex.EncodeToString(h[:]) }
 func terminal(s *Snapshot, state, code string, now time.Time) {
+	finishTiming(s, normalized(now))
 	s.State = state
 	s.Code = code
 	s.InFlight = false

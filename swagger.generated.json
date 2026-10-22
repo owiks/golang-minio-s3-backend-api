@@ -95432,6 +95432,9 @@
                       "kind": {
                         "type": "string"
                       },
+                      "phase": {
+                        "type": "string"
+                      },
                       "retryable": {
                         "type": "boolean"
                       },
@@ -95466,12 +95469,44 @@
                       "state": {
                         "type": "string"
                       },
+                      "timing": {
+                        "additionalProperties": false,
+                        "nullable": true,
+                        "properties": {
+                          "executionMs": {
+                            "format": "int64",
+                            "type": "integer"
+                          },
+                          "finishedAt": {
+                            "format": "date-time",
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "startedAt": {
+                            "format": "date-time",
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "waitingMs": {
+                            "format": "int64",
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "executionMs",
+                          "waitingMs"
+                        ],
+                        "type": "object"
+                      },
                       "total": {
                         "format": "int64",
                         "type": "integer"
                       },
                       "updatedAt": {
                         "format": "date-time",
+                        "type": "string"
+                      },
+                      "waitingReason": {
                         "type": "string"
                       }
                     },
@@ -95482,6 +95517,7 @@
                       "errors",
                       "id",
                       "kind",
+                      "phase",
                       "retryable",
                       "revision",
                       "state",
@@ -96187,6 +96223,9 @@
                     "kind": {
                       "type": "string"
                     },
+                    "phase": {
+                      "type": "string"
+                    },
                     "retryable": {
                       "type": "boolean"
                     },
@@ -96221,12 +96260,44 @@
                     "state": {
                       "type": "string"
                     },
+                    "timing": {
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "properties": {
+                        "executionMs": {
+                          "format": "int64",
+                          "type": "integer"
+                        },
+                        "finishedAt": {
+                          "format": "date-time",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "startedAt": {
+                          "format": "date-time",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "waitingMs": {
+                          "format": "int64",
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "executionMs",
+                        "waitingMs"
+                      ],
+                      "type": "object"
+                    },
                     "total": {
                       "format": "int64",
                       "type": "integer"
                     },
                     "updatedAt": {
                       "format": "date-time",
+                      "type": "string"
+                    },
+                    "waitingReason": {
                       "type": "string"
                     }
                   },
@@ -96237,6 +96308,7 @@
                     "errors",
                     "id",
                     "kind",
+                    "phase",
                     "retryable",
                     "revision",
                     "state",
@@ -96971,6 +97043,9 @@
                     "kind": {
                       "type": "string"
                     },
+                    "phase": {
+                      "type": "string"
+                    },
                     "retryable": {
                       "type": "boolean"
                     },
@@ -97005,12 +97080,44 @@
                     "state": {
                       "type": "string"
                     },
+                    "timing": {
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "properties": {
+                        "executionMs": {
+                          "format": "int64",
+                          "type": "integer"
+                        },
+                        "finishedAt": {
+                          "format": "date-time",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "startedAt": {
+                          "format": "date-time",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "waitingMs": {
+                          "format": "int64",
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "executionMs",
+                        "waitingMs"
+                      ],
+                      "type": "object"
+                    },
                     "total": {
                       "format": "int64",
                       "type": "integer"
                     },
                     "updatedAt": {
                       "format": "date-time",
+                      "type": "string"
+                    },
+                    "waitingReason": {
                       "type": "string"
                     }
                   },
@@ -97021,6 +97128,7 @@
                     "errors",
                     "id",
                     "kind",
+                    "phase",
                     "retryable",
                     "revision",
                     "state",
@@ -97694,6 +97802,9 @@
                     "kind": {
                       "type": "string"
                     },
+                    "phase": {
+                      "type": "string"
+                    },
                     "retryable": {
                       "type": "boolean"
                     },
@@ -97728,12 +97839,44 @@
                     "state": {
                       "type": "string"
                     },
+                    "timing": {
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "properties": {
+                        "executionMs": {
+                          "format": "int64",
+                          "type": "integer"
+                        },
+                        "finishedAt": {
+                          "format": "date-time",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "startedAt": {
+                          "format": "date-time",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "waitingMs": {
+                          "format": "int64",
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "executionMs",
+                        "waitingMs"
+                      ],
+                      "type": "object"
+                    },
                     "total": {
                       "format": "int64",
                       "type": "integer"
                     },
                     "updatedAt": {
                       "format": "date-time",
+                      "type": "string"
+                    },
+                    "waitingReason": {
                       "type": "string"
                     }
                   },
@@ -97744,6 +97887,7 @@
                     "errors",
                     "id",
                     "kind",
+                    "phase",
                     "retryable",
                     "revision",
                     "state",
@@ -99078,6 +99222,9 @@
                     "kind": {
                       "type": "string"
                     },
+                    "phase": {
+                      "type": "string"
+                    },
                     "retryable": {
                       "type": "boolean"
                     },
@@ -99112,12 +99259,44 @@
                     "state": {
                       "type": "string"
                     },
+                    "timing": {
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "properties": {
+                        "executionMs": {
+                          "format": "int64",
+                          "type": "integer"
+                        },
+                        "finishedAt": {
+                          "format": "date-time",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "startedAt": {
+                          "format": "date-time",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "waitingMs": {
+                          "format": "int64",
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "executionMs",
+                        "waitingMs"
+                      ],
+                      "type": "object"
+                    },
                     "total": {
                       "format": "int64",
                       "type": "integer"
                     },
                     "updatedAt": {
                       "format": "date-time",
+                      "type": "string"
+                    },
+                    "waitingReason": {
                       "type": "string"
                     }
                   },
@@ -99128,6 +99307,7 @@
                     "errors",
                     "id",
                     "kind",
+                    "phase",
                     "retryable",
                     "revision",
                     "state",

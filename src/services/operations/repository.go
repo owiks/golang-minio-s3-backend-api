@@ -43,7 +43,9 @@ type ScanPage struct {
 // Checkpoint is a single fenced transition: start a transfer before upstream
 // I/O, store its outcome, or atomically add a read-only scan page and cursor.
 type Checkpoint struct {
-	Yield    bool
+	Yield bool
+	// Execute starts accounting only after an execution slot was acquired.
+	Execute  bool
 	Begin    bool
 	Transfer *TransferOutcome
 	Page     *ScanPage
@@ -132,6 +134,8 @@ func ClaimRecord(records map[string]Snapshot, worker string, now time.Time, leas
 		return a.ID < b.ID
 	})
 	s := candidates[0]
+	s = s.Clone()
+	queueTiming(&s, now)
 	s.State = Running
 	s.WorkerID = worker
 	s.LeaseID = securetoken.New()
@@ -152,6 +156,9 @@ func SaveRecord(s Snapshot, lease string, revision uint64, c Checkpoint, now tim
 	if c.Yield {
 		commands++
 	}
+	if c.Execute {
+		commands++
+	}
 	if c.Begin {
 		commands++
 	}
@@ -169,6 +176,20 @@ func SaveRecord(s Snapshot, lease string, revision uint64, c Checkpoint, now tim
 	}
 	s = s.Clone()
 	s.UpdatedAt = now
+	if c.Execute {
+		if s.InFlight || s.Timing != nil && !s.Timing.ExecutionSince.IsZero() {
+			return Snapshot{}, ErrInvalid
+		}
+		if s.CancelRequested {
+			terminal(&s, Cancelled, "", now)
+		} else if !now.Before(s.Deadline) {
+			terminal(&s, Failed, "AuthorizationExpired", now)
+		} else {
+			startTiming(&s, now)
+			s.Revision++
+		}
+		return s, nil
+	}
 	if c.Yield {
 		if s.InFlight {
 			return Snapshot{}, ErrInvalid
@@ -176,7 +197,7 @@ func SaveRecord(s Snapshot, lease string, revision uint64, c Checkpoint, now tim
 		if s.CancelRequested {
 			terminal(&s, Cancelled, "", now)
 		} else {
-			yield(&s)
+			yield(&s, now)
 			s.Revision++
 		}
 		return s, nil
@@ -205,6 +226,7 @@ func SaveRecord(s Snapshot, lease string, revision uint64, c Checkpoint, now tim
 			return s, nil
 		}
 		s.InFlight = true
+		startTiming(&s, now)
 		s.Revision++
 		return s, nil
 	}
@@ -234,7 +256,7 @@ func SaveRecord(s Snapshot, lease string, revision uint64, c Checkpoint, now tim
 			terminal(&s, Cancelled, "", now)
 			return s, nil
 		}
-		yield(&s)
+		yield(&s, now)
 		s.Revision++
 		return s, nil
 	}
@@ -263,12 +285,13 @@ func SaveRecord(s Snapshot, lease string, revision uint64, c Checkpoint, now tim
 		terminal(&s, Cancelled, "", now)
 		return s, nil
 	}
-	yield(&s)
+	yield(&s, now)
 	s.Revision++
 	return s, nil
 }
 
-func yield(s *Snapshot) {
+func yield(s *Snapshot, now time.Time) {
+	queueTiming(s, now)
 	s.State = Queued
 	s.WorkerID = ""
 	s.LeaseID = ""
@@ -302,6 +325,10 @@ func RetryRecord(s Snapshot, revision uint64, now time.Time) (Snapshot, error) {
 	s.CancelRequested = false
 	s.ExpiresAt = time.Time{}
 	s.UpdatedAt = normalized(now)
+	if s.Timing != nil {
+		s.Timing.FinishedAt = time.Time{}
+		s.Timing.WaitingSince = s.UpdatedAt
+	}
 	s.Revision++
 	return s, nil
 }

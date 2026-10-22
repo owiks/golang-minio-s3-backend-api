@@ -157,6 +157,10 @@ func (w Worker) RunOnce(ctx context.Context) (resultErr error) {
 		}
 		defer release()
 	}
+	s, err = w.save(s, Checkpoint{Execute: true})
+	if err != nil || s.Terminal() {
+		return err
+	}
 	budget := w.StepTimeout
 	if budget <= 0 || budget > MaxStepDuration {
 		budget = MaxStepDuration
