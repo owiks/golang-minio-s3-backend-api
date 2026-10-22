@@ -15,6 +15,8 @@ type View struct {
 	// Phase is a coarse observed stage, not an ETA or queue position.
 	Phase         string `json:"phase"`
 	WaitingReason string `json:"waitingReason,omitempty"`
+	// RetryAt is the current shared connection pause, not an execution ETA.
+	RetryAt *time.Time `json:"retryAt,omitempty"`
 	// Timing is omitted for legacy records whose execution was not measured.
 	Timing          *TimingView `json:"timing,omitempty"`
 	Code            string      `json:"code,omitempty"`
@@ -75,6 +77,16 @@ func publicView(s operations.Snapshot, now time.Time) View {
 	}
 	if s.Spec.Scan != nil {
 		v.Scan = &ScanView{Objects: s.Scan.Objects, Bytes: s.Scan.Bytes, Pages: s.Scan.Pages}
+	}
+	return v
+}
+
+func pausedView(s operations.Snapshot, now, until time.Time) View {
+	v := publicView(s, now)
+	if s.State == operations.Queued && until.After(now) {
+		v.WaitingReason = "upstream_throttled"
+		stamp := until.UTC()
+		v.RetryAt = &stamp
 	}
 	return v
 }

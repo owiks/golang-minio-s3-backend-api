@@ -90,6 +90,11 @@ type Snapshot struct {
 	// Timing is absent in records written before execution accounting existed.
 	// Keeping it optional avoids inventing queue or execution time on restore.
 	Timing *Timing `json:"timing,omitempty"`
+	// NotBefore also fences other queued work using this connection. It is kept
+	// after cancellation so deleting a job cannot immediately bypass backpressure.
+	NotBefore           time.Time `json:"notBefore,omitempty"`
+	ThrottleConsecutive int       `json:"throttleConsecutive,omitempty"`
+	ThrottleTotal       int       `json:"throttleTotal,omitempty"`
 }
 
 func validID(s string) bool {
@@ -148,6 +153,16 @@ func (s Snapshot) Terminal() bool {
 }
 func (s Snapshot) Retryable() bool       { return s.State == Failed && !s.InFlight }
 func normalized(now time.Time) time.Time { return now.UTC().Truncate(time.Microsecond) }
+
+// A clock adjustment or a different replica must not move a durable transition
+// behind a previously acknowledged timestamp or discard a confirmed outcome.
+func recordTime(s Snapshot, now time.Time) time.Time {
+	now = normalized(now)
+	if s.UpdatedAt.After(now) {
+		return s.UpdatedAt
+	}
+	return now
+}
 func New(scope Scope, spec Spec, deadline, now time.Time) (Snapshot, error) {
 	now = normalized(now)
 	deadline = normalized(deadline)
@@ -176,7 +191,7 @@ func Valid(s Snapshot) bool {
 	if s.State != Running && (s.InFlight || s.WorkerID != "" || s.LeaseID != "" || !s.LeaseUntil.IsZero()) {
 		return false
 	}
-	if !validTiming(s) {
+	if !validTiming(s) || !validBackpressure(s) {
 		return false
 	}
 	if s.Terminal() && !s.ExpiresAt.Equal(s.UpdatedAt.Add(Retention)) || !s.Terminal() && !s.ExpiresAt.IsZero() {
@@ -230,7 +245,8 @@ func safeCode(s string) bool {
 }
 func tokenHash(s string) string { h := sha256.Sum256([]byte(s)); return hex.EncodeToString(h[:]) }
 func terminal(s *Snapshot, state, code string, now time.Time) {
-	finishTiming(s, normalized(now))
+	now = recordTime(*s, now)
+	finishTiming(s, now)
 	s.State = state
 	s.Code = code
 	s.InFlight = false

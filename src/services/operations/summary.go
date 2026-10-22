@@ -14,6 +14,7 @@ type SummaryReader interface {
 type QueueSummary struct {
 	Scope              string     `json:"scope"`
 	Queued             int        `json:"queued"`
+	Throttled          int        `json:"throttled"`
 	Running            int        `json:"running"`
 	ExpiredLeases      int        `json:"expiredLeases"`
 	Completed          int        `json:"completed"`

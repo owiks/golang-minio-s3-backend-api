@@ -96,7 +96,10 @@ func (m *Memory) Renew(ctx context.Context, id, lease string, n time.Time, l tim
 	if l < time.Second || l > time.Hour {
 		return ErrInvalid
 	}
-	s.LeaseUntil = normalized(n.Add(l))
+	n = recordTime(s, n)
+	if until := normalized(n.Add(l)); until.After(s.LeaseUntil) {
+		s.LeaseUntil = until
+	}
 	m.records[id] = s
 	return nil
 }

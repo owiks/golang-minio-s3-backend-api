@@ -14,6 +14,7 @@ import (
 // expired-lease recovery, across all workers sharing the same store.
 type Repository interface {
 	SummaryReader
+	CooldownReader
 	Insert(context.Context, Scope, Spec, time.Time, time.Time) (Snapshot, error)
 	Get(context.Context, Scope, string) (Snapshot, error)
 	List(context.Context, Scope) ([]Snapshot, error)
@@ -45,6 +46,8 @@ type ScanPage struct {
 // I/O, store its outcome, or atomically add a read-only scan page and cursor.
 type Checkpoint struct {
 	Yield bool
+	// Throttle defers a safe scan page without advancing its checkpoint.
+	Throttle bool
 	// Execute starts accounting only after an execution slot was acquired.
 	Execute  bool
 	Begin    bool
@@ -66,13 +69,13 @@ func InsertRecord(records map[string]Snapshot, scope Scope, spec Spec, deadline,
 		}
 	}
 	for actor >= MaxPerActor {
-		if !evictTerminal(records, scope.ActorID) {
+		if !evictTerminal(records, scope.ActorID, now) {
 			return Snapshot{}, ErrLimit
 		}
 		actor--
 	}
 	for len(records) >= MaxRecords {
-		if !evictTerminal(records, "") {
+		if !evictTerminal(records, "", now) {
 			return Snapshot{}, ErrLimit
 		}
 	}
@@ -90,7 +93,11 @@ func ClaimRecord(records map[string]Snapshot, worker string, now time.Time, leas
 	PruneRecords(records, now)
 	candidates := []Snapshot{}
 	served := map[string]time.Time{}
+	cooldowns := map[string]time.Time{}
 	for _, s := range records {
+		if s.NotBefore.After(cooldowns[s.Scope.ConnectionID]) {
+			cooldowns[s.Scope.ConnectionID] = s.NotBefore
+		}
 		if s.LastServedAt.After(served[s.Scope.ActorID]) {
 			served[s.Scope.ActorID] = s.LastServedAt
 		}
@@ -118,6 +125,16 @@ func ClaimRecord(records map[string]Snapshot, worker string, now time.Time, leas
 			records[id] = s
 			continue
 		}
+		if until := cooldowns[s.Scope.ConnectionID]; now.Before(until) {
+			if s.State == Running {
+				waiting, err := WaitForCooldown(s, until, now)
+				if err != nil {
+					return Snapshot{}, err
+				}
+				records[id] = waiting
+			}
+			continue
+		}
 		candidates = append(candidates, s)
 	}
 	if len(candidates) == 0 {
@@ -136,6 +153,7 @@ func ClaimRecord(records map[string]Snapshot, worker string, now time.Time, leas
 	})
 	s := candidates[0]
 	s = s.Clone()
+	now = recordTime(s, now)
 	queueTiming(&s, now)
 	s.State = Running
 	s.WorkerID = worker
@@ -149,12 +167,15 @@ func ClaimRecord(records map[string]Snapshot, worker string, now time.Time, leas
 }
 
 func SaveRecord(s Snapshot, lease string, revision uint64, c Checkpoint, now time.Time) (Snapshot, error) {
-	now = normalized(now)
+	now = recordTime(s, now)
 	if s.State != Running || s.LeaseID != lease || s.Revision != revision || !now.Before(s.LeaseUntil) {
 		return Snapshot{}, ErrConflict
 	}
 	commands := 0
 	if c.Yield {
+		commands++
+	}
+	if c.Throttle {
 		commands++
 	}
 	if c.Execute {
@@ -177,6 +198,9 @@ func SaveRecord(s Snapshot, lease string, revision uint64, c Checkpoint, now tim
 	}
 	s = s.Clone()
 	s.UpdatedAt = now
+	if c.Throttle {
+		return throttleRecord(s, now)
+	}
 	if c.Execute {
 		if s.InFlight || s.Timing != nil && !s.Timing.ExecutionSince.IsZero() {
 			return Snapshot{}, ErrInvalid
@@ -278,6 +302,8 @@ func SaveRecord(s Snapshot, lease string, revision uint64, c Checkpoint, now tim
 	s.Scan.Bytes += p.Bytes
 	s.Scan.Pages++
 	s.Scan.Token = p.NextToken
+	s.ThrottleConsecutive = 0
+	s.NotBefore = time.Time{}
 	if p.NextToken == "" {
 		terminal(&s, Completed, "", now)
 		return s, nil
@@ -300,6 +326,7 @@ func yield(s *Snapshot, now time.Time) {
 }
 
 func CancelRecord(s Snapshot, revision uint64, now time.Time) (Snapshot, error) {
+	now = recordTime(s, now)
 	if revision != s.Revision {
 		return Snapshot{}, ErrConflict
 	}
@@ -317,12 +344,14 @@ func CancelRecord(s Snapshot, revision uint64, now time.Time) (Snapshot, error) 
 	return s, nil
 }
 func RetryRecord(s Snapshot, revision uint64, now time.Time) (Snapshot, error) {
+	now = recordTime(s, now)
 	if revision != s.Revision || !s.Retryable() || !now.Before(s.Deadline) {
 		return Snapshot{}, ErrConflict
 	}
 	s = s.Clone()
 	s.State = Queued
 	s.Code = ""
+	s.ThrottleConsecutive = 0
 	s.CancelRequested = false
 	s.ExpiresAt = time.Time{}
 	s.UpdatedAt = normalized(now)
@@ -341,11 +370,11 @@ func PruneRecords(records map[string]Snapshot, now time.Time) {
 	}
 }
 
-func evictTerminal(records map[string]Snapshot, actor string) bool {
+func evictTerminal(records map[string]Snapshot, actor string, now time.Time) bool {
 	oldest := ""
 	var stamp time.Time
 	for id, s := range records {
-		if !s.Terminal() || actor != "" && s.Scope.ActorID != actor {
+		if !s.Terminal() || now.Before(s.NotBefore) || actor != "" && s.Scope.ActorID != actor {
 			continue
 		}
 		if oldest == "" || s.UpdatedAt.Before(stamp) || s.UpdatedAt.Equal(stamp) && id < oldest {

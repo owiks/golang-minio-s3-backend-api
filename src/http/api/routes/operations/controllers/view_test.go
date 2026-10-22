@@ -43,3 +43,20 @@ func TestPublicOperationPhaseAndTimingRemainSafeAndDocumented(t *testing.T) {
 		}
 	}
 }
+
+func TestPublicPauseExpiresWithoutInventingExecutionStart(t *testing.T) {
+	now := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	s, err := operations.New(operations.Scope{ActorID: "actor", ConnectionID: "connection"}, operations.Spec{Scan: &operations.ScanSpec{Bucket: "data"}}, now.Add(time.Hour), now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	until := now.Add(time.Minute)
+	v := pausedView(s, now, until)
+	if v.RetryAt == nil || v.WaitingReason != "upstream_throttled" || v.Timing.StartedAt != nil {
+		t.Fatal("pause must not imply an execution start", v)
+	}
+	v = pausedView(s, until, until)
+	if v.RetryAt != nil || v.WaitingReason != "scheduler" {
+		t.Fatal("expired pause still exposed", v)
+	}
+}

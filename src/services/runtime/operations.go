@@ -104,7 +104,7 @@ func (e operationExecutor) ScanPage(ctx context.Context, job operations.Snapshot
 	}
 	page, err := search.RecursivePage(ctx, NewClients(s), input.Bucket, input.Prefix, token)
 	if err != nil {
-		return operations.ScanPage{}, err
+		return operations.ScanPage{}, operationReadError(err)
 	}
 	if err = search.NewListingGuard(input.Prefix, operations.MaxScanPages).Check(ctx, token, page); err != nil {
 		return operations.ScanPage{}, err

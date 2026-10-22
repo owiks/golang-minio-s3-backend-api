@@ -12,6 +12,12 @@ func (m *Memory) Summary(ctx context.Context, now time.Time) (QueueSummary, erro
 		return QueueSummary{}, err
 	}
 	summary := QueueSummary{Scope: "store"}
+	cooldowns := map[string]time.Time{}
+	for _, row := range m.records {
+		if row.NotBefore.After(cooldowns[row.Scope.ConnectionID]) {
+			cooldowns[row.Scope.ConnectionID] = row.NotBefore
+		}
+	}
 	for _, row := range m.records {
 		if !row.ExpiresAt.IsZero() && !now.Before(row.ExpiresAt) {
 			continue
@@ -22,6 +28,9 @@ func (m *Memory) Summary(ctx context.Context, now time.Time) (QueueSummary, erro
 		}
 		if err := summary.AddMetadata(row.State, 1, expired, row.CreatedAt, now); err != nil {
 			return QueueSummary{}, err
+		}
+		if row.State == Queued && cooldowns[row.Scope.ConnectionID].After(now) {
+			summary.Throttled++
 		}
 	}
 	return summary, nil

@@ -22,7 +22,7 @@ type Store struct {
 	driver string
 }
 
-const columns = "id,actor_id,connection_id,state,revision,created_us,expires_us,lease_us,last_served_us,payload"
+const columns = "id,actor_id,connection_id,state,revision,created_us,expires_us,lease_us,last_served_us,not_before_us,payload"
 
 func Open(ctx context.Context, cfg Config) (*Store, error) {
 	db, err := database.Open(ctx, cfg)
@@ -89,8 +89,8 @@ type rowScanner interface{ Scan(...any) error }
 func read(row rowScanner) (operations.Snapshot, error) {
 	var id, actor, connection, state, payload string
 	var revision uint64
-	var created, expires, lease, served int64
-	err := row.Scan(&id, &actor, &connection, &state, &revision, &created, &expires, &lease, &served, &payload)
+	var created, expires, lease, served, notBefore int64
+	err := row.Scan(&id, &actor, &connection, &state, &revision, &created, &expires, &lease, &served, &notBefore, &payload)
 	if errors.Is(err, sql.ErrNoRows) {
 		return operations.Snapshot{}, operations.ErrNotFound
 	}
@@ -98,7 +98,7 @@ func read(row rowScanner) (operations.Snapshot, error) {
 		return operations.Snapshot{}, operations.ErrUnavailable
 	}
 	var v operations.Snapshot
-	if json.Unmarshal([]byte(payload), &v) != nil || !operations.Valid(v) || v.ID != id || v.Scope.ActorID != actor || v.Scope.ConnectionID != connection || v.State != state || v.Revision != revision || micros(v.CreatedAt) != created || micros(v.ExpiresAt) != expires || micros(v.LeaseUntil) != lease || micros(v.LastServedAt) != served {
+	if json.Unmarshal([]byte(payload), &v) != nil || !operations.Valid(v) || v.ID != id || v.Scope.ActorID != actor || v.Scope.ConnectionID != connection || v.State != state || v.Revision != revision || micros(v.CreatedAt) != created || micros(v.ExpiresAt) != expires || micros(v.LeaseUntil) != lease || micros(v.LastServedAt) != served || micros(v.NotBefore) != notBefore {
 		return operations.Snapshot{}, operations.ErrUnavailable
 	}
 	return v, nil
@@ -117,10 +117,10 @@ func (s *Store) write(ctx context.Context, tx *sql.Tx, v operations.Snapshot, in
 	if err != nil || len(raw) > operations.MaxRecordBytes {
 		return operations.ErrInvalid
 	}
-	args := []any{v.Scope.ActorID, v.Scope.ConnectionID, v.State, v.Revision, micros(v.CreatedAt), micros(v.ExpiresAt), micros(v.LeaseUntil), micros(v.LastServedAt), string(raw), v.ID}
-	query := "UPDATE api_operations SET actor_id=?,connection_id=?,state=?,revision=?,created_us=?,expires_us=?,lease_us=?,last_served_us=?,payload=? WHERE id=?"
+	args := []any{v.Scope.ActorID, v.Scope.ConnectionID, v.State, v.Revision, micros(v.CreatedAt), micros(v.ExpiresAt), micros(v.LeaseUntil), micros(v.LastServedAt), micros(v.NotBefore), string(raw), v.ID}
+	query := "UPDATE api_operations SET actor_id=?,connection_id=?,state=?,revision=?,created_us=?,expires_us=?,lease_us=?,last_served_us=?,not_before_us=?,payload=? WHERE id=?"
 	if insert {
-		query = "INSERT INTO api_operations(actor_id,connection_id,state,revision,created_us,expires_us,lease_us,last_served_us,payload,id) VALUES(?,?,?,?,?,?,?,?,?,?)"
+		query = "INSERT INTO api_operations(actor_id,connection_id,state,revision,created_us,expires_us,lease_us,last_served_us,not_before_us,payload,id) VALUES(?,?,?,?,?,?,?,?,?,?,?)"
 	}
 	r, err := tx.ExecContext(ctx, s.q(query), args...)
 	if err != nil {
@@ -157,14 +157,14 @@ func (s *Store) Insert(ctx context.Context, scope operations.Scope, spec operati
 		return operations.Snapshot{}, operations.ErrUnavailable
 	}
 	for actor >= operations.MaxPerActor {
-		if err = s.evict(ctx, tx, scope.ActorID); err != nil {
+		if err = s.evict(ctx, tx, scope.ActorID, now); err != nil {
 			return operations.Snapshot{}, err
 		}
 		actor--
 		total--
 	}
 	for total >= operations.MaxRecords {
-		if err = s.evict(ctx, tx, ""); err != nil {
+		if err = s.evict(ctx, tx, "", now); err != nil {
 			return operations.Snapshot{}, err
 		}
 		total--
@@ -202,6 +202,28 @@ func (s *Store) List(ctx context.Context, scope operations.Scope) ([]operations.
 	}
 	return out, nil
 }
+
+type cooldownReader interface {
+	QueryRowContext(context.Context, string, ...any) *sql.Row
+}
+
+func (s *Store) cooldown(ctx context.Context, source cooldownReader, connectionID string, now time.Time) (time.Time, error) {
+	var until int64
+	if err := source.QueryRowContext(ctx, s.q("SELECT COALESCE(MAX(not_before_us),0) FROM api_operations WHERE connection_id=? AND not_before_us>?"), connectionID, now.UnixMicro()).Scan(&until); err != nil {
+		return time.Time{}, operations.ErrUnavailable
+	}
+	if until == 0 {
+		return time.Time{}, nil
+	}
+	return time.UnixMicro(until).UTC(), nil
+}
+
+// Cooldown is an internal scheduler read. It deliberately shares a connection's
+// load-limit signal across actors without exposing another actor's operation.
+func (s *Store) Cooldown(ctx context.Context, connectionID string, now time.Time) (time.Time, error) {
+	return s.cooldown(ctx, s.db, connectionID, now)
+}
+
 func (s *Store) Claim(ctx context.Context, worker string, now time.Time, lease time.Duration) (operations.Snapshot, error) {
 	tx, err := s.begin(ctx)
 	if err != nil {
@@ -213,9 +235,9 @@ func (s *Store) Claim(ctx context.Context, worker string, now time.Time, lease t
 	}
 	for range operations.MaxRecords {
 		// Load a single manifest, not every potentially large queued payload.
-		query := "SELECT " + strings.ReplaceAll(columns, ",", ",o.") + " FROM api_operations o WHERE (o.state='queued' OR (o.state='running' AND o.lease_us<=?)) ORDER BY COALESCE((SELECT MAX(a.last_served_us) FROM api_operations a WHERE a.actor_id=o.actor_id),0),o.created_us,o.id LIMIT 1"
+		query := "SELECT " + strings.ReplaceAll(columns, ",", ",o.") + " FROM api_operations o WHERE ((o.state='queued' AND NOT EXISTS (SELECT 1 FROM api_operations c WHERE c.connection_id=o.connection_id AND c.not_before_us>?)) OR (o.state='running' AND o.lease_us<=?)) ORDER BY COALESCE((SELECT MAX(a.last_served_us) FROM api_operations a WHERE a.actor_id=o.actor_id),0),o.created_us,o.id LIMIT 1"
 		query = strings.Replace(query, "SELECT id,", "SELECT o.id,", 1)
-		v, err := read(tx.QueryRowContext(ctx, s.q(query), now.UnixMicro()))
+		v, err := read(tx.QueryRowContext(ctx, s.q(query), now.UnixMicro(), now.UnixMicro()))
 		if errors.Is(err, operations.ErrNotFound) {
 			if tx.Commit() != nil {
 				return operations.Snapshot{}, operations.ErrUnavailable
@@ -224,6 +246,25 @@ func (s *Store) Claim(ctx context.Context, worker string, now time.Time, lease t
 		}
 		if err != nil {
 			return operations.Snapshot{}, err
+		}
+		// An expired in-flight transfer must first become Unknown, even when its
+		// connection is paused. A safe step from a lost worker can instead yield
+		// its lease, preserving the active cooldown before another worker starts.
+		if v.State == operations.Running && !v.InFlight {
+			until, cooldownErr := s.cooldown(ctx, tx, v.Scope.ConnectionID, now)
+			if cooldownErr != nil {
+				return operations.Snapshot{}, cooldownErr
+			}
+			if until.After(now) {
+				waiting, waitErr := operations.WaitForCooldown(v, until, now)
+				if waitErr != nil {
+					return operations.Snapshot{}, waitErr
+				}
+				if err = s.write(ctx, tx, waiting, false); err != nil {
+					return operations.Snapshot{}, err
+				}
+				continue
+			}
 		}
 		records := map[string]operations.Snapshot{v.ID: v}
 		claimed, claimErr := operations.ClaimRecord(records, worker, now, lease)
@@ -283,7 +324,12 @@ func (s *Store) Renew(ctx context.Context, id, lease string, n time.Time, l time
 		if l < time.Second || l > time.Hour {
 			return v, operations.ErrInvalid
 		}
-		v.LeaseUntil = n.Add(l).UTC().Truncate(time.Microsecond)
+		if v.UpdatedAt.After(n) {
+			n = v.UpdatedAt
+		}
+		if until := n.Add(l).UTC().Truncate(time.Microsecond); until.After(v.LeaseUntil) {
+			v.LeaseUntil = until
+		}
 		return v, nil
 	})
 	return err
@@ -326,9 +372,11 @@ func (s *Store) Ping(ctx context.Context) error {
 }
 func (s *Store) Close() error { return s.db.Close() }
 
-func (s *Store) evict(ctx context.Context, tx *sql.Tx, actor string) error {
-	query := "SELECT id FROM api_operations WHERE state NOT IN ('queued','running')"
-	args := []any{}
+func (s *Store) evict(ctx context.Context, tx *sql.Tx, actor string, now time.Time) error {
+	// A cancelled or failed scan can still carry an active connection cooldown.
+	// Capacity eviction must not silently remove that backpressure signal.
+	query := "SELECT id FROM api_operations WHERE state NOT IN ('queued','running') AND not_before_us<=?"
+	args := []any{now.UnixMicro()}
 	if actor != "" {
 		query += " AND actor_id=?"
 		args = append(args, actor)

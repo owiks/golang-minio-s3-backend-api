@@ -63,8 +63,7 @@ func create(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runti
 		return err
 	}
 	w.Header().Set("Location", "/api/sessions/"+url.PathEscape(s.SessionID())+"/operations/"+url.PathEscape(snapshot.ID))
-	common.WriteJSON(w, r, http.StatusAccepted, publicView(snapshot, time.Now()))
-	return nil
+	return writeView(app, w, r, http.StatusAccepted, snapshot)
 }
 func scope(s *runtime.Session) operations.Scope {
 	return operations.Scope{ActorID: s.SessionID(), ConnectionID: s.ConnectionID()}
@@ -75,6 +74,11 @@ func List(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime
 		return operations.PublicError(err)
 	}
 	result := []View{}
+	now := time.Now()
+	until, err := app.Operations.Cooldown(r.Context(), s.ConnectionID(), now)
+	if err != nil {
+		return operations.PublicError(err)
+	}
 	for _, row := range rows {
 		if err = app.AuthorizeOperation(r.Context(), s, row.Spec, false); err != nil {
 			if apperror.Public(err).Status == http.StatusForbidden {
@@ -82,7 +86,7 @@ func List(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime
 			}
 			return err
 		}
-		result = append(result, publicView(row, time.Now()))
+		result = append(result, pausedView(row, now, until))
 	}
 	common.WriteJSON(w, r, http.StatusOK, result)
 	return nil
@@ -106,8 +110,7 @@ func Get(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.
 	if err = app.AuthorizeOperation(r.Context(), s, snapshot.Spec, false); err != nil {
 		return err
 	}
-	common.WriteJSON(w, r, http.StatusOK, publicView(snapshot, time.Now()))
-	return nil
+	return writeView(app, w, r, http.StatusOK, snapshot)
 }
 func Cancel(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session, _ string) error {
 	id, revision, err := revisionRequest(w, r)
@@ -138,7 +141,20 @@ func Retry(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtim
 	if err != nil {
 		return operations.PublicError(err)
 	}
-	common.WriteJSON(w, r, http.StatusOK, publicView(snapshot, time.Now()))
+	return writeView(app, w, r, http.StatusOK, snapshot)
+}
+
+func writeView(app *runtime.State, w http.ResponseWriter, r *http.Request, status int, snapshot operations.Snapshot) error {
+	now := time.Now()
+	var until time.Time
+	if snapshot.State == operations.Queued {
+		var err error
+		until, err = app.Operations.Cooldown(r.Context(), snapshot.Scope.ConnectionID, now)
+		if err != nil {
+			return operations.PublicError(err)
+		}
+	}
+	common.WriteJSON(w, r, status, pausedView(snapshot, now, until))
 	return nil
 }
 func revisionRequest(w http.ResponseWriter, r *http.Request) (string, uint64, error) {

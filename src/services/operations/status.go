@@ -29,5 +29,5 @@ func ValidStatus(s OperatorStatus) bool {
 			return false
 		}
 	}
-	return s.Queue.ExpiredLeases <= s.Queue.Running
+	return s.Queue.ExpiredLeases <= s.Queue.Running && s.Queue.Throttled >= 0 && s.Queue.Throttled <= s.Queue.Queued
 }

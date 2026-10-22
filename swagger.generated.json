@@ -150,6 +150,10 @@
                         "scope": {
                           "type": "string"
                         },
+                        "throttled": {
+                          "format": "int64",
+                          "type": "integer"
+                        },
                         "unknown": {
                           "format": "int64",
                           "type": "integer"
@@ -164,6 +168,7 @@
                         "queued",
                         "running",
                         "scope",
+                        "throttled",
                         "unknown"
                       ],
                       "type": "object"
@@ -96180,6 +96185,11 @@
                       "phase": {
                         "type": "string"
                       },
+                      "retryAt": {
+                        "format": "date-time",
+                        "nullable": true,
+                        "type": "string"
+                      },
                       "retryable": {
                         "type": "boolean"
                       },
@@ -96969,6 +96979,11 @@
                       "type": "string"
                     },
                     "phase": {
+                      "type": "string"
+                    },
+                    "retryAt": {
+                      "format": "date-time",
+                      "nullable": true,
                       "type": "string"
                     },
                     "retryable": {
@@ -97791,6 +97806,11 @@
                     "phase": {
                       "type": "string"
                     },
+                    "retryAt": {
+                      "format": "date-time",
+                      "nullable": true,
+                      "type": "string"
+                    },
                     "retryable": {
                       "type": "boolean"
                     },
@@ -98548,6 +98568,11 @@
                       "type": "string"
                     },
                     "phase": {
+                      "type": "string"
+                    },
+                    "retryAt": {
+                      "format": "date-time",
+                      "nullable": true,
                       "type": "string"
                     },
                     "retryable": {
@@ -99968,6 +99993,11 @@
                       "type": "string"
                     },
                     "phase": {
+                      "type": "string"
+                    },
+                    "retryAt": {
+                      "format": "date-time",
+                      "nullable": true,
                       "type": "string"
                     },
                     "retryable": {

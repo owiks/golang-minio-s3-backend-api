@@ -21,7 +21,7 @@ func (s Snapshot) Durations(now time.Time) (waiting, execution time.Duration, kn
 		return 0, 0, false
 	}
 	copy := s.Clone()
-	finishTiming(&copy, normalized(now))
+	finishTiming(&copy, recordTime(copy, now))
 	return time.Duration(copy.Timing.WaitingUS) * time.Microsecond, time.Duration(copy.Timing.ExecutionUS) * time.Microsecond, true
 }
 

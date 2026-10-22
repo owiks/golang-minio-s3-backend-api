@@ -75,14 +75,19 @@ func TestTimingLeaseRecoveryCapsExecutionAndPreservesUnknownFence(t *testing.T) 
 	ctx := context.Background()
 	now := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 	scope := Scope{"actor", "connection"}
-	s, _ := r.Insert(ctx, scope, transferSpec(1), now.Add(time.Hour), now)
-	s, _ = r.Claim(ctx, "worker", now.Add(time.Second), time.Minute)
+	if _, err := r.Insert(ctx, scope, transferSpec(1), now.Add(time.Hour), now); err != nil {
+		t.Fatal(err)
+	}
+	s, err := r.Claim(ctx, "worker", now.Add(time.Second), time.Minute)
+	if err != nil {
+		t.Fatal(err)
+	}
 	s, _ = r.Save(ctx, s.ID, s.LeaseID, s.Revision, Checkpoint{Execute: true}, now.Add(2*time.Second))
 	s, _ = r.Save(ctx, s.ID, s.LeaseID, s.Revision, Checkpoint{Begin: true}, now.Add(2*time.Second))
 	if _, err := r.Claim(ctx, "recovery", now.Add(2*time.Minute), time.Minute); !errors.Is(err, ErrNotFound) {
 		t.Fatal("uncertain operation was reclaimed", err)
 	}
-	s, err := r.Get(ctx, scope, s.ID)
+	s, err = r.Get(ctx, scope, s.ID)
 	waiting, execution, known := s.Durations(now.Add(time.Hour))
 	if err != nil || !known || !Valid(s) || s.State != Unknown || waiting != 61*time.Second || execution != 59*time.Second {
 		t.Fatal(s.State, waiting, execution, s.Timing, err)

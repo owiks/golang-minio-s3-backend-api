@@ -191,6 +191,10 @@ func (w Worker) RunOnce(ctx context.Context) (resultErr error) {
 	if s.Kind == "scan" {
 		page, readErr := w.Executor.ScanPage(stepCtx, s.Clone(), *s.Spec.Scan, s.Scan.Token)
 		if readErr != nil {
+			if errors.Is(readErr, ErrThrottled) {
+				w.Monitor.Failure("S3Throttled", w.clock())
+				return w.finish(s, Checkpoint{Throttle: true})
+			}
 			return w.finish(s, Checkpoint{FailCode: "ScanFailed"})
 		}
 		err = w.finish(s, Checkpoint{Page: &page})
