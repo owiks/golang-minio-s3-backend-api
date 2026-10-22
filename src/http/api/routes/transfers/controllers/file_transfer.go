@@ -7,7 +7,6 @@ import (
 	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
 	httpvalidation "github.com/owiks/golang-minio-s3-backend-api/src/http/validation"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
-	"github.com/owiks/golang-minio-s3-backend-api/src/services/commandlog"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
 	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 	transferssvc "github.com/owiks/golang-minio-s3-backend-api/src/services/transfers"
@@ -24,7 +23,7 @@ func HandleFileTransfer(app *runtimesvc.State, w http.ResponseWriter, r *http.Re
 	if len(r.Header.Values("Idempotency-Key")) > 1 || r.Header.Get("Idempotency-Key") == "" && len(r.Header.Values("Idempotency-Key")) != 0 {
 		return apperror.New(400, "InvalidIdempotencyKey", messages.CommandInvalid)
 	}
-	value, id, replayed, err := transferssvc.TransferCommand(r.Context(), app.Commands, runtimesvc.NewClients(s), commandlog.Scope{ActorID: s.SessionID(), ConnectionID: s.ConnectionID(), Operation: "objects/transfer"}, r.Header.Get("Idempotency-Key"), body)
+	value, id, replayed, err := app.ExecuteTransferCommand(r.Context(), s, body, r.Header.Get("Idempotency-Key"))
 	if id != "" {
 		w.Header().Set("X-Command-ID", id)
 	}

@@ -108,6 +108,9 @@ func executeOperation(app *runtimesvc.State, w http.ResponseWriter, r *http.Requ
 			return err
 		}
 	}
+	if err := checkOperationPolicy(app.Config().Operations, match); err != nil {
+		return err
+	}
 	if s != nil && long {
 		_ = http.NewResponseController(w).SetReadDeadline(time.Now().Add(timeout))
 		_ = http.NewResponseController(w).SetWriteDeadline(time.Now().Add(timeout))

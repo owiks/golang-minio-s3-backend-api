@@ -6,6 +6,7 @@ import (
 	httpcommon "github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
 	httpvalidation "github.com/owiks/golang-minio-s3-backend-api/src/http/validation"
 	svc "github.com/owiks/golang-minio-s3-backend-api/src/services/batch"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/operationpolicy"
 	runtimesvc "github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
@@ -21,6 +22,13 @@ func HandleListBatchJobs(app *runtimesvc.State, w http.ResponseWriter, r *http.R
 func HandleStartBatchJob(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session) error {
 	var body svc.BatchInput
 	if err := httpvalidation.Decode(w, r, &body); err != nil {
+		return err
+	}
+	action := operationpolicy.Admin
+	if body.Type == "expire" {
+		action |= operationpolicy.Delete
+	}
+	if err := app.Config().Operations.Check(action); err != nil {
 		return err
 	}
 	value, err := svc.Start(r.Context(), runtimesvc.NewClients(s), body)

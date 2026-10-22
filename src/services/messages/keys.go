@@ -610,7 +610,7 @@ const (
 func AllIDs() []ID {
 	return []ID{
 		CommandInvalid, CommandConflict, CommandRunning, CommandUnknown, CommandUnavailable, CommandLimit,
-		AuthStateUnavailable, AuthStateInvalid, AuthStateDenied, AuthStateNotFound, AuthStateConflict, AuthStateLimit, ResourceNameInvalid, Combined, ManagementUnsupported, RouteNotFound, HTTPStopping,
+		OperationDisabled, AuthStateUnavailable, AuthStateInvalid, AuthStateDenied, AuthStateNotFound, AuthStateConflict, AuthStateLimit, ResourceNameInvalid, Combined, ManagementUnsupported, RouteNotFound, HTTPStopping,
 		HttpInvalidBearerToken,
 		SessionsInvalidTokenTTL,
 		HttpMethodNotAllowed,

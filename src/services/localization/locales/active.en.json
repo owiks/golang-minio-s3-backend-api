@@ -2429,6 +2429,10 @@
     "other": "The connection or access limit has been reached. Revoke unused entries."
   },
   {
+    "id": "api.operation_disabled",
+    "other": "This operation is temporarily disabled by the API operator."
+  },
+  {
     "id": "command.invalid",
     "other": "Idempotency-Key must contain 1 to 128 visible ASCII characters."
   },

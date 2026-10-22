@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/endpoint"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/operationpolicy"
 )
 
 type Config struct {
@@ -19,6 +20,7 @@ type Config struct {
 	SessionTTL                   time.Duration   `env:"-"`
 	TokenTTL                     time.Duration   `env:"API_TOKEN_TTL"`
 	TemporaryBytes               int64           `env:"API_TEMPORARY_BYTES"`
+	Operations                   operationpolicy.Policy
 	Limits                       Limits
 	TrustedProxies               []netip.Prefix  `env:"-"`
 	ConditionalDeleteEndpoints   map[string]bool `env:"-"`

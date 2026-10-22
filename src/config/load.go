@@ -27,6 +27,16 @@ func LoadEnv(getenv func(string) string) (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+	for _, option := range []struct{ field, name string }{
+		{"ReadOnly", "API_READ_ONLY"},
+		{"DisableUploads", "API_DISABLE_UPLOADS"},
+		{"DisableDeletes", "API_DISABLE_DELETES"},
+		{"DisableAdminChanges", "API_DISABLE_ADMIN_CHANGES"},
+	} {
+		if invalid[option.field] {
+			return Config{}, errors.New("invalid " + option.name)
+		}
+	}
 	if invalid["TokenTTL"] || c.TokenTTL < time.Second || c.TokenTTL > 24*time.Hour || c.TokenTTL%time.Second != 0 {
 		return Config{}, errors.New("invalid API_TOKEN_TTL")
 	}
