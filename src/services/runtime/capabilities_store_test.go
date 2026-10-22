@@ -202,7 +202,7 @@ func TestCapabilityCacheUsesLiveIAMRevisionAndLogout(t *testing.T) {
 	app := New(config.Config{})
 	defer app.Close()
 	u, _ := url.Parse("https://fixture.invalid")
-	session := &Session{id: "fixture-session", internal: u, public: u, expires: time.Now().Add(time.Hour)}
+	session := &Session{id: "fixture-session", expires: time.Now().Add(time.Hour), sessionCore: &sessionCore{internal: u, public: u}}
 	if err := app.StoreSession(session); err != nil {
 		t.Fatal(err)
 	}

@@ -15,7 +15,9 @@ import (
 	"github.com/owiks/golang-minio-s3-backend-api/src/http/middleware"
 	"github.com/owiks/golang-minio-s3-backend-api/src/http/presentation"
 	"github.com/owiks/golang-minio-s3-backend-api/src/http/requestctx"
+	"github.com/owiks/golang-minio-s3-backend-api/src/persistence"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime"
 )
 
 var (
@@ -25,11 +27,18 @@ var (
 
 // Run returns only errors safe to log, never listener or upstream error text.
 func Run(ctx context.Context, cfg config.Config, logger *slog.Logger) error {
+	startup, cancel := context.WithTimeout(ctx, 30*time.Second)
+	manager, err := persistence.Open(startup, cfg)
+	cancel()
+	if err != nil {
+		return err
+	}
 	listener, err := net.Listen("tcp", cfg.Listen)
 	if err != nil {
+		_ = manager.Close()
 		return ErrListen
 	}
-	return serve(ctx, httpapi.New(cfg), listener, logger)
+	return serve(ctx, httpapi.NewHandler(runtime.NewWithAuth(cfg, manager)), listener, logger)
 }
 
 func serve(ctx context.Context, handler *httpapi.Handler, listener net.Listener, logger *slog.Logger) error {

@@ -9,6 +9,7 @@ import (
 func Default() Config {
 	return Config{
 		Language:       "auto",
+		State:          State{Database: Database{Driver: "memory"}, MaxOpen: 10, MaxIdle: 2, Lifetime: 30 * time.Minute},
 		Listen:         ":8081",
 		Endpoints:      endpoint.Policy{Allowed: map[string]bool{}, Overrides: map[string]string{}},
 		SessionTTL:     time.Hour,

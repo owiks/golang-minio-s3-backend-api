@@ -25,7 +25,7 @@ func diagnosticTestClients(t *testing.T, handler http.HandlerFunc) *Clients {
 	}
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	t.Cleanup(transport.CloseIdleConnections)
-	return NewClients(&Session{internal: endpoint, credentials: credentials.NewStaticV4("fixture-key", "fixture-secret", ""), transport: transport})
+	return NewClients(&Session{sessionCore: &sessionCore{internal: endpoint, credentials: credentials.NewStaticV4("fixture-key", "fixture-secret", ""), transport: transport}})
 }
 
 func TestDiagnosticAdaptersKeepNativeScopeAndCloseUpstream(t *testing.T) {

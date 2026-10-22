@@ -10,6 +10,8 @@ import (
 )
 
 type Config struct {
+	State State
+
 	Language                     string
 	Listen                       string
 	Origin                       string
@@ -40,4 +42,26 @@ type Limits struct {
 	Logins              int
 	LoginBurst          int
 	LoginInterval       time.Duration
+}
+
+// Database describes connection fields without exposing a driver-specific DSN.
+type Database struct {
+	Driver     string
+	Host       string
+	Port       int
+	Name       string
+	User       string
+	Password   string `json:"-"`
+	SQLitePath string
+	TLSMode    string
+	TLSCAFile  string
+}
+
+// State selects the persistence adapter and encryption settings.
+type State struct {
+	Database
+	KeyringFile string
+	MaxOpen     int
+	MaxIdle     int
+	Lifetime    time.Duration
 }

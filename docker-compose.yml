@@ -1,6 +1,7 @@
 services:
   api:
     build: .
+    image: golang-minio-s3-backend-api:local
     ports:
       - "${API_BIND:-127.0.0.1}:${API_PORT:-8081}:8081"
     stop_grace_period: 45s
@@ -12,8 +13,24 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
-    environment:
+    volumes:
+      - api_data:/var/lib/api
+      - api_keys:/run/api-state:ro
+    environment: &api-environment
       API_LISTEN: :8081
+      API_DB_DRIVER: ${API_DB_DRIVER:?Set API_DB_DRIVER in .env (memory, sqlite, postgres or mysql)}
+      API_DB_HOST: ${API_DB_HOST:-127.0.0.1}
+      API_DB_PORT: ${API_DB_PORT:-}
+      API_DB_NAME: ${API_DB_NAME:-}
+      API_DB_USER: ${API_DB_USER:-}
+      API_DB_PASSWORD: ${API_DB_PASSWORD:-}
+      API_DB_SQLITE_PATH: ${API_DB_SQLITE_PATH:-/var/lib/api/state.db}
+      API_DB_TLS_MODE: ${API_DB_TLS_MODE:-verify-full}
+      API_DB_TLS_CA_FILE: ${API_DB_TLS_CA_FILE:-}
+      API_STATE_KEYRING_FILE: ${API_STATE_KEYRING_FILE:-/run/api-state/keyring.json}
+      API_DB_MAX_OPEN: ${API_DB_MAX_OPEN:-10}
+      API_DB_MAX_IDLE: ${API_DB_MAX_IDLE:-2}
+      API_DB_CONN_LIFETIME: ${API_DB_CONN_LIFETIME:-30m}
       API_LANGUAGE: ${API_LANGUAGE:-auto}
       API_TOKEN_TTL: ${API_TOKEN_TTL:-1h}
       APP_ORIGIN: ${APP_ORIGIN:-}
@@ -30,3 +47,30 @@ services:
       MINIO_ENDPOINT_OVERRIDES: ${MINIO_ENDPOINT_OVERRIDES:-}
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
+  state-tools:
+    profiles: [tools]
+    image: golang-minio-s3-backend-api:local
+    pull_policy: never
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    environment:
+      <<: *api-environment
+      API_TARGET_DB_DRIVER: ${API_TARGET_DB_DRIVER:-}
+      API_TARGET_DB_HOST: ${API_TARGET_DB_HOST:-127.0.0.1}
+      API_TARGET_DB_PORT: ${API_TARGET_DB_PORT:-}
+      API_TARGET_DB_NAME: ${API_TARGET_DB_NAME:-}
+      API_TARGET_DB_USER: ${API_TARGET_DB_USER:-}
+      API_TARGET_DB_PASSWORD: ${API_TARGET_DB_PASSWORD:-}
+      API_TARGET_DB_SQLITE_PATH: ${API_TARGET_DB_SQLITE_PATH:-}
+      API_TARGET_DB_TLS_MODE: ${API_TARGET_DB_TLS_MODE:-verify-full}
+      API_TARGET_DB_TLS_CA_FILE: ${API_TARGET_DB_TLS_CA_FILE:-}
+    volumes:
+      - api_data:/var/lib/api
+      - api_keys:/run/api-state
+    command: [state, keygen, --out, /run/api-state/keyring.json]
+volumes:
+  api_data:
+  api_keys:

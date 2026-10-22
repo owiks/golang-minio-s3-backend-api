@@ -35,6 +35,8 @@ jobs:
         run: make tools
       - name: Format, OpenAPI, lint, race tests and build
         run: make check
+      - name: Check reachable Go vulnerabilities
+        run: make vuln
 
   integration:
     name: Native MinIO integration
@@ -43,6 +45,7 @@ jobs:
     env:
       COMPOSE: docker compose --env-file .env.example
       FIXTURE_PROJECT: minio-s3-api-ci-native
+      STATE_INTEGRATION: "1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -55,6 +58,8 @@ jobs:
         run: make deps
       - name: Start disposable MinIO fixtures
         run: make fixtures-up
+      - name: Start disposable PostgreSQL and MySQL
+        run: make state-fixtures-up
       - name: Run native integration tests
         run: make test-integration
       # Decommission changes the fixture topology and must follow all other tests.
@@ -67,7 +72,9 @@ jobs:
         run: docker compose --env-file .env.example -p "$FIXTURE_PROJECT" -f docker-compose.test.yml --profile tiers --profile pools logs --no-color --tail=100
       - name: Remove disposable fixtures
         if: always()
-        run: make fixtures-down
+        run: |
+          make fixtures-down
+          make state-fixtures-down
 
   docker:
     name: Docker build and startup
@@ -84,6 +91,10 @@ jobs:
           persist-credentials: false
       - name: Validate Compose and build production image
         run: make docker-config docker-build
+      - name: Generate isolated encryption key
+        run: make state-init
+      - name: Apply database migrations separately
+        run: make docker-migrate OFFLINE=1
       - name: Start production image
         run: docker compose --env-file .env.example -p minio-s3-api-ci-docker -f docker-compose.yml up -d --no-build --wait --wait-timeout 60
       - name: Check health endpoint

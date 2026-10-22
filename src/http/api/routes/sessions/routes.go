@@ -32,7 +32,7 @@ func GetRoutes() []routes.APIRoute {
 		},
 		{Path: "", Tag: "sessions", Operations: []routes.Operation{
 			{Method: "DELETE", Summary: "Завершение сессии / отзыв Bearer-токена",
-				Input:      routes.Inputs().Describe("Удаляет текущую сессию; следующие запросы с её токеном возвращают 401. Уже выполняющиеся запросы могут завершиться. Другие сессии и ключи MinIO сохраняются."),
+				Input:      routes.Inputs().Describe("Отзывает текущий доступ и зависимые Bearer-токены; следующие запросы возвращают 401. Выход из cookie-сессии сохраняет выданные через неё самостоятельные сервисные токены. Уже выполняющиеся запросы могут завершиться. Независимые доступы и ключи MinIO сохраняются."),
 				Controller: "HandleLogout",
 				Response:   resultdto.Success{}, Handler: func(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session, rest string) error {
 					return controllers.HandleLogout(app, w, r, s)
@@ -56,7 +56,7 @@ Origin необязателен; если передан, должен совп�
       "ttlSeconds": 900
     }
 
-Ответ содержит id, token, tokenType, expiresAt и expiresIn. Используйте полученные id и token в запросах:
+Ответ содержит id, connectionID, revision, token, tokenType, expiresAt и expiresIn. Используйте полученные id и token в запросах:
 
     curl -H 'Authorization: Bearer ACCESS_TOKEN' https://api.example.com/api/sessions/SESSION_ID/admin/buckets
 
@@ -64,5 +64,5 @@ Origin необязателен; если передан, должен совп�
 
     curl -X DELETE -H 'Authorization: Bearer ACCESS_TOKEN' https://api.example.com/api/sessions/SESSION_ID
 
-Cookie, Origin и X-CSRF-Token для этих Bearer-запросов не нужны. После отзыва, истечения срока или перезапуска API получите новый токен.
+Cookie, Origin и X-CSRF-Token для этих Bearer-запросов не нужны. До истечения срока собственный токен с renewable=true можно продлить через POST /api/sessions/{id}/tokens/{id}/renew с revision и ttlSeconds; ID, секрет и права сохраняются. После отзыва или истечения срока получите новый токен. В postgres/mysql/sqlite доступ сохраняется после перезапуска; memory остаётся временным режимом.
 `

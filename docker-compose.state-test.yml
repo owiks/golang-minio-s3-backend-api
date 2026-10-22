@@ -1,0 +1,28 @@
+# Disposable databases for contract and restart tests only.
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: fixture
+      POSTGRES_PASSWORD: "fixture:/@?#% password"
+      POSTGRES_DB: api_state_test
+    ports: ["127.0.0.1:15432:5432"]
+    tmpfs: [/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fixture -d api_state_test"]
+      interval: 2s
+      timeout: 2s
+      retries: 40
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: "fixture:/@?#% password"
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: api_state_test
+    ports: ["127.0.0.1:13306:3306"]
+    tmpfs: [/var/lib/mysql]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
+      interval: 2s
+      timeout: 2s
+      retries: 60

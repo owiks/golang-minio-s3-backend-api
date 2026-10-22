@@ -17,11 +17,13 @@ type TokenRequest struct {
 
 // TokenResponse is the only response that exposes the newly issued credential.
 type TokenResponse struct {
-	ID        string    `json:"id"`
-	Token     string    `json:"token"`
-	TokenType string    `json:"tokenType"`
-	ExpiresAt time.Time `json:"expiresAt"`
-	ExpiresIn int64     `json:"expiresIn"`
+	ConnectionID string    `json:"connectionID"`
+	Revision     int64     `json:"revision"`
+	ID           string    `json:"id"`
+	Token        string    `json:"token"`
+	TokenType    string    `json:"tokenType"`
+	ExpiresAt    time.Time `json:"expiresAt"`
+	ExpiresIn    int64     `json:"expiresIn"`
 }
 
 func IssueToken(ctx context.Context, cfg config.Config, registry ConnectionRegistry, request TokenRequest) (TokenResponse, error) {
@@ -35,9 +37,9 @@ func IssueToken(ctx context.Context, cfg config.Config, registry ConnectionRegis
 		ttl = time.Duration(seconds) * time.Second
 	}
 	cfg.SessionTTL = ttl
-	session, _, token, err := connect(ctx, cfg, registry, request.Connection, runtime.NewBearerSession)
+	session, _, token, err := connect(ctx, cfg, registry, request.Connection, runtime.NewBearerSession, true)
 	if err != nil {
 		return TokenResponse{}, err
 	}
-	return TokenResponse{ID: session.SessionID(), Token: token, TokenType: "Bearer", ExpiresAt: session.ExpiresAt(), ExpiresIn: int64(ttl / time.Second)}, nil
+	return TokenResponse{ConnectionID: session.ConnectionID(), Revision: 1, ID: session.SessionID(), Token: token, TokenType: "Bearer", ExpiresAt: session.ExpiresAt(), ExpiresIn: int64(ttl / time.Second)}, nil
 }

@@ -11,6 +11,7 @@ type Parameter struct {
 }
 
 type Operation struct {
+	APIScopes   []string              `json:"x-api-scopes,omitempty"`
 	OperationID string                `json:"operationId"`
 	Tags        []string              `json:"tags"`
 	Summary     string                `json:"summary"`

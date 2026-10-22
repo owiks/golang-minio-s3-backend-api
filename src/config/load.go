@@ -21,6 +21,9 @@ func Load() (Config, error) { return LoadEnv(os.Getenv) }
 // Errors contain variable names only; environment values can include secrets.
 func LoadEnv(getenv func(string) string) (Config, error) {
 	c := Default()
+	if err := loadState(&c, getenv); err != nil {
+		return Config{}, err
+	}
 	if raw := strings.TrimSpace(getenv("API_TOKEN_TTL")); raw != "" {
 		value, err := time.ParseDuration(raw)
 		if err != nil || value < time.Second || value > 24*time.Hour || value%time.Second != 0 {

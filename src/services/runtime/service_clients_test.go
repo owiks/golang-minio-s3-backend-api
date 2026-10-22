@@ -20,7 +20,7 @@ func TestServiceClientSignsPublicEndpoint(t *testing.T) {
 		}
 		return client
 	}
-	s := &Session{id: "private-session", actor: "private-actor", s3: create("internal.example.test:9000"), signer: create("public.example.test")}
+	s := &Session{id: "private-session", sessionCore: &sessionCore{actor: "private-actor", s3: create("internal.example.test:9000"), signer: create("public.example.test")}}
 	client := NewClients(s)
 	link, err := client.PresignedGetObject(context.Background(), "test-bucket", "folder/file.txt", time.Minute, url.Values{"response-content-type": {"text/plain"}})
 	if err != nil {

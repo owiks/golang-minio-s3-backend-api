@@ -65,6 +65,11 @@ func HandleCreateFolderShare(app *runtimesvc.State, w http.ResponseWriter, r *ht
 	if err := httpvalidation.Decode(w, r, &body); err != nil {
 		return err
 	}
+	ttl, err := s.DelegationTTL(r.Context(), "objects:read", body.Bucket, body.Prefix, body.ExpiresIn)
+	if err != nil {
+		return err
+	}
+	body.ExpiresIn = ttl
 	value, err := folderssvc.CreateFolderShare(r.Context(), app.Shares, runtimesvc.NewClients(s), body)
 	if err != nil {
 		return err

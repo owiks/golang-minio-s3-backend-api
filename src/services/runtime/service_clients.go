@@ -22,7 +22,14 @@ func NewClients(s *Session) *Clients {
 	if s == nil {
 		return nil
 	}
-	return &Clients{S3Client: storage.NewS3Client(s.s3), AdminClient: s.admin, session: s}
+	s3, admin := s.s3, s.admin
+	if s.boundS3 != nil {
+		s3 = s.boundS3
+	}
+	if s.boundAdmin != nil {
+		admin = s.boundAdmin
+	}
+	return &Clients{S3Client: storage.NewS3Client(s3), AdminClient: admin, session: s}
 }
 func (c *Clients) SessionID() string          { return c.session.id }
 func (c *Clients) ActorName() string          { return c.session.actor }
@@ -38,13 +45,21 @@ func (c *Clients) ActionPolicySnapshot() *iam.Policy {
 	return c.session.Actions().policy
 }
 func (c *Clients) PresignedGetObject(ctx context.Context, bucket, key string, expires time.Duration, params url.Values) (*url.URL, error) {
-	return c.session.signer.PresignedGetObject(ctx, bucket, key, expires, params)
+	ttl, err := c.session.signPermission(ctx, "objects:read", bucket, key, expires)
+	if err != nil {
+		return nil, err
+	}
+	return c.session.signer.PresignedGetObject(ctx, bucket, key, ttl, params)
 }
 func (c *Clients) ConditionalDeleteSupported() bool { return c.session.conditionalDelete }
 func (c *Clients) RemoveConditional(ctx context.Context, bucket, key, etag string) error {
-	return storage.ConditionalDelete(ctx, c.session.clientConfig(), c.session.transport, bucket, key, etag, true)
+	return storage.ConditionalDelete(ctx, c.session.clientConfig(), c.session.requestTransport(), bucket, key, etag, true)
 }
 
 func (c *Clients) LockAccess(ctx context.Context) (func(), error) {
 	return c.session.accessLock.Acquire(ctx, "discovery")
+}
+
+func (c *Clients) AuthorizeResource(ctx context.Context, scope, bucket, key string) error {
+	return c.session.AuthorizeResource(ctx, scope, bucket, key)
 }

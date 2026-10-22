@@ -44,6 +44,7 @@ func newSession(c Connection, cfg settings.Config, public, internal *url.URL, tr
 	if c.Region == "" {
 		c.Region = "us-east-1"
 	}
+	c.Endpoint = public.String()
 	creds := credentials.NewStaticV4(c.AccessKey, c.SecretKey, c.SessionToken)
 	clientConfig := storage.Config{Endpoint: internal, Credentials: creds, Region: c.Region}
 	s3, err := storage.NewS3(clientConfig, tr)
@@ -58,13 +59,13 @@ func newSession(c Connection, cfg settings.Config, public, internal *url.URL, tr
 	if err != nil {
 		return nil, err
 	}
-	return &Session{
+	return &Session{id: securetoken.New(), expires: time.Now().Add(cfg.SessionTTL), sessionCore: &sessionCore{
 		conditionalDelete: storage.NativeConditionalDelete(public) || cfg.ConditionalDeleteEndpoints[public.String()] || cfg.ConditionalDeleteEndpoints[internal.String()],
 		// Conditional completion is an explicit operator assertion for the
 		// checked endpoint, never inferred from a hostname or successful PUT.
 		conditionalComplete: cfg.ConditionalCompleteEndpoints[public.String()] || cfg.ConditionalCompleteEndpoints[internal.String()],
-		id:                  securetoken.New(), actor: c.AccessKey,
-		secureCookies: strings.HasPrefix(cfg.Origin, "https://"), region: c.Region, expires: time.Now().Add(cfg.SessionTTL),
+		actor:               c.AccessKey, connection: c, connectionID: securetoken.New(), connectionRevision: 1, secretVersion: 1,
+		secureCookies: strings.HasPrefix(cfg.Origin, "https://"), region: c.Region,
 		public: public, internal: internal, s3: s3, signer: signer, admin: admin, transport: tr, credentials: creds,
-	}, nil
+	}}, nil
 }

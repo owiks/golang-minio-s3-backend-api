@@ -16,6 +16,7 @@ import (
 	"github.com/owiks/golang-minio-s3-backend-api/src/config"
 	httpapi "github.com/owiks/golang-minio-s3-backend-api/src/http/api"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/folders/share"
+	"github.com/owiks/golang-minio-s3-backend-api/tests/testsession"
 )
 
 func TestServeFailureClosesAcceptedKeepAlive(t *testing.T) {
@@ -89,7 +90,11 @@ func TestServeFailureCancelsAndJoinsHandlersBeforeRuntimeClose(t *testing.T) {
 	reader := &cancelledFolderRead{make(chan struct{}), make(chan struct{}), make(chan struct{})}
 	var once sync.Once
 	defer once.Do(func() { close(reader.proceed) })
-	grant := foldershare.New(foldershare.Config{Owner: "owner", Token: "test-token", Bucket: "bucket-test", Expires: time.Now().Add(time.Hour), Reader: reader})
+	owner := testsession.New(t, "http://fixture.example")
+	if err := handler.StoreSession(owner); err != nil {
+		t.Fatal(err)
+	}
+	grant := foldershare.New(foldershare.Config{Owner: owner.SessionID(), Token: "test-token", Bucket: "bucket-test", Expires: time.Now().Add(time.Hour), Reader: reader})
 	if err := handler.Shares.Add(grant); err != nil {
 		t.Fatal(err)
 	}

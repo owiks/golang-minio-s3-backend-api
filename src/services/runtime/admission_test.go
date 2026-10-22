@@ -43,9 +43,9 @@ func TestMutationScopeIsSharedAcrossSessionsAndServersAreIndependent(t *testing.
 	app := New(config.Default())
 	one, _ := url.Parse("http://first:9000")
 	two, _ := url.Parse("http://second:9000")
-	a := &Session{id: "a", internal: one}
-	b := &Session{id: "b", internal: one}
-	c := &Session{id: "c", internal: two}
+	a := &Session{id: "a", sessionCore: &sessionCore{internal: one}}
+	b := &Session{id: "b", sessionCore: &sessionCore{internal: one}}
+	c := &Session{id: "c", sessionCore: &sessionCore{internal: two}}
 	release, _ := app.AcquireMutation(context.Background(), a, "iam")
 	defer release()
 	ctx, cancel := context.WithCancel(context.Background())

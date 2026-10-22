@@ -9,7 +9,7 @@ import (
 )
 
 func TestSessionAndPrivateSnapshotsNeverSerialize(t *testing.T) {
-	value := Session{id: "private-id", token: "private-cookie", csrf: "private-csrf", actor: "private-user"}
+	value := Session{id: "private-id", token: "private-cookie", csrf: "private-csrf", sessionCore: &sessionCore{actor: "private-user"}}
 	raw, err := json.Marshal(&value)
 	if err != nil || string(raw) != "{}" {
 		t.Fatalf("session internals became serializable: %s, %v", raw, err)

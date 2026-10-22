@@ -18,7 +18,7 @@ func TestEveryDocumentedOperationResolvesThroughRegistry(t *testing.T) {
 	document := doc.Build(Catalog())
 	total := 0
 	for path, methods := range document.Paths {
-		concrete := strings.NewReplacer("{sessionID}", "fixture-session", "{name}", "fixture-name", "{id}", "fixture-id", "{ticket}", "fixture-ticket", "{operation}", "fixture-operation", "{part}", "1").Replace(path)
+		concrete := strings.NewReplacer("{sessionID}", "fixture-session", "{name}", "fixture-name", "{id}", "fixture-id", "{ticket}", "fixture-ticket", "{operation}", "fixture-operation", "{part}", "1", "{connectionID}", "fixture-connection", "{tokenID}", "fixture-token").Replace(path)
 		for method := range methods {
 			total++
 			m := registry.Match(strings.ToUpper(method), concrete)
@@ -30,7 +30,7 @@ func TestEveryDocumentedOperationResolvesThroughRegistry(t *testing.T) {
 			}
 		}
 	}
-	if total != 136 {
+	if total != 149 {
 		t.Fatal("unexpected operation count", total)
 	}
 }

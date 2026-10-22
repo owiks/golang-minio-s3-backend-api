@@ -14,14 +14,10 @@ func (s *Session) clientConfig() storage.Config {
 	return storage.Config{Endpoint: s.internal, Credentials: s.credentials, Region: s.region}
 }
 
-func (s *Session) newS3(transport http.RoundTripper) (*minio.Client, error) {
-	return storage.NewS3(s.clientConfig(), transport)
-}
-
 func (s *Session) requestS3(ctx context.Context) (*minio.Client, error) {
-	return s.newS3(storage.WithContext(ctx, telemetry.Transport{Base: s.transport}))
+	return storage.NewS3(s.clientConfig(), storage.WithContext(ctx, telemetry.Transport{Base: s.requestTransport()}))
 }
 
 func (s *Session) newAdmin(transport http.RoundTripper) (*storage.AdminClient, error) {
-	return storage.NewAdmin(s.clientConfig(), transport)
+	return storage.NewAdmin(s.clientConfig(), storage.ScopeTransport{Base: transport, Policy: s.AccessPolicy(), Load: s.livePolicy, Admin: true})
 }

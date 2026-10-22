@@ -10,6 +10,7 @@ import (
 	"github.com/owiks/golang-minio-s3-backend-api/src/http/middleware"
 	"github.com/owiks/golang-minio-s3-backend-api/src/http/requestctx"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/authstate"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/localization"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/mutation"
@@ -61,6 +62,7 @@ func executeOperation(app *runtimesvc.State, w http.ResponseWriter, r *http.Requ
 			}
 			return err
 		}
+		r = r.WithContext(s.RequestContext(r.Context()))
 		telemetry.Identify(r.Context(), s.ActorName(), s.InternalHost())
 	}
 	if !match.Found {
@@ -70,10 +72,40 @@ func executeOperation(app *runtimesvc.State, w http.ResponseWriter, r *http.Requ
 		w.Header().Set("Allow", strings.Join(match.Allow, ", "))
 		return apperror.New(405, "MethodNotAllowed", messages.HttpMethodNotAllowed)
 	}
+	if s != nil {
+		p := s.AccessPolicy()
+		if strings.HasPrefix(match.Route.Path, "admin/buckets") && match.Params["name"] != "" && !p.AllowsBucket(match.Params["name"]) {
+			return authstate.Denied()
+		}
+		if err := authorizeResources(app, r, match, s); err != nil {
+			return err
+		}
+		for _, scope := range match.Operation.Scopes {
+			if !p.Allows(scope) {
+				return authstate.Denied()
+			}
+		}
+		if s.AccessGuard().Previous {
+			for _, scope := range match.Operation.Scopes {
+				switch scope {
+				case "access:manage", "iam:manage", "server:manage", "buckets:manage":
+					return authstate.Denied()
+				}
+			}
+		}
+		if s.AccessGuard().Previous && (p.Allows("access:manage") && (strings.HasPrefix(match.Route.Path, "connections") || match.Route.Path == "tokens" || match.Route.Path == "auth-events") || match.Route.Path == "") {
+			return authstate.Denied()
+		}
+	}
 	// The former management dispatcher validated these before any SDK call.
 	for _, parameter := range []string{"name", "id"} {
 		if name := match.Params[parameter]; name != "" && !validationsvc.ValidName(name) {
 			return apperror.New(400, "InvalidName", messages.ResourceNameInvalid)
+		}
+	}
+	if match.Route.Public {
+		if err := authorizeDelegated(app, r, match); err != nil {
+			return err
 		}
 	}
 	if s != nil && long {
@@ -104,6 +136,9 @@ func executeOperation(app *runtimesvc.State, w http.ResponseWriter, r *http.Requ
 				telemetry.Event(r.Context(), "access revision invalidated")
 			}
 		}()
+	}
+	for name, value := range match.Params {
+		r.SetPathValue(name, value)
 	}
 	handler := match.Operation.Handler
 	err := handler(app, w, r, s, match.Rest)

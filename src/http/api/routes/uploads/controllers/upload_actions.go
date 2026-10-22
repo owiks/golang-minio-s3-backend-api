@@ -95,6 +95,11 @@ func HandleCreateUploadInvite(app *runtimesvc.State, w http.ResponseWriter, r *h
 	if err := httpvalidation.Decode(w, r, &body); err != nil {
 		return err
 	}
+	ttl, err := s.DelegationTTL(r.Context(), "objects:write", body.Bucket, body.Prefix, body.ExpiresIn)
+	if err != nil {
+		return err
+	}
+	body.ExpiresIn = ttl
 	value, err := uploadssvc.CreateUploadInvite(r.Context(), app.Invites, runtimesvc.NewClients(s), body)
 	if err != nil {
 		return err

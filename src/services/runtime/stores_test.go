@@ -85,7 +85,7 @@ func TestStoreReapingPreservesDelegatedLifetimes(t *testing.T) {
 	app := New(config.Default())
 	defer app.Close()
 	now := time.Now()
-	if err := app.StoreSession(&Session{id: "owner", expires: now.Add(-time.Second)}); err != nil {
+	if err := app.StoreSession(&Session{id: "owner", expires: now.Add(time.Second)}); err != nil {
 		t.Fatal(err)
 	}
 	plan := archiveplan.New(archiveplan.Config{SessionID: "owner", Created: now})
@@ -112,7 +112,7 @@ func TestStoreReapingPreservesDelegatedLifetimes(t *testing.T) {
 	if err := app.Invites.Add(invite); err != nil {
 		t.Fatal(err)
 	}
-	app.reap(now)
+	app.reap(now.Add(2 * time.Second))
 	if app.Session("owner") != nil || app.Archives.Get(ticket, "owner") != nil || !plan.Snapshot("").Cancelled {
 		t.Fatal("expired session or archive retained")
 	}

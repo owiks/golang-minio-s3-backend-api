@@ -20,5 +20,5 @@ func (c *Clients) ListObjectPage(ctx context.Context, bucket, prefix, token, del
 }
 
 func (c *Clients) ReadVersionPage(ctx context.Context, bucket, prefix, keyMarker, versionMarker string, maxKeys int) (storage.VersionPage, error) {
-	return storage.ReadVersionPage(ctx, c.session.s3, c.session.transport, bucket, prefix, keyMarker, versionMarker, maxKeys)
+	return storage.ReadVersionPage(ctx, c.session.s3, c.session.requestTransport(), bucket, prefix, keyMarker, versionMarker, maxKeys)
 }

@@ -38,3 +38,14 @@
 /tmp
 /temp
 /*.log
+
+# Durable API state and private exports.
+/data
+**/*.db
+**/*.db-wal
+**/*.db-shm
+**/*.sqlite
+**/*.sqlite3
+**/*.state-backup.json
+**/*keyring*.json
+**/*.goose.lock

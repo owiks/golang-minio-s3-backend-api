@@ -156,3 +156,7 @@ func TestMoveNativeMinIO(t *testing.T) {
 		})
 	}
 }
+
+// This native SDK fixture deliberately has no API access policy; MinIO performs
+// its authorization. Runtime clients implement the API scope check separately.
+func (minioMoveClient) AuthorizeResource(context.Context, string, string, string) error { return nil }

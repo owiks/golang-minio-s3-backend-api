@@ -51,6 +51,18 @@ func Transfer(ctx context.Context, s TransferClient, body FileTransferRequest) (
 	if body.SourceBucket == body.DestinationBucket && body.SourceKey == body.DestinationKey {
 		return TransferResult{}, apperror.New(400, "SameDestination", messages.TransfersSameDestination)
 	}
+	if err = s.AuthorizeResource(ctx, "objects:read", body.SourceBucket, body.SourceKey); err != nil {
+		return TransferResult{}, err
+	}
+	if err = s.AuthorizeResource(ctx, "objects:write", body.DestinationBucket, body.DestinationKey); err != nil {
+		return TransferResult{}, err
+	}
+	if body.Move {
+		if err = s.AuthorizeResource(ctx, "objects:delete", body.SourceBucket, body.SourceKey); err != nil {
+			return TransferResult{}, err
+		}
+	}
+
 	source, err := s.StatObject(ctx, body.SourceBucket, body.SourceKey, minio.StatObjectOptions{})
 	if err != nil {
 		return TransferResult{}, err

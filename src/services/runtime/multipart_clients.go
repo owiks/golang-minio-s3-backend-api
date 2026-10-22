@@ -27,7 +27,11 @@ func (c *multipartClients) ConditionalCompletionConfigured() bool {
 	return c.session.conditionalComplete
 }
 func (c *multipartClients) PresignMultipartPart(ctx context.Context, bucket, key, uploadID string, part int, checksum string, expiry time.Duration) (*url.URL, error) {
-	return c.signer.PresignMultipartPart(ctx, bucket, key, uploadID, part, checksum, expiry)
+	ttl, err := c.session.signPermission(ctx, "objects:write", bucket, key, expiry)
+	if err != nil {
+		return nil, err
+	}
+	return c.signer.PresignMultipartPart(ctx, bucket, key, uploadID, part, checksum, ttl)
 }
 
 func (c *multipartClients) ObserveMultipart(ctx context.Context, operation, bucket, key string, err error) {

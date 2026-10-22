@@ -2,6 +2,13 @@
 package messages
 
 const (
+	AuthStateUnavailable ID = "authstate.unavailable"
+	AuthStateInvalid     ID = "authstate.invalid"
+	AuthStateDenied      ID = "authstate.denied"
+	AuthStateNotFound    ID = "authstate.not_found"
+	AuthStateConflict    ID = "authstate.conflict"
+	AuthStateLimit       ID = "authstate.limit"
+
 	HttpInvalidBearerToken                                                  ID = "http.invalid_bearer_token"
 	SessionsInvalidTokenTTL                                                 ID = "sessions.invalid_token_ttl"
 	HttpMethodNotAllowed                                                    ID = "http.method_not_allowed"
@@ -601,7 +608,7 @@ const (
 
 // AllIDs returns a detached inventory for catalog validation.
 func AllIDs() []ID {
-	return []ID{ResourceNameInvalid, Combined, ManagementUnsupported, RouteNotFound, HTTPStopping,
+	return []ID{AuthStateUnavailable, AuthStateInvalid, AuthStateDenied, AuthStateNotFound, AuthStateConflict, AuthStateLimit, ResourceNameInvalid, Combined, ManagementUnsupported, RouteNotFound, HTTPStopping,
 		HttpInvalidBearerToken,
 		SessionsInvalidTokenTTL,
 		HttpMethodNotAllowed,

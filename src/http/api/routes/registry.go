@@ -23,6 +23,7 @@ type Registry struct {
 }
 
 func cloneOperation(op Operation) Operation {
+	op.Scopes = append([]string(nil), op.Scopes...)
 	op.Input = cloneInput(op.Input)
 	op.Required = append([]string(nil), op.Required...)
 	op.Responses = append([]Response(nil), op.Responses...)

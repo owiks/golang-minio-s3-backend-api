@@ -1,4 +1,4 @@
-FROM golang:1.26-alpine AS build
+FROM golang:1.26.10-alpine AS build
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
@@ -6,7 +6,7 @@ COPY . .
 RUN CGO_ENABLED=0 go run ./tools/openapi -check && CGO_ENABLED=0 go test ./... && CGO_ENABLED=0 go vet ./... && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/api ./src
 
 FROM alpine:3.24 AS production
-RUN apk add --no-cache ca-certificates && adduser -D -u 10001 app
+RUN apk add --no-cache ca-certificates && adduser -D -u 10001 app && mkdir -p /var/lib/api /run/api-state && chown app:app /var/lib/api /run/api-state
 COPY --from=build /out/api /app/api
 COPY LICENSE /app/
 USER 10001:10001

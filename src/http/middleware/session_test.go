@@ -64,7 +64,7 @@ func TestPrivateSessionPreservesAuthenticationAndCSRF(t *testing.T) {
 			r.Header.Set("Origin", tc.origin)
 			got, err := middleware.Authenticate(app, r, id)
 			if tc.code == "" {
-				if err != nil || got != s {
+				if err != nil || (got == nil || got.SessionID() != s.SessionID()) {
 					t.Fatal("valid session rejected", err)
 				}
 			} else if err == nil || got != nil || apperror.Public(err).Code != tc.code {
@@ -140,7 +140,7 @@ func TestBearerAuthenticationIsExclusiveAndRevocable(t *testing.T) {
 				}
 				got, err := middleware.Authenticate(app, r, id)
 				if tc.want {
-					if err != nil || got != s {
+					if err != nil || (got == nil || got.SessionID() != s.SessionID()) {
 						t.Fatal("valid bearer rejected", err)
 					}
 				} else if err == nil || got != nil || apperror.Public(err).Status != 401 {

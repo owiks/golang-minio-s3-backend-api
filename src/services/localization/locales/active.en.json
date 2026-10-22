@@ -2403,5 +2403,29 @@
   {
     "id": "sessions.invalid_token_ttl",
     "other": "ttlSeconds must be a positive integer no greater than the configured token lifetime."
+  },
+  {
+    "id": "authstate.unavailable",
+    "other": "The access store is unavailable. Retry later."
+  },
+  {
+    "id": "authstate.invalid",
+    "other": "Invalid connection or access parameters."
+  },
+  {
+    "id": "authstate.denied",
+    "other": "This access does not permit the requested action or resource."
+  },
+  {
+    "id": "authstate.not_found",
+    "other": "The connection or access was not found."
+  },
+  {
+    "id": "authstate.conflict",
+    "other": "The connection or access changed. Read its current revision before retrying."
+  },
+  {
+    "id": "authstate.limit",
+    "other": "The connection or access limit has been reached. Revoke unused entries."
   }
 ]

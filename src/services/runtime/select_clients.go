@@ -8,5 +8,5 @@ import (
 )
 
 func (c *Clients) OpenSelect(ctx context.Context, bucket, key string, options minio.SelectObjectOptions) (storage.SelectStream, error) {
-	return storage.OpenSelect(ctx, c.session.clientConfig(), c.session.transport, bucket, key, options)
+	return storage.OpenSelect(ctx, c.session.clientConfig(), c.session.requestTransport(), bucket, key, options)
 }

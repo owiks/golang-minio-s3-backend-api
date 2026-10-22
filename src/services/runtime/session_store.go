@@ -1,11 +1,11 @@
 package runtime
 
 import (
+	"context"
 	"sync"
 	"time"
 
-	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
-	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/authstate"
 )
 
 type SessionStore struct {
@@ -23,18 +23,29 @@ func (store *SessionStore) Get(id string) *Session {
 func (store *SessionStore) Has(id string) bool { return store.Get(id) != nil }
 func (store *SessionStore) Put(s *Session) error {
 	store.mu.Lock()
-	defer store.mu.Unlock()
 	if store.closed {
+		store.mu.Unlock()
 		return closingError()
 	}
-	if len(store.items) >= 256 {
-		return apperror.New(429, "SessionLimit", messages.RuntimeSessionLimit)
+	old := store.items[s.id]
+	// This is an SDK cache, not the durable auth registry. Eviction closes idle
+	// sockets only; it never revokes durable credentials or delegated work.
+	if old == nil && len(store.items) >= 256 {
+		for id, item := range store.items {
+			old = item
+			delete(store.items, id)
+			break
+		}
 	}
 	store.items[s.id] = s
+	store.mu.Unlock()
+	if old != s && (old == nil || old.sessionCore != s.sessionCore) {
+		closeSession(old)
+	}
 	return nil
 }
 func closeSession(s *Session) {
-	if s != nil && s.transport != nil {
+	if s != nil && s.sessionCore != nil && s.transport != nil {
 		s.transport.CloseIdleConnections()
 	}
 }
@@ -76,9 +87,24 @@ func (store *SessionStore) Close() {
 	}
 }
 
-func (app *State) Session(id string) *Session    { return app.Sessions.Get(id) }
-func (app *State) StoreSession(s *Session) error { return app.Sessions.Put(s) }
+func (app *State) Session(id string) *Session { return app.Sessions.Get(id) }
+func (app *State) StoreSession(s *Session) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	return app.StoreSessionContext(ctx, s)
+}
 func (app *State) RemoveSession(id string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	a, _, err := app.Auth.Lookup(ctx, id)
+	if err == nil {
+		if app.Auth.Logout(ctx, authstate.CredentialGuard(a, false)) != nil {
+			return
+		}
+	}
+	app.removeCachedSession(id)
+}
+func (app *State) removeCachedSession(id string) {
 	s := app.Sessions.detach(id)
 	defer closeSession(s)
 	app.Multipart.AbortSession(id)

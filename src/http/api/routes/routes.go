@@ -37,6 +37,7 @@ type Response struct {
 }
 
 type Operation struct {
+	Scopes        []string
 	Handler       Handler
 	Suffix        string
 	Method        string

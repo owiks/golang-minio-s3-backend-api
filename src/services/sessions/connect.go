@@ -18,6 +18,7 @@ import (
 )
 
 type LoginResponse struct {
+	ConnectionID   string                     `json:"connectionID"`
 	ID             string                     `json:"id"`
 	CSRF           string                     `json:"csrf"`
 	Endpoint       string                     `json:"endpoint"`
@@ -29,7 +30,7 @@ type LoginResponse struct {
 }
 
 func Connect(ctx context.Context, cfg settings.Config, registry ConnectionRegistry, c runtimesvc.Connection) (*runtimesvc.Session, LoginResponse, error) {
-	session, response, _, err := connect(ctx, cfg, registry, c, newCookieSession)
+	session, response, _, err := connect(ctx, cfg, registry, c, newCookieSession, true)
 	return session, response, err
 }
 
@@ -40,7 +41,7 @@ func newCookieSession(c runtimesvc.Connection, cfg settings.Config, public, inte
 	return s, "", err
 }
 
-func connect(ctx context.Context, cfg settings.Config, registry ConnectionRegistry, c runtimesvc.Connection, factory sessionFactory) (*runtimesvc.Session, LoginResponse, string, error) {
+func connect(ctx context.Context, cfg settings.Config, registry ConnectionRegistry, c runtimesvc.Connection, factory sessionFactory, publish bool) (*runtimesvc.Session, LoginResponse, string, error) {
 	c.AccessKey = strings.TrimSpace(c.AccessKey)
 	c.Region = strings.TrimSpace(c.Region)
 	c.SessionToken = strings.TrimSpace(c.SessionToken)
@@ -76,11 +77,22 @@ func connect(ctx context.Context, cfg settings.Config, registry ConnectionRegist
 	if err != nil {
 		return nil, LoginResponse{}, "", err
 	}
-	if err := registry.StoreSession(s); err != nil {
-		return nil, LoginResponse{}, "", err
+	if publish {
+		if err := registry.StoreSessionContext(ctx, s); err != nil {
+			return nil, LoginResponse{}, "", err
+		}
+		accepted = true
 	}
-	accepted = true
 	telemetry.Identify(ctx, s.ActorName(), s.InternalHost())
-	telemetry.Event(ctx, "session created")
-	return s, LoginResponse{ID: s.SessionID(), CSRF: s.CSRFToken(), Endpoint: endpoint.String(), Region: c.Region, ExpiresAt: s.ExpiresAt(), Buckets: buckets, Access: access, AccessRevision: accessRevision}, token, nil
+	if publish {
+		telemetry.Event(ctx, "session created")
+	}
+	return s, LoginResponse{ConnectionID: s.ConnectionID(), ID: s.SessionID(), CSRF: s.CSRFToken(), Endpoint: endpoint.String(), Region: c.Region, ExpiresAt: s.ExpiresAt(), Buckets: buckets, Access: access, AccessRevision: accessRevision}, token, nil
+}
+
+// VerifyCredentials performs the same endpoint, rate and upstream checks as
+// login without publishing a connection or credential.
+func VerifyCredentials(ctx context.Context, cfg settings.Config, registry ConnectionRegistry, c runtimesvc.Connection) error {
+	_, _, _, err := connect(ctx, cfg, registry, c, newCookieSession, false)
+	return err
 }

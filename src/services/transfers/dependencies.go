@@ -15,6 +15,7 @@ type PrepareFolderClient interface {
 }
 
 type TransferClient interface {
+	AuthorizeResource(context.Context, string, string, string) error
 	AbortMultipartUpload(context.Context, string, string, string) error
 	CompleteMultipartUpload(context.Context, string, string, string, []minio.CompletePart, minio.PutObjectOptions) (minio.UploadInfo, error)
 	ConditionalDeleteSupported() bool

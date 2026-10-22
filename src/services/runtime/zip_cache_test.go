@@ -121,7 +121,7 @@ func TestZIPCacheCoalescesDownloadsAndReleasesBudget(t *testing.T) {
 	}
 	app := New(settings.Config{TemporaryBytes: int64(body.Len())})
 	defer app.Close()
-	session := &Session{id: "test", s3: client}
+	session := &Session{id: "test", sessionCore: &sessionCore{s3: client}}
 	if err := app.StoreSession(session); err != nil {
 		t.Fatal(err)
 	}
@@ -269,7 +269,7 @@ func TestZIPCacheCloseDuringDownloadDoesNotPublishOrLeak(t *testing.T) {
 			app := New(settings.Config{TemporaryBytes: int64(body.Len())})
 			defer app.Close()
 			done := make(chan error, 1)
-			session := &Session{id: "test", s3: client}
+			session := &Session{id: "test", sessionCore: &sessionCore{s3: client}}
 			if err := app.StoreSession(session); err != nil {
 				t.Fatal(err)
 			}

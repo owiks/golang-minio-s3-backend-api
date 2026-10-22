@@ -41,3 +41,15 @@ test-results/
 *~
 *.orig
 *.rej
+
+# Durable API state and private exports.
+/data/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+*.state-backup.json
+*keyring*.json
+# SQLite migration process lock (kept on disk to avoid inode races).
+*.goose.lock

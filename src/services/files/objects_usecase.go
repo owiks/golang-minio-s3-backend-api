@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/url"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 	"unicode"
@@ -166,5 +167,13 @@ func GetObjectLink(ctx context.Context, s GetObjectLinkClient, bucket, key strin
 	if err != nil {
 		return ObjectLink{}, err
 	}
-	return ObjectLink{URL: signed.String(), ExpiresAt: time.Now().Add(time.Duration(expires) * time.Second)}, nil
+	if signed == nil {
+		return ObjectLink{}, apperror.New(502, "InvalidSignedURL", messages.InternalError)
+	}
+	date, dateErr := time.Parse("20060102T150405Z", signed.Query().Get("X-Amz-Date"))
+	seconds, ttlErr := strconv.ParseInt(signed.Query().Get("X-Amz-Expires"), 10, 64)
+	if dateErr != nil || ttlErr != nil || seconds < 1 || seconds > int64(expires) {
+		return ObjectLink{}, apperror.New(502, "InvalidSignedURL", messages.InternalError)
+	}
+	return ObjectLink{URL: signed.String(), ExpiresAt: date.Add(time.Duration(seconds) * time.Second)}, nil
 }

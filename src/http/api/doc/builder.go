@@ -11,12 +11,12 @@ import (
 func Build(catalog []routes.APIRoute) openapi.Document {
 	d := openapi.Document{OpenAPI: "3.0.3", Info: map[string]string{
 		"title": "MinIO S3 Backend API", "version": "1.0.0",
-		"description": "HTTP API для S3-совместимых хранилищ и MinIO Admin API. Для веба: POST /api/sessions выдаёт HttpOnly cookie minio_session_{sessionID}; изменения требуют Origin и X-CSRF-Token. Для скриптов: POST /api/tokens выдаёт отдельные id, token и expiresAt; передавайте Authorization: Bearer <token> на тех же /api/sessions/{id}/... без cookie и CSRF. DELETE /api/sessions/{id} отзывает токен. Токены живут в памяти до истечения срока, отзыва или перезапуска API. Передавайте ключи и токены через HTTPS. Swagger UI служит документацией; выполнение запросов отключено. Право на каждую операцию окончательно проверяет MinIO. Ключи и токены не сохраняются в документации.",
+		"description": "HTTP API для S3-совместимых хранилищ и MinIO Admin API. Для веба: POST /api/sessions выдаёт HttpOnly cookie minio_session_{sessionID}; изменения требуют Origin и X-CSRF-Token. Для скриптов: POST /api/tokens выдаёт отдельные id, token и expiresAt; передавайте Authorization: Bearer <token> на тех же /api/sessions/{id}/... без cookie и CSRF. DELETE /api/sessions/{id} отзывает токен. При API_DB_DRIVER=postgres/mysql/sqlite подключения и доступы сохраняются между перезапусками; memory сохраняет прежний временный режим. Управление: connections, connections/{connectionID}/tokens, tokens/{tokenID}/rotate и renew. API дополнительно ограничивает scopes и bucket/prefix; MinIO сохраняет окончательную проверку прав. Передавайте ключи и токены через HTTPS. Swagger UI служит документацией; выполнение запросов отключено. Право на каждую операцию окончательно проверяет MinIO. Ключи и токены не сохраняются в документации.",
 	}, Servers: []map[string]string{{"url": "/"}}, Paths: map[string]map[string]openapi.Operation{}, Components: map[string]any{
 		"securitySchemes": map[string]any{
 			"SessionCookie": map[string]any{"type": "apiKey", "in": "header", "name": "Cookie", "description": "Cookie minio_session_{sessionID}, полученная после подключения. Браузер передаёт её автоматически; JavaScript не читает HttpOnly cookie."},
 			"CSRF":          map[string]any{"type": "apiKey", "in": "header", "name": "X-CSRF-Token", "description": "csrf из ответа POST /api/sessions; изменения также требуют Origin интерфейса."},
-			"SessionBearer": map[string]any{"type": "http", "scheme": "bearer", "description": "token из POST /api/tokens, для соответствующего id в пути сессии. Не требует cookie, Origin и CSRF. Неверный Authorization возвращает 401 без перехода к cookie. Не является токеном приглашения/общей папки или STS-токеном MinIO."},
+			"SessionBearer": map[string]any{"type": "http", "scheme": "bearer", "description": "token из POST /api/tokens или connections/{connectionID}/tokens, для соответствующего id в пути сессии. Не требует cookie, Origin и CSRF. Неверный Authorization возвращает 401 без перехода к cookie. Не является токеном приглашения/общей папки или STS-токеном MinIO."},
 			"BearerGrant":   map[string]any{"type": "http", "scheme": "bearer", "description": "Токен приглашения загрузки или общей папки. Не сохраняется в Swagger UI."},
 		}, "schemas": map[string]any{"Error": map[string]any{"type": "object", "required": []string{"error"}, "properties": map[string]any{"error": map[string]any{"type": "object", "required": []string{"code", "message"}, "properties": map[string]any{"code": map[string]string{"type": "string"}, "message": map[string]string{"type": "string"}}}}}},
 	}}
@@ -26,6 +26,7 @@ func Build(catalog []routes.APIRoute) openapi.Document {
 			add(&d, path, route.Tag, op.Method, op.Summary, route.Public)
 			documented := d.Paths[path][strings.ToLower(op.Method)]
 			applyInput(&documented, op)
+			documented.APIScopes = append([]string(nil), op.Scopes...)
 			if op.Request != nil {
 				schema := openapi.TypeSchema(op.Request, true)
 				if len(op.Required) > 0 {

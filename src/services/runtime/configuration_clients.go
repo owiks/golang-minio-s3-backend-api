@@ -11,20 +11,20 @@ import (
 )
 
 func (c *Clients) ReadLifecycleConfig(ctx context.Context, bucket string) (storage.ConfigRead[*lifecycle.Configuration], error) {
-	return storage.ReadLifecycleConfig(ctx, c.session.clientConfig(), c.session.transport, bucket)
+	return storage.ReadLifecycleConfig(ctx, c.session.clientConfig(), c.session.requestTransport(), bucket)
 }
 func (c *Clients) WriteLifecycleConfig(ctx context.Context, bucket string, value *lifecycle.Configuration) (int, error) {
-	return storage.WriteLifecycleConfig(ctx, c.session.clientConfig(), c.session.transport, bucket, value)
+	return storage.WriteLifecycleConfig(ctx, c.session.clientConfig(), c.session.requestTransport(), bucket, value)
 }
 func (c *Clients) ReadCORSConfig(ctx context.Context, bucket string) (storage.ConfigRead[*cors.Config], error) {
-	return storage.ReadCORSConfig(ctx, c.session.clientConfig(), c.session.transport, bucket)
+	return storage.ReadCORSConfig(ctx, c.session.clientConfig(), c.session.requestTransport(), bucket)
 }
 func (c *Clients) WriteCORSConfig(ctx context.Context, bucket string, value *cors.Config) (int, error) {
-	return storage.WriteCORSConfig(ctx, c.session.clientConfig(), c.session.transport, bucket, value)
+	return storage.WriteCORSConfig(ctx, c.session.clientConfig(), c.session.requestTransport(), bucket, value)
 }
 func (c *Clients) ReadEncryptionConfig(ctx context.Context, bucket string) (storage.ConfigRead[*sse.Configuration], error) {
-	return storage.ReadEncryptionConfig(ctx, c.session.clientConfig(), c.session.transport, bucket)
+	return storage.ReadEncryptionConfig(ctx, c.session.clientConfig(), c.session.requestTransport(), bucket)
 }
 func (c *Clients) WriteEncryptionConfig(ctx context.Context, bucket string, value *sse.Configuration) (int, error) {
-	return storage.WriteEncryptionConfig(ctx, c.session.clientConfig(), c.session.transport, bucket, value)
+	return storage.WriteEncryptionConfig(ctx, c.session.clientConfig(), c.session.requestTransport(), bucket, value)
 }
