@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/owiks/golang-minio-s3-backend-api/src/persistence/database"
 	"github.com/owiks/golang-minio-s3-backend-api/src/persistence/migrations"
@@ -20,9 +21,19 @@ type Config = database.Config
 type Store struct {
 	db     *sql.DB
 	driver string
+	now    func() time.Time
 }
 
 func Open(ctx context.Context, c Config) (*Store, error) {
+	return OpenWithClock(ctx, c, time.Now)
+}
+
+// OpenWithClock shares the manager clock for decisions inside write transactions.
+// The clock must be safe for concurrent calls. A nil clock uses the wall clock.
+func OpenWithClock(ctx context.Context, c Config, now func() time.Time) (*Store, error) {
+	if now == nil {
+		now = time.Now
+	}
 	db, err := database.Open(ctx, c)
 	if err != nil {
 		return nil, err
@@ -31,7 +42,7 @@ func Open(ctx context.Context, c Config) (*Store, error) {
 		_ = db.Close()
 		return nil, err
 	}
-	return &Store{db: db, driver: c.Driver}, nil
+	return &Store{db: db, driver: c.Driver, now: now}, nil
 }
 func (s *Store) q(query string) string {
 	if s.driver != "postgres" {
@@ -213,7 +224,7 @@ func (s *Store) Apply(ctx context.Context, cmd authstate.Command) (authstate.Res
 	if err != nil {
 		return authstate.Result{}, err
 	}
-	changes, err := authstate.Transition(records, cmd)
+	changes, err := authstate.TransitionAt(records, cmd, s.now())
 	if err != nil {
 		return authstate.Result{}, err
 	}

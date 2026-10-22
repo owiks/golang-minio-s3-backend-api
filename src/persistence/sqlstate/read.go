@@ -182,7 +182,7 @@ func (s *Store) Reencrypt(ctx context.Context, c authstate.Connection) error {
 	}
 	before.Cipher = d.Cipher
 	before.Revision++
-	if err = s.write(ctx, tx, authstate.Changes{Connections: []authstate.Connection{authstate.NewConnection(before)}, Event: authstate.ReencryptionEvent(c)}); err != nil {
+	if err = s.write(ctx, tx, authstate.Changes{Connections: []authstate.Connection{authstate.NewConnection(before)}, Event: authstate.ReencryptionEventAt(c, s.now())}); err != nil {
 		return err
 	}
 	if tx.Commit() != nil {

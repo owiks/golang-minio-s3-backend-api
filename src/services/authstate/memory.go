@@ -4,6 +4,7 @@ import (
 	"context"
 	"sort"
 	"sync"
+	"time"
 )
 
 type Memory struct {
@@ -12,10 +13,20 @@ type Memory struct {
 	accesses    map[string]Access
 	events      []Event
 	closed      bool
+	now         func() time.Time
 }
 
 func NewMemory() *Memory {
-	return &Memory{connections: map[string]Connection{}, accesses: map[string]Access{}}
+	return NewMemoryWithClock(time.Now)
+}
+
+// NewMemoryWithClock shares the manager clock for decisions made under the write lock.
+// The clock must be safe for concurrent calls. A nil clock uses the wall clock.
+func NewMemoryWithClock(now func() time.Time) *Memory {
+	if now == nil {
+		now = time.Now
+	}
+	return &Memory{connections: map[string]Connection{}, accesses: map[string]Access{}, now: now}
 }
 func (m *Memory) Ping(ctx context.Context) error {
 	if ctx.Err() != nil {
@@ -168,7 +179,7 @@ func (m *Memory) Apply(ctx context.Context, cmd Command) (Result, error) {
 	if cmd.Kind == "create" && len(m.accesses) >= 16384 {
 		return Result{}, Limit()
 	}
-	changes, err := Transition(Records{m.connections, m.accesses}, cmd)
+	changes, err := TransitionAt(Records{m.connections, m.accesses}, cmd, m.now())
 	if err != nil {
 		return Result{}, err
 	}

@@ -15,10 +15,20 @@ type Manager struct {
 	box        SecretBox
 	maxTTL     time.Duration
 	verifier   CredentialVerifier
+	now        func() time.Time
 }
 
 func NewManager(repository Repository, box SecretBox, maxTTL time.Duration) *Manager {
-	return &Manager{repository: repository, box: box, maxTTL: maxTTL}
+	return NewManagerWithClock(repository, box, maxTTL, time.Now)
+}
+
+// NewManagerWithClock uses a fixed clock dependency for lifecycle decisions.
+// The clock must be safe for concurrent calls and must not be replaced at runtime.
+func NewManagerWithClock(repository Repository, box SecretBox, maxTTL time.Duration, now func() time.Time) *Manager {
+	if now == nil {
+		now = time.Now
+	}
+	return &Manager{repository: repository, box: box, maxTTL: maxTTL, now: now}
 }
 func (m *Manager) Close() error { return m.repository.Close() }
 func (m *Manager) Lookup(ctx context.Context, id string) (Access, Connection, error) {
@@ -39,7 +49,7 @@ func (m *Manager) Bootstrap(ctx context.Context, input Bootstrap) error {
 	if !validSecrets(input.Secrets) {
 		return Invalid()
 	}
-	now := time.Now().UTC()
+	now := m.now().UTC()
 	owner := Owner(input.Endpoint, input.Secrets.AccessKey)
 	c := ConnectionData{ID: input.ConnectionID, Owner: owner, Endpoint: input.Endpoint, Region: input.Region, Actor: Digest(input.Secrets.AccessKey), Revision: 1, SecretVersion: 1, Active: true, CreatedAt: now}
 	raw, err := json.Marshal(input.Secrets)
@@ -52,7 +62,7 @@ func (m *Manager) Bootstrap(ctx context.Context, input Bootstrap) error {
 		return Unavailable()
 	}
 	a := NewAccess(AccessData{ID: input.ID, ConnectionID: c.ID, Owner: owner, Mode: input.Mode, Renewable: input.Mode == "bearer", Revision: 1, Generation: 1, Active: true, CreatedAt: now, ExpiresAt: input.ExpiresAt, Digest: input.Digest, CSRFDigest: input.CSRFDigest, Policy: FullPolicy()})
-	return m.repository.Bootstrap(ctx, NewConnection(c), a, event(owner, input.ID, input.ID, "access.created"))
+	return m.repository.Bootstrap(ctx, NewConnection(c), a, m.event(owner, input.ID, input.ID, "access.created"))
 }
 func (m *Manager) Decrypt(c Connection) (Secrets, error) {
 	d := c.Snapshot()
@@ -84,7 +94,7 @@ func (m *Manager) guardedAccess(ctx context.Context, g Guard, management bool) (
 		return Access{}, err
 	}
 	d := a.Snapshot()
-	if !a.Valid(time.Now()) || !c.Snapshot().Active || d.Owner != g.Owner || d.Revision != g.Revision || d.Generation != g.Generation || g.Previous || management && !d.Policy.Allows("access:manage") {
+	if !a.Valid(m.now()) || !c.Snapshot().Active || d.Owner != g.Owner || d.Revision != g.Revision || d.Generation != g.Generation || g.Previous || management && !d.Policy.Allows("access:manage") {
 		return Access{}, Denied()
 	}
 	return a, nil
@@ -201,7 +211,7 @@ func (m *Manager) Issue(ctx context.Context, g Guard, cid string, r IssueRequest
 	if err != nil {
 		return Issued{}, err
 	}
-	now := time.Now().UTC()
+	now := m.now().UTC()
 	expiry := now.Add(time.Duration(r.TTLSeconds) * time.Second)
 	parent := ""
 	if actor.Snapshot().Mode == "bearer" {
@@ -211,15 +221,15 @@ func (m *Manager) Issue(ctx context.Context, g Guard, cid string, r IssueRequest
 	token := securetoken.New()
 	id := securetoken.New()
 	access := NewAccess(AccessData{ID: id, Owner: g.Owner, ConnectionID: cid, ParentID: parent, Renewable: true, Name: r.Name, Mode: "bearer", Revision: 1, Generation: 1, Active: true, CreatedAt: now, ExpiresAt: expiry, Digest: Digest(token), Policy: r.Policy})
-	result, err := m.repository.Apply(ctx, Command{Kind: "create", Guard: g, ConnectionRevision: connection.Snapshot().Revision, Access: access, Event: event(g.Owner, g.ActorID, id, "access.created")})
+	result, err := m.repository.Apply(ctx, Command{Kind: "create", Guard: g, ConnectionRevision: connection.Snapshot().Revision, Access: access, Event: m.event(g.Owner, g.ActorID, id, "access.created")})
 	if err != nil {
 		return Issued{}, err
 	}
-	return issued(result.Access, token), nil
+	return issued(result.Access, token, m.now()), nil
 }
-func issued(a Access, token string) Issued {
+func issued(a Access, token string, now time.Time) Issued {
 	d := a.Snapshot()
-	return Issued{ID: d.ID, Token: token, TokenType: "Bearer", ExpiresAt: d.ExpiresAt, ExpiresIn: max(0, int64(time.Until(d.ExpiresAt).Seconds())), Revision: d.Revision}
+	return Issued{ID: d.ID, Token: token, TokenType: "Bearer", ExpiresAt: d.ExpiresAt, ExpiresIn: max(0, int64(d.ExpiresAt.Sub(now).Seconds())), Revision: d.Revision}
 }
 
 type RotateRequest struct {
@@ -235,11 +245,11 @@ func (m *Manager) Rotate(ctx context.Context, g Guard, id string, r RotateReques
 		return Issued{}, err
 	}
 	token := securetoken.New()
-	result, err := m.repository.Apply(ctx, Command{Kind: "rotate", Guard: g, TargetID: id, Revision: r.Revision, Digest: Digest(token), GraceSeconds: r.GraceSeconds, Event: event(g.Owner, g.ActorID, id, "access.rotated")})
+	result, err := m.repository.Apply(ctx, Command{Kind: "rotate", Guard: g, TargetID: id, Revision: r.Revision, Digest: Digest(token), GraceSeconds: r.GraceSeconds, Event: m.event(g.Owner, g.ActorID, id, "access.rotated")})
 	if err != nil {
 		return Issued{}, err
 	}
-	return issued(result.Access, token), nil
+	return issued(result.Access, token, m.now()), nil
 }
 
 type RenewRequest struct {
@@ -260,11 +270,11 @@ func (m *Manager) Renew(ctx context.Context, g Guard, id string, r RenewRequest)
 			return AccessView{}, err
 		}
 	}
-	expiry := time.Now().Add(time.Duration(r.TTLSeconds) * time.Second)
+	expiry := m.now().Add(time.Duration(r.TTLSeconds) * time.Second)
 	if id != g.ActorID || !actor.Snapshot().Renewable {
 		expiry = minTime(expiry, actor.Snapshot().ExpiresAt)
 	}
-	result, err := m.repository.Apply(ctx, Command{Kind: "renew", Guard: g, TargetID: id, Revision: r.Revision, ExpiresAt: expiry.UnixMicro(), Event: event(g.Owner, g.ActorID, id, "access.renewed")})
+	result, err := m.repository.Apply(ctx, Command{Kind: "renew", Guard: g, TargetID: id, Revision: r.Revision, ExpiresAt: expiry.UnixMicro(), Event: m.event(g.Owner, g.ActorID, id, "access.renewed")})
 	if err != nil {
 		return AccessView{}, err
 	}
@@ -284,7 +294,7 @@ func (m *Manager) Edit(ctx context.Context, g Guard, id string, r EditRequest) (
 	if err := m.authorizeToken(ctx, g, id); err != nil {
 		return AccessView{}, err
 	}
-	result, err := m.repository.Apply(ctx, Command{Kind: "edit", Guard: g, TargetID: id, Revision: r.Revision, Name: r.Name, Policy: r.Policy, Event: event(g.Owner, g.ActorID, id, "access.updated")})
+	result, err := m.repository.Apply(ctx, Command{Kind: "edit", Guard: g, TargetID: id, Revision: r.Revision, Name: r.Name, Policy: r.Policy, Event: m.event(g.Owner, g.ActorID, id, "access.updated")})
 	if err != nil {
 		return AccessView{}, err
 	}
@@ -297,11 +307,11 @@ func (m *Manager) Revoke(ctx context.Context, g Guard, id string, revision int64
 	if err := m.authorizeToken(ctx, g, id); err != nil {
 		return err
 	}
-	_, err := m.repository.Apply(ctx, Command{Kind: "revoke", Guard: g, TargetID: id, Revision: revision, Event: event(g.Owner, g.ActorID, id, "access.revoked")})
+	_, err := m.repository.Apply(ctx, Command{Kind: "revoke", Guard: g, TargetID: id, Revision: revision, Event: m.event(g.Owner, g.ActorID, id, "access.revoked")})
 	return err
 }
 func (m *Manager) Logout(ctx context.Context, g Guard) error {
-	_, err := m.repository.Apply(ctx, Command{Kind: "logout", Guard: g, TargetID: g.ActorID, Revision: g.Revision, Event: event(g.Owner, g.ActorID, g.ActorID, "access.closed")})
+	_, err := m.repository.Apply(ctx, Command{Kind: "logout", Guard: g, TargetID: g.ActorID, Revision: g.Revision, Event: m.event(g.Owner, g.ActorID, g.ActorID, "access.closed")})
 	return err
 }
 func (m *Manager) DeleteConnection(ctx context.Context, g Guard, id string, revision int64) error {
@@ -311,7 +321,7 @@ func (m *Manager) DeleteConnection(ctx context.Context, g Guard, id string, revi
 	if _, err := m.Connection(ctx, g, id); err != nil {
 		return err
 	}
-	_, err := m.repository.Apply(ctx, Command{Kind: "revoke_connection", Guard: g, TargetID: id, Revision: revision, Event: event(g.Owner, g.ActorID, id, "connection.revoked")})
+	_, err := m.repository.Apply(ctx, Command{Kind: "revoke_connection", Guard: g, TargetID: id, Revision: revision, Event: m.event(g.Owner, g.ActorID, id, "connection.revoked")})
 	return err
 }
 func (m *Manager) ReplaceCredentials(ctx context.Context, g Guard, id string, revision int64, secrets Secrets, verifier CredentialVerifier) error {
@@ -351,11 +361,15 @@ func (m *Manager) ReplaceCredentials(ctx context.Context, g Guard, id string, re
 	if err != nil {
 		return Unavailable()
 	}
-	_, err = m.repository.Apply(ctx, Command{Kind: "credentials", Guard: g, TargetID: id, Revision: revision, Cipher: cipher, SecretVersion: d.SecretVersion, Event: event(g.Owner, g.ActorID, id, "connection.credentials_changed")})
+	_, err = m.repository.Apply(ctx, Command{Kind: "credentials", Guard: g, TargetID: id, Revision: revision, Cipher: cipher, SecretVersion: d.SecretVersion, Event: m.event(g.Owner, g.ActorID, id, "connection.credentials_changed")})
 	return err
 }
-func event(owner, actor, target, action string) Event {
-	return Event{ID: securetoken.New(), Owner: owner, ActorID: actor, TargetID: target, Action: action, At: time.Now().UTC()}
+func (m *Manager) event(owner, actor, target, action string) Event {
+	return eventAt(owner, actor, target, action, m.now())
+}
+
+func eventAt(owner, actor, target, action string, now time.Time) Event {
+	return Event{ID: securetoken.New(), Owner: owner, ActorID: actor, TargetID: target, Action: action, At: now.UTC()}
 }
 func IsMissing(err error) bool { return apperror.Public(err).Code == "AccessStateNotFound" }
 

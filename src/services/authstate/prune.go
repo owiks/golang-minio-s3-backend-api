@@ -41,13 +41,13 @@ func Prunable(r Records, before time.Time) ([]string, []string) {
 	return accesses, connections
 }
 func (m *Manager) Prune(ctx context.Context, before time.Time) (int, error) {
-	if before.IsZero() || !before.Before(time.Now()) {
+	if before.IsZero() || !before.Before(m.now()) {
 		return 0, Invalid()
 	}
 	return m.repository.Prune(ctx, before)
 }
 func (m *Memory) Prune(ctx context.Context, before time.Time) (int, error) {
-	if before.IsZero() || !before.Before(time.Now()) {
+	if before.IsZero() || !before.Before(m.now()) {
 		return 0, Invalid()
 	}
 	if ctx.Err() != nil {

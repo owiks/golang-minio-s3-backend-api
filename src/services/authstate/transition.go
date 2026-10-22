@@ -16,12 +16,18 @@ type Changes struct {
 }
 
 func Transition(records Records, command Command) (Changes, error) {
+	return TransitionAt(records, command, time.Now())
+}
+
+// TransitionAt evaluates a command at the repository clock after acquiring its
+// write lock. Request timestamps cannot extend an expired credential lifetime.
+func TransitionAt(records Records, command Command, now time.Time) (Changes, error) {
 	actor, ok := records.Accesses[command.Guard.ActorID]
 	if !ok {
 		return Changes{}, Denied()
 	}
 	a := actor.Snapshot()
-	now := time.Now().UTC()
+	now = now.UTC()
 	actorConnection, ok := records.Connections[a.ConnectionID]
 	if !ok || !actorConnection.Snapshot().Active || !actor.Valid(now) || a.Owner != command.Guard.Owner || a.Revision != command.Guard.Revision || a.Generation != command.Guard.Generation || command.Guard.Previous {
 		return Changes{}, Denied()

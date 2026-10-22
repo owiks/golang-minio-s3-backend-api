@@ -84,7 +84,7 @@ func (m *Memory) Reencrypt(ctx context.Context, c Connection) error {
 	o.Cipher = d.Cipher
 	o.Revision++
 	m.connections[d.ID] = NewConnection(o)
-	m.events = append(m.events, ReencryptionEvent(c))
+	m.events = append(m.events, ReencryptionEventAt(c, m.now()))
 	if len(m.events) > 10000 {
 		m.events = append([]Event(nil), m.events[len(m.events)-10000:]...)
 	}

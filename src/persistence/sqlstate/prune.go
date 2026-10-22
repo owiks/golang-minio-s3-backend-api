@@ -8,7 +8,7 @@ import (
 )
 
 func (s *Store) Prune(ctx context.Context, before time.Time) (int, error) {
-	if before.IsZero() || !before.Before(time.Now()) {
+	if before.IsZero() || !before.Before(s.now()) {
 		return 0, authstate.Invalid()
 	}
 	tx, err := s.begin(ctx)

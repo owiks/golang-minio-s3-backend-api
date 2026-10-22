@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"sort"
+	"time"
 )
 
 // Verify prevents serving a database whose active secrets cannot be decrypted.
@@ -102,6 +103,11 @@ func (m *Manager) Reencrypt(ctx context.Context) (int, error) {
 }
 
 func ReencryptionEvent(c Connection) Event {
+	return ReencryptionEventAt(c, time.Now())
+}
+
+// ReencryptionEventAt records maintenance using the repository clock.
+func ReencryptionEventAt(c Connection, now time.Time) Event {
 	d := c.Snapshot()
-	return event(d.Owner, "maintenance", d.ID, "connection.reencrypted")
+	return eventAt(d.Owner, "maintenance", d.ID, "connection.reencrypted", now)
 }

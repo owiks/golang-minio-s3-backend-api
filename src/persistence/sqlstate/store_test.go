@@ -8,6 +8,7 @@ import (
 
 	"github.com/owiks/golang-minio-s3-backend-api/src/config"
 	"github.com/owiks/golang-minio-s3-backend-api/src/persistence/sqlstate"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/authstate"
 	"github.com/owiks/golang-minio-s3-backend-api/tests/databasefixtures"
 	"github.com/owiks/golang-minio-s3-backend-api/tests/statecontract"
 	"github.com/owiks/golang-minio-s3-backend-api/tests/statefixtures"
@@ -40,4 +41,26 @@ func open(t *testing.T, cfg config.State) *sqlstate.Store {
 	}
 	t.Cleanup(func() { _ = s.Close() })
 	return s
+}
+
+func TestSQLClockContract(t *testing.T) {
+	drivers := []string{"sqlite"}
+	if os.Getenv("STATE_INTEGRATION") == "1" {
+		drivers = append(drivers, "postgres", "mysql")
+	}
+	for _, driver := range drivers {
+		t.Run(driver, func(t *testing.T) {
+			statecontract.RunClock(t, func(t *testing.T, now func() time.Time) authstate.Repository {
+				cfg := databasefixtures.Database(t, driver)
+				statefixtures.Migrate(t, cfg)
+				ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+				defer cancel()
+				s, err := sqlstate.OpenWithClock(ctx, sqlstate.Config{Database: cfg.Database}, now)
+				if err != nil {
+					t.Fatal(err)
+				}
+				return s
+			})
+		})
+	}
 }
