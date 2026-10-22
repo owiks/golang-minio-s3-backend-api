@@ -1,0 +1,18 @@
+# Run make mocks with the pinned Mockery version from Makefile.
+# Keep the list explicit: stateful fakes and integration adapters stay handwritten.
+all: false
+dir: '{{.InterfaceDir}}'
+filename: user_admin_mock_test.go
+force-file-write: true
+formatter: goimports
+formatter-options:
+  goimports:
+    local-prefix: github.com/owiks/golang-minio-s3-backend-api
+pkgname: '{{.SrcPackageName}}'
+recursive: false
+structname: 'Mock{{.InterfaceName}}'
+template: testify
+packages:
+  github.com/owiks/golang-minio-s3-backend-api/src/services/identities:
+    interfaces:
+      UserAdmin: {}

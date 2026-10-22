@@ -13,58 +13,64 @@ import (
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
 )
 
-type userStub struct {
-	info    madmin.UserInfo
-	readErr error
-	writes  int
-}
+var _ UserAdmin = (*MockUserAdmin)(nil)
 
-func (f *userStub) ListUsers(context.Context) (map[string]madmin.UserInfo, error) {
-	return map[string]madmin.UserInfo{"alice": f.info}, nil
-}
-func (f *userStub) GetUserInfo(context.Context, string) (madmin.UserInfo, error) {
-	return f.info, f.readErr
-}
-func (f *userStub) AddUser(context.Context, string, string) error { f.writes++; return nil }
-func (f *userStub) SetUserStatus(context.Context, string, madmin.AccountStatus) error {
-	f.writes++
-	return nil
-}
-func (f *userStub) RemoveUser(context.Context, string) error { f.writes++; return nil }
 func TestUserUseCasesRejectObservedExistingAndProtectCurrentIdentity(t *testing.T) {
 	ctx := context.Background()
-	f := &userStub{}
-	if err := CreateUser(ctx, f, CreateUserRequest{Name: "alice", SecretKey: "valid-secret"}); apperror.Public(err).Code != "AlreadyExists" {
-		t.Fatal(err)
+	missing := fmt.Errorf("wrapped: %w", madmin.ErrorResponse{Code: "XMinioAdminNoSuchUser"})
+	for _, acknowledge := range []bool{false, true} {
+		t.Run(fmt.Sprintf("existing acknowledged=%v", acknowledge), func(t *testing.T) {
+			admin := NewMockUserAdmin(t)
+			admin.EXPECT().GetUserInfo(ctx, "alice").Return(madmin.UserInfo{}, nil).Once()
+			err := CreateUser(ctx, admin, CreateUserRequest{Name: "alice", SecretKey: "valid-secret", AcknowledgeNonAtomicCreate: acknowledge})
+			if apperror.Public(err).Code != "AlreadyExists" {
+				t.Fatal(err)
+			}
+			// Any write fails as an unexpected mock call, even with acknowledgement.
+		})
 	}
-	f.readErr = errors.New("PRIVATE-UPSTREAM-ERROR")
-	if err := CreateUser(ctx, f, CreateUserRequest{Name: "alice", SecretKey: "valid-secret"}); err != f.readErr {
-		t.Fatal("upstream error ignored")
-	}
-	disabled := false
-	if err := SetUserStatus(ctx, f, "alice", "alice", StatusRequest{Enabled: &disabled}); apperror.Public(err).Code != "CurrentUser" {
-		t.Fatal(err)
-	}
-	if err := DeleteUser(ctx, f, "alice", "alice"); apperror.Public(err).Code != "CurrentUser" {
-		t.Fatal(err)
-	}
-	if f.writes != 0 {
-		t.Fatal("guarded operation reached upstream")
-	}
-	f.readErr = fmt.Errorf("wrapped: %w", madmin.ErrorResponse{Code: "XMinioAdminNoSuchUser"})
-	if err := CreateUser(ctx, f, CreateUserRequest{Name: "alice", SecretKey: "valid-secret"}); apperror.Public(err).Code != "UserCreateAcknowledgementRequired" || f.writes != 0 {
-		t.Fatal("unacknowledged upsert reached upstream", err)
-	}
-	if err := CreateUser(ctx, f, CreateUserRequest{Name: "alice", SecretKey: "valid-secret", AcknowledgeNonAtomicCreate: true}); err != nil {
-		t.Fatal(err)
-	}
-	if f.writes != 1 {
-		t.Fatal("valid creation not performed")
+	t.Run("read failure", func(t *testing.T) {
+		admin := NewMockUserAdmin(t)
+		failure := errors.New("PRIVATE-UPSTREAM-ERROR")
+		admin.EXPECT().GetUserInfo(ctx, "alice").Return(madmin.UserInfo{}, failure).Once()
+		if err := CreateUser(ctx, admin, CreateUserRequest{Name: "alice", SecretKey: "valid-secret"}); err != failure {
+			t.Fatal("upstream error ignored", err)
+		}
+	})
+	t.Run("current user", func(t *testing.T) {
+		admin := NewMockUserAdmin(t)
+		if err := SetUserStatus(ctx, admin, "alice", "alice", StatusRequest{Enabled: new(false)}); apperror.Public(err).Code != "CurrentUser" {
+			t.Fatal(err)
+		}
+		if err := DeleteUser(ctx, admin, "alice", "alice"); apperror.Public(err).Code != "CurrentUser" {
+			t.Fatal(err)
+		}
+	})
+	t.Run("acknowledgement required", func(t *testing.T) {
+		admin := NewMockUserAdmin(t)
+		admin.EXPECT().GetUserInfo(ctx, "alice").Return(madmin.UserInfo{}, missing).Once()
+		if err := CreateUser(ctx, admin, CreateUserRequest{Name: "alice", SecretKey: "valid-secret"}); apperror.Public(err).Code != "UserCreateAcknowledgementRequired" {
+			t.Fatal("unacknowledged upsert reached upstream", err)
+		}
+	})
+	for _, failure := range []error{nil, errors.New("uncertain write result")} {
+		t.Run(fmt.Sprintf("acknowledged create failure=%v", failure != nil), func(t *testing.T) {
+			admin := NewMockUserAdmin(t)
+			read := admin.EXPECT().GetUserInfo(ctx, "alice").Return(madmin.UserInfo{}, missing).Once()
+			admin.EXPECT().AddUser(ctx, "alice", "valid-secret").Return(failure).Once().NotBefore(read)
+			if err := CreateUser(ctx, admin, CreateUserRequest{Name: "alice", SecretKey: "valid-secret", AcknowledgeNonAtomicCreate: true}); err != failure {
+				t.Fatal("creation result changed", err)
+			}
+		})
 	}
 }
 func TestUserResponseExcludesUpstreamCredentials(t *testing.T) {
-	f := &userStub{info: madmin.UserInfo{SecretKey: "PRIVATE-SECRET", PolicyName: "read,write", Status: madmin.AccountEnabled}}
-	rows, err := ListUsers(context.Background(), f, "alice")
+	ctx := context.Background()
+	admin := NewMockUserAdmin(t)
+	admin.EXPECT().ListUsers(ctx).Return(map[string]madmin.UserInfo{
+		"alice": {SecretKey: "PRIVATE-SECRET", PolicyName: "read,write", Status: madmin.AccountEnabled},
+	}, nil).Once()
+	rows, err := ListUsers(ctx, admin, "alice")
 	if err != nil {
 		t.Fatal(err)
 	}

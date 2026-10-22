@@ -4,6 +4,8 @@ GO ?= go
 GOFMT ?= gofmt
 GOLANGCI_LINT ?= .tools/golangci-lint
 GOLANGCI_LINT_VERSION := v2.12.2
+MOCKERY ?= .tools/mockery
+MOCKERY_VERSION := v3.7.3
 TOOLS_DIR := $(CURDIR)/.tools
 COVERAGE_DIR := coverage
 COMPOSE ?= docker compose
@@ -62,6 +64,21 @@ lint: ## Запустить golangci-lint (установка: make tools)
 tools: ## Установить golangci-lint фиксированной версии в .tools
 	@mkdir -p "$(TOOLS_DIR)"
 	GOBIN="$(TOOLS_DIR)" $(GO) install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
+
+.PHONY: mocks-tools mocks mocks-check
+mocks-tools: ## Установить закреплённую версию Mockery для тестовых заглушек
+	@mkdir -p "$(TOOLS_DIR)"
+	GOBIN="$(TOOLS_DIR)" $(GO) install github.com/vektra/mockery/v3@$(MOCKERY_VERSION)
+
+mocks: ## Пересоздать только явно перечисленные тестовые заглушки
+	@test "$$($(MOCKERY) version)" = "$(MOCKERY_VERSION)" || { printf '%s\n' 'Нужна закреплённая версия Mockery. Запустите make mocks-tools.'; exit 1; }
+	$(MOCKERY) --config .mockery.yaml
+
+mocks-check: ## Проверить воспроизводимость сгенерированной тестовой заглушки
+	@set -eu; snapshot="$$(mktemp)"; trap 'rm -f "$$snapshot"' EXIT; \
+	cp src/services/identities/user_admin_mock_test.go "$$snapshot"; \
+	$(MAKE) mocks; \
+	cmp "$$snapshot" src/services/identities/user_admin_mock_test.go
 
 deps: ## Скачать и проверить зависимости без изменения go.mod
 	$(GO) mod download

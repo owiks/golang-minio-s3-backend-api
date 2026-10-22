@@ -31,6 +31,8 @@ jobs:
           cache-dependency-path: go.sum
       - name: Verify dependencies
         run: make deps
+      - name: Verify generated test mocks
+        run: make mocks-tools mocks-check
       - name: Install pinned linter
         run: make tools
       - name: Format, OpenAPI, lint, race tests and build
