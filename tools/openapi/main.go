@@ -3,12 +3,14 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/owiks/golang-minio-s3-backend-api/src/http/api"
 	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/doc"
 )
@@ -30,6 +32,9 @@ func main() {
 	}
 	raw, err := json.MarshalIndent(doc.Build(api.Catalog()), "", "  ")
 	must(err)
+	specification, err := openapi3.NewLoader().LoadFromData(raw)
+	must(err)
+	must(specification.Validate(context.Background()))
 	raw = append(raw, '\n')
 	path := filepath.Join(root, "swagger.generated.json")
 	if *check {

@@ -2,16 +2,18 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"math"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/owiks/golang-minio-s3-backend-api/src/config"
 	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/doc"
-	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/openapi"
 )
 
 func TestDocumentationMatchesCatalogAndGeneratedFile(t *testing.T) {
@@ -28,14 +30,14 @@ func TestDocumentationMatchesCatalogAndGeneratedFile(t *testing.T) {
 		t.Fatal("generated Swagger is stale; run make docs")
 	}
 	for _, path := range []string{"/api/sessions/{sessionID}/objects/upload", "/api/sessions/{sessionID}/admin/users", "/api/sessions/{sessionID}/admin/buckets/{name}/lifecycle"} {
-		if document.Paths[path] == nil {
+		if document.Paths.Value(path) == nil {
 			t.Errorf("missing operation: %s", path)
 		}
 	}
-	login := document.Paths["/api/sessions"]["post"].RequestBody.(map[string]any)
-	schema := login["content"].(map[string]any)["application/json"].(map[string]any)["schema"].(openapi.Schema)
-	properties := schema["properties"].(map[string]any)
-	if properties["secretKey"].(openapi.Schema)["writeOnly"] != true {
+	login := document.Paths.Value("/api/sessions").GetOperation("POST").RequestBody.Value
+	schema := login.Content["application/json"].Schema.Value
+	properties := schema.Properties
+	if !properties["secretKey"].Value.WriteOnly {
 		t.Fatal("credentials are not marked writeOnly")
 	}
 
@@ -71,7 +73,7 @@ func TestIAMDocumentationMatchesEachAction(t *testing.T) {
 		{"/api/sessions/{sessionID}/admin/policies/{name}", "put", []string{"document", "revision"}, nil},
 		{"/api/sessions/{sessionID}/admin/access-keys/{name}/rotate", "post", []string{"confirmation", "revision"}, []string{"enabled", "policy"}},
 	} {
-		operation := document.Paths[tc.path][tc.method]
+		operation := document.Paths.Value(tc.path).GetOperation(strings.ToUpper(tc.method))
 		raw, err := json.Marshal(operation.RequestBody)
 		if err != nil {
 			t.Fatal(err)
@@ -121,14 +123,14 @@ func TestLanguageHeadersIncludeGeneratedArchivesAndPreserveRawBinaryContract(t *
 		{"objects/archive/{ticket}", "application/zip", true},
 		{"objects/preview", "text/plain", false},
 	} {
-		response := document.Paths[prefix+tc.path]["get"].Responses["200"].(map[string]any)
-		headers := response["headers"].(map[string]any)
+		response := document.Paths.Value(prefix + tc.path).GetOperation("GET").Responses.Value("200").Value
+		headers := response.Headers
 		if (headers["Content-Language"] != nil) != tc.localized || (headers["Vary"] != nil) != tc.localized || headers["X-Request-ID"] == nil {
 			t.Fatal(tc.path, headers)
 		}
-		content := response["content"].(map[string]any)
-		schema := content[tc.media].(map[string]any)["schema"].(openapi.Schema)
-		if schema["type"] != "string" || schema["format"] != "binary" {
+		content := response.Content
+		schema := content[tc.media].Schema.Value
+		if !schema.Type.Is("string") || schema.Format != "binary" {
 			t.Fatal("binary contract changed", schema)
 		}
 	}
@@ -141,43 +143,67 @@ func TestBearerDocumentationPreservesCookieAndGrantSecurity(t *testing.T) {
 			continue
 		}
 		for _, op := range route.Operations {
-			operation := document.Paths[route.Template(op)][strings.ToLower(op.Method)]
-			if len(operation.Security) != 2 {
+			operation := document.Paths.Value(route.Template(op)).GetOperation(op.Method)
+			if len(*operation.Security) != 2 {
 				t.Fatal("missing alternative authentication", route.Template(op))
 			}
-			if _, ok := operation.Security[0]["SessionCookie"]; !ok {
+			if _, ok := (*operation.Security)[0]["SessionCookie"]; !ok {
 				t.Fatal("cookie authentication removed")
 			}
-			if _, ok := operation.Security[1]["SessionBearer"]; !ok || len(operation.Security[1]) != 1 {
+			if _, ok := (*operation.Security)[1]["SessionBearer"]; !ok || len((*operation.Security)[1]) != 1 {
 				t.Fatal("bearer incorrectly requires cookie or CSRF")
 			}
-			_, csrf := operation.Security[0]["CSRF"]
+			_, csrf := (*operation.Security)[0]["CSRF"]
 			if csrf != (op.Method != "GET") {
 				t.Fatal("cookie CSRF contract changed")
 			}
-			for _, p := range operation.Parameters {
+			for _, ref := range operation.Parameters {
+				p := ref.Value
 				if p.In == "header" && p.Name == "Origin" && p.Required {
 					t.Fatal("Origin is mandatory for bearer")
 				}
 			}
 		}
 	}
-	issue := document.Paths["/api/tokens"]["post"]
-	if len(issue.Security) != 0 {
+	issue := document.Paths.Value("/api/tokens").GetOperation("POST")
+	if len(*issue.Security) != 0 {
 		t.Fatal("issuance requires an existing token")
 	}
-	schema := issue.RequestBody.(map[string]any)["content"].(map[string]any)["application/json"].(map[string]any)["schema"].(openapi.Schema)
-	properties := schema["properties"].(map[string]any)
-	if properties["secretKey"].(openapi.Schema)["writeOnly"] != true || properties["ttlSeconds"] == nil {
+	schema := issue.RequestBody.Value.Content["application/json"].Schema.Value
+	properties := schema.Properties
+	if !properties["secretKey"].Value.WriteOnly || properties["ttlSeconds"] == nil {
 		t.Fatal("invalid token request documentation")
 	}
-	for _, methods := range document.Paths {
-		for _, operation := range methods {
-			for _, requirement := range operation.Security {
-				if _, grant := requirement["BearerGrant"]; grant && len(operation.Security) != 1 {
+	for _, methods := range document.Paths.Map() {
+		for _, operation := range methods.Operations() {
+			for _, requirement := range *operation.Security {
+				if _, grant := requirement["BearerGrant"]; grant && len(*operation.Security) != 1 {
 					t.Fatal("public grant now accepts a session bearer")
 				}
 			}
+		}
+	}
+}
+
+func TestStandaloneOpenAPIDocumentPassesLibraryValidation(t *testing.T) {
+	raw, err := json.Marshal(doc.Build(Catalog()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	document, err := openapi3.NewLoader().LoadFromData(raw)
+	if err != nil {
+		t.Fatal("unresolved OpenAPI references", err)
+	}
+	if err := document.Validate(context.Background()); err != nil {
+		t.Fatal("invalid OpenAPI specification", err)
+	}
+	// kin-openapi represents JSON Schema numeric bounds as float64. In
+	// particular MaxInt64 is rounded in JSON; native API parsing still uses int64.
+	search := document.Paths.Value("/api/sessions/{sessionID}/objects/search").Get
+	for _, name := range []string{"minSize", "maxSize"} {
+		bound := inputParameter(t, search, name).Schema.Value
+		if !bound.Type.Is("integer") || bound.Min == nil || *bound.Min != 0 || bound.Max == nil || *bound.Max != float64(math.MaxInt64) {
+			t.Fatalf("numeric parameter contract changed: %s: %+v", name, bound)
 		}
 	}
 }

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/doc"
-	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/openapi"
 	servercontroller "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/server/controllers"
 	uploadcontroller "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/uploads/controllers"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
@@ -38,9 +38,9 @@ func TestInputContractsMatchValidationFailures(t *testing.T) {
 		}, []string{"", "-1", "5368709121", "abc"}, "InvalidUploadSize"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			operation := document.Paths["/api/sessions/{sessionID}/"+tc.path][tc.method]
+			operation := document.Paths.Value("/api/sessions/{sessionID}/" + tc.path).GetOperation(strings.ToUpper(tc.method))
 			p := inputParameter(t, operation, tc.parameter)
-			if !p.Required || p.Schema["type"] != "integer" || p.Schema["minimum"] != tc.minimum || p.Schema["maximum"] != tc.maximum {
+			if !p.Required || !p.Schema.Value.Type.Is("integer") || p.Schema.Value.Min == nil || *p.Schema.Value.Min != float64(tc.minimum) || p.Schema.Value.Max == nil || *p.Schema.Value.Max != float64(tc.maximum) {
 				t.Fatalf("wrong parameter contract: %+v", p)
 			}
 			for _, value := range tc.invalid {
@@ -57,15 +57,16 @@ func TestInputContractsMatchValidationFailures(t *testing.T) {
 	}
 }
 
-func inputParameter(t *testing.T, operation openapi.Operation, name string) openapi.Parameter {
+func inputParameter(t *testing.T, operation *openapi3.Operation, name string) *openapi3.Parameter {
 	t.Helper()
-	for _, p := range operation.Parameters {
+	for _, ref := range operation.Parameters {
+		p := ref.Value
 		if p.Name == name {
 			return p
 		}
 	}
 	t.Fatalf("missing parameter: %s", name)
-	return openapi.Parameter{}
+	return nil
 }
 
 func TestInputsAreSpecificToEachAction(t *testing.T) {
@@ -99,9 +100,10 @@ func TestInputsAreSpecificToEachAction(t *testing.T) {
 		{"objects/archive-status/{ticket}", "delete", nil, []string{"Origin"}, false},
 	} {
 		t.Run(tc.method+" "+tc.path, func(t *testing.T) {
-			operation := document.Paths[prefix+tc.path][tc.method]
+			operation := document.Paths.Value(prefix + tc.path).GetOperation(strings.ToUpper(tc.method))
 			var query, headers []string
-			for _, p := range operation.Parameters {
+			for _, ref := range operation.Parameters {
+				p := ref.Value
 				if p.In == "query" {
 					query = append(query, p.Name)
 				}
@@ -115,7 +117,7 @@ func TestInputsAreSpecificToEachAction(t *testing.T) {
 			if !slices.Equal(query, tc.query) || !slices.Equal(headers, tc.headers) || (operation.RequestBody != nil) != tc.body {
 				t.Fatalf("mixed action inputs: query=%v headers=%v body=%t", query, headers, operation.RequestBody != nil)
 			}
-			if tc.body && operation.RequestBody.(map[string]any)["required"] != true {
+			if tc.body && !operation.RequestBody.Value.Required {
 				t.Fatal("decoded body is optional")
 			}
 		})
@@ -124,35 +126,36 @@ func TestInputsAreSpecificToEachAction(t *testing.T) {
 
 func TestSearchFiltersAndPublicGrantSecurityAreDocumented(t *testing.T) {
 	document := doc.Build(Catalog())
-	search := document.Paths["/api/sessions/{sessionID}/objects/search"]["get"]
+	search := document.Paths.Value("/api/sessions/{sessionID}/objects/search").GetOperation("GET")
 	for _, name := range []string{"minSize", "maxSize"} {
 		p := inputParameter(t, search, name)
-		if p.Required || p.Schema["type"] != "integer" || p.Schema["minimum"] != int64(0) {
+		if p.Required || !p.Schema.Value.Type.Is("integer") || p.Schema.Value.Min == nil || *p.Schema.Value.Min != 0 {
 			t.Fatal(p)
 		}
 	}
 	for _, name := range []string{"after", "before"} {
-		if inputParameter(t, search, name).Schema["format"] != "date" {
+		if inputParameter(t, search, name).Schema.Value.Format != "date" {
 			t.Fatal(name)
 		}
 	}
 	for _, path := range []string{"/api/receive", "/api/shared-folder"} {
-		for _, operation := range document.Paths[path] {
-			if !reflect.DeepEqual(operation.Security, []map[string][]string{{"BearerGrant": {}}}) {
+		for _, operation := range document.Paths.Value(path).Operations() {
+			if !reflect.DeepEqual(*operation.Security, openapi3.SecurityRequirements{{"BearerGrant": {}}}) {
 				t.Fatal("missing bearer security", path)
 			}
-			for _, p := range operation.Parameters {
+			for _, ref := range operation.Parameters {
+				p := ref.Value
 				if strings.EqualFold(p.Name, "Authorization") {
 					t.Fatal("OpenAPI ignores Authorization header parameters; use security", path)
 				}
 			}
 		}
 	}
-	if inputParameter(t, document.Paths["/api/receive"]["put"], "X-Upload-Size").Schema["maximum"] != int64(1073741824) {
+	if *inputParameter(t, document.Paths.Value("/api/receive").GetOperation("PUT"), "X-Upload-Size").Schema.Value.Max != 1073741824 {
 		t.Fatal("wrong invitation upload limit")
 	}
-	scope := inputParameter(t, document.Paths["/api/sessions/{sessionID}/admin/access-keys"]["get"], "scope")
-	if !slices.Equal(scope.Schema["enum"].([]string), []string{"own", "user", "all"}) {
+	scope := inputParameter(t, document.Paths.Value("/api/sessions/{sessionID}/admin/access-keys").GetOperation("GET"), "scope")
+	if !slices.Equal(scope.Schema.Value.Enum, []any{"own", "user", "all"}) {
 		t.Fatal(scope)
 	}
 }
@@ -170,8 +173,8 @@ func TestRequestBodiesAreExplicitAndRequired(t *testing.T) {
 		{"admin/buckets/{name}/lifecycle", "patch", []string{"revision", "index", "enabled"}},
 		{"objects/content", "put", []string{"revision"}},
 	} {
-		body := document.Paths[prefix+tc.path][tc.method].RequestBody.(map[string]any)
-		raw, _ := json.Marshal(body["content"].(map[string]any)["application/json"].(map[string]any)["schema"])
+		body := document.Paths.Value(prefix + tc.path).GetOperation(strings.ToUpper(tc.method)).RequestBody.Value
+		raw, _ := json.Marshal(body.Content["application/json"].Schema)
 		var schema struct {
 			Required   []string
 			Properties map[string]map[string]any
@@ -180,7 +183,7 @@ func TestRequestBodiesAreExplicitAndRequired(t *testing.T) {
 		if err := json.Unmarshal(raw, &schema); err != nil {
 			t.Fatal(err)
 		}
-		if body["required"] != true || len(schema.AnyOf) != 0 {
+		if !body.Required || len(schema.AnyOf) != 0 {
 			t.Fatal("body missing or mixes unrelated DTOs", tc)
 		}
 		for _, name := range tc.required {

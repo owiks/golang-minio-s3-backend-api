@@ -1,8 +1,11 @@
 package coordination
 
 import (
+	"math"
 	"sync"
 	"time"
+
+	"golang.org/x/time/rate"
 )
 
 // Admission enforces both process and principal budgets atomically.
@@ -41,7 +44,7 @@ func (a *Admission) Try(key string) (func(), bool) {
 }
 
 type bucket struct {
-	tokens  float64
+	limiter *rate.Limiter
 	updated time.Time
 }
 
@@ -70,19 +73,22 @@ func (a *Attempts) Allow(key string, now time.Time) (bool, time.Duration) {
 		if len(a.entries) >= a.maxEntries {
 			return false, a.interval
 		}
-		b = bucket{tokens: float64(a.burst), updated: now}
+		b = bucket{limiter: rate.NewLimiter(rate.Every(a.interval), a.burst)}
 	}
-	elapsed := max(0, now.Sub(b.updated).Seconds())
-	b.tokens = min(float64(a.burst), b.tokens+elapsed/a.interval.Seconds())
+	// Checkpoint every attempt, including rejected attempts. AllowN alone only
+	// advances its clock after success, which would change backward-clock and
+	// idle-expiration behavior for this caller-supplied timestamp.
+	b.limiter.SetLimitAt(now, b.limiter.Limit())
 	b.updated = now
-	allowed := b.tokens >= 1
-	if allowed {
-		b.tokens--
-	}
+	tokens := b.limiter.TokensAt(now)
+	// AllowN rounds a future reservation to nanoseconds. Reject fractional
+	// deficits, while tolerating the single float step introduced when rate's
+	// reciprocal multiplication replaces division at an exact refill boundary.
+	allowed := tokens >= math.Nextafter(1, 0) && b.limiter.AllowN(now, 1)
 	a.entries[key] = b
 	if allowed {
 		return true, 0
 	}
-	return false, time.Duration((1 - b.tokens) * float64(a.interval))
+	return false, time.Duration((1 - tokens) * float64(a.interval))
 }
 func (a *Admission) Active() int { a.mu.Lock(); defer a.mu.Unlock(); return a.active }

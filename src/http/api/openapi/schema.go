@@ -4,136 +4,140 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
-	"sort"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/getkin/kin-openapi/openapi3gen"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
 )
 
-// TypeSchema is used for explicit per-operation contracts. Runtime validation
-// stays in services; validate tags document only constraints enforced there.
-func TypeSchema(value any, request bool) Schema { return typeSchema(reflect.TypeOf(value), request, 0) }
-func typeSchema(t reflect.Type, request bool, depth int) Schema {
-	if t == nil || depth > 16 {
-		return Schema{}
+// TypeSchema uses kin-openapi's type graph and JSON field discovery. The policy
+// below preserves the API's existing wire contracts; validate tags document
+// service validation and never enable HTTP request validation.
+func TypeSchema(value any, request bool) *openapi3.SchemaRef {
+	if value == nil {
+		return &openapi3.SchemaRef{Value: openapi3.NewSchema()}
 	}
-	if t == reflect.TypeFor[messages.Ref]() {
-		return Schema{"type": "string"}
+	g := openapi3gen.NewGenerator(openapi3gen.UseAllExportedFields(), openapi3gen.ThrowErrorOnCycle(), openapi3gen.CreateFieldNameGenerator(jsonFieldName))
+	// Messages are localized strings at the HTTP boundary, never their internal
+	// descriptors. Preseeding also avoids openapi3gen treating the named Ref
+	// interface as one of kin-openapi's struct reference wrappers.
+	g.Types[reflect.TypeFor[messages.Ref]()] = &openapi3.SchemaRef{Value: openapi3.NewStringSchema()}
+	ref, err := g.NewSchemaRefForValue(value, nil)
+	if err != nil {
+		panic(fmt.Sprintf("cannot generate API schema for %T: %v", value, err))
 	}
-	if t == reflect.TypeFor[json.RawMessage]() {
-		return Schema{}
+	for t, generated := range g.Types {
+		applyTypePolicy(t, generated.Value, request)
 	}
-	if t == reflect.TypeFor[time.Time]() {
-		return Schema{"type": "string", "format": "date-time"}
+	// Field constraints require detached schemas: a required field must not
+	// change nullability or secrecy of another field with the same Go type.
+	for t, generated := range g.Types {
+		for t.Kind() == reflect.Pointer {
+			t = t.Elem()
+		}
+		if t.Kind() != reflect.Struct || t == reflect.TypeFor[time.Time]() {
+			continue
+		}
+		for _, field := range reflect.VisibleFields(t) {
+			name := jsonFieldName(field, "")
+			property := generated.Value.Properties[name]
+			if property == nil {
+				continue
+			}
+			copy := *property.Value
+			applyFieldPolicy(name, field.Tag, &copy, request)
+			generated.Value.Properties[name] = &openapi3.SchemaRef{Value: &copy}
+		}
+	}
+	return ref
+}
+
+func jsonFieldName(field reflect.StructField, _ string) string {
+	name, _, _ := strings.Cut(field.Tag.Get("json"), ",")
+	if name == "" {
+		return field.Name
+	}
+	return name
+}
+
+func applyTypePolicy(t reflect.Type, schema *openapi3.Schema, request bool) {
+	if t == reflect.TypeFor[json.RawMessage]() || t == reflect.TypeFor[messages.Ref]() {
+		return
 	}
 	if t.Kind() == reflect.Pointer {
-		s := typeSchema(t.Elem(), request, depth+1)
-		if _, ok := s["type"]; ok {
-			s["nullable"] = true
+		if schema.Type != nil {
+			schema.Nullable = true
 		}
-		return s
+		for t.Kind() == reflect.Pointer {
+			t = t.Elem()
+		}
 	}
-	switch t.Kind() {
-	case reflect.String:
-		return Schema{"type": "string"}
-	case reflect.Bool:
-		return Schema{"type": "boolean"}
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		return Schema{"type": "integer", "format": "int64"}
-	case reflect.Float32, reflect.Float64:
-		return Schema{"type": "number"}
-	case reflect.Slice:
-		return Schema{"type": "array", "nullable": true, "items": typeSchema(t.Elem(), request, depth+1)}
-	case reflect.Array:
-		return Schema{"type": "array", "items": typeSchema(t.Elem(), request, depth+1)}
-	case reflect.Map:
-		return Schema{"type": "object", "nullable": true, "additionalProperties": typeSchema(t.Elem(), request, depth+1)}
-	case reflect.Struct:
-		properties := map[string]any{}
-		required := []string{}
-		for i := 0; i < t.NumField(); i++ {
-			f := t.Field(i)
-			if !f.IsExported() {
-				continue
-			}
-			tag := f.Tag.Get("json")
-			name := strings.Split(tag, ",")[0]
-			if name == "-" {
-				continue
-			}
-			if f.Anonymous && name == "" {
-				nested := typeSchema(f.Type, request, depth+1)
-				if values, ok := nested["properties"].(map[string]any); ok {
-					for k, v := range values {
-						properties[k] = v
-					}
-				}
-				if values, ok := nested["required"].([]string); ok {
-					required = append(required, values...)
-				}
-				continue
-			}
-			if name == "" {
-				name = f.Name
-			}
-			s := typeSchema(f.Type, request, depth+1)
-			if strings.Contains(strings.ToLower(name), "secret") || name == "sessionToken" {
-				if request {
-					s["writeOnly"] = true
-				} else {
-					s["readOnly"] = true
-				}
-			}
-			for _, rule := range strings.Split(f.Tag.Get("validate"), ",") {
-				if rule == "required" {
-					required = append(required, name)
-					delete(s, "nullable")
-				}
-				if key, value, ok := strings.Cut(rule, "="); ok {
-					if n, err := strconv.Atoi(value); err == nil {
-						if s["type"] == "array" {
-							if key == "min" {
-								s["minItems"] = n
-							}
-							if key == "max" {
-								s["maxItems"] = n
-							}
-						}
-						if s["type"] == "string" {
-							if key == "minBytes" {
-								s["x-minBytes"] = n
-								s["description"] = fmt.Sprintf("Минимум %d байт UTF-8.", n)
-							}
-							if key == "maxBytes" {
-								s["x-maxBytes"] = n
-								prefix, _ := s["description"].(string)
-								s["description"] = strings.TrimSpace(prefix + fmt.Sprintf(" Максимум %d байт UTF-8.", n))
-							}
-						}
-					}
-				}
-			}
-			if !request && !strings.Contains(tag, ",omitempty") {
-				required = append(required, name)
-			}
-			properties[name] = s
-		}
-		s := Schema{"type": "object", "properties": properties, "additionalProperties": false}
-		if len(required) > 0 {
-			seen := map[string]bool{}
-			unique := []string{}
-			for _, name := range required {
-				if !seen[name] {
-					seen[name] = true
-					unique = append(unique, name)
-				}
-			}
-			sort.Strings(unique)
-			s["required"] = unique
-		}
-		return s
+	if schema.Type.Is("integer") {
+		schema.Format, schema.Min, schema.Max = "int64", nil, nil
 	}
-	return Schema{}
+	if schema.Type.Is("number") {
+		schema.Format = ""
+	}
+	if t.Kind() == reflect.Slice || t.Kind() == reflect.Map {
+		schema.Nullable = true
+	}
+	if t.Kind() == reflect.Slice && t.Elem().Kind() == reflect.Uint8 {
+		schema.Type, schema.Format = &openapi3.Types{"array"}, ""
+		schema.Items = &openapi3.SchemaRef{Value: openapi3.NewIntegerSchema().WithFormat("int64")}
+	}
+	if t.Kind() != reflect.Struct || t == reflect.TypeFor[time.Time]() {
+		return
+	}
+	schema.Type = &openapi3.Types{"object"}
+	schema.AdditionalProperties = openapi3.AdditionalProperties{Has: new(false)}
+	for _, field := range reflect.VisibleFields(t) {
+		name := jsonFieldName(field, "")
+		if schema.Properties[name] == nil {
+			continue
+		}
+		if slices.Contains(strings.Split(field.Tag.Get("validate"), ","), "required") || (!request && !slices.Contains(strings.Split(field.Tag.Get("json"), ","), "omitempty")) {
+			schema.Required = append(schema.Required, name)
+		}
+	}
+	slices.Sort(schema.Required)
+	schema.Required = slices.Compact(schema.Required)
+}
+
+func applyFieldPolicy(name string, tag reflect.StructTag, schema *openapi3.Schema, request bool) {
+	if strings.Contains(strings.ToLower(name), "secret") || name == "sessionToken" {
+		schema.WriteOnly, schema.ReadOnly = request, !request
+	}
+	for _, rule := range strings.Split(tag.Get("validate"), ",") {
+		if rule == "required" {
+			schema.Nullable = false
+		}
+		key, value, _ := strings.Cut(rule, "=")
+		n, err := strconv.ParseUint(value, 10, 64)
+		if err != nil {
+			continue
+		}
+		if schema.Type.Is("array") {
+			if key == "min" {
+				schema.MinItems = n
+			}
+			if key == "max" {
+				schema.MaxItems = &n
+			}
+		}
+		if schema.Type.Is("string") && (key == "minBytes" || key == "maxBytes") {
+			if schema.Extensions == nil {
+				schema.Extensions = make(map[string]any)
+			}
+			schema.Extensions["x-"+key] = n
+			if key == "minBytes" {
+				schema.Description = fmt.Sprintf("Минимум %d байт UTF-8.", n)
+			} else {
+				schema.Description = strings.TrimSpace(schema.Description + fmt.Sprintf(" Максимум %d байт UTF-8.", n))
+			}
+		}
+	}
 }

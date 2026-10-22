@@ -17,9 +17,9 @@ import (
 func TestEveryDocumentedOperationResolvesThroughRegistry(t *testing.T) {
 	document := doc.Build(Catalog())
 	total := 0
-	for path, methods := range document.Paths {
+	for path, methods := range document.Paths.Map() {
 		concrete := strings.NewReplacer("{sessionID}", "fixture-session", "{name}", "fixture-name", "{id}", "fixture-id", "{ticket}", "fixture-ticket", "{operation}", "fixture-operation", "{part}", "1", "{connectionID}", "fixture-connection", "{tokenID}", "fixture-token").Replace(path)
-		for method := range methods {
+		for method := range methods.Operations() {
 			total++
 			m := registry.Match(strings.ToUpper(method), concrete)
 			if !m.MethodAllowed || m.Template != path || m.Operation.Handler == nil {

@@ -10,19 +10,19 @@ import (
 )
 
 type Config struct {
-	State State
+	State State `env:"-"`
 
-	Language                     string
-	Listen                       string
-	Origin                       string
-	Endpoints                    endpoint.Policy
-	SessionTTL                   time.Duration
-	TokenTTL                     time.Duration
-	TemporaryBytes               int64
+	Language                     string          `env:"API_LANGUAGE"`
+	Listen                       string          `env:"API_LISTEN"`
+	Origin                       string          `env:"APP_ORIGIN"`
+	Endpoints                    endpoint.Policy `env:"-"`
+	SessionTTL                   time.Duration   `env:"-"`
+	TokenTTL                     time.Duration   `env:"API_TOKEN_TTL"`
+	TemporaryBytes               int64           `env:"API_TEMPORARY_BYTES"`
 	Limits                       Limits
-	TrustedProxies               []netip.Prefix
-	ConditionalDeleteEndpoints   map[string]bool
-	ConditionalCompleteEndpoints map[string]bool
+	TrustedProxies               []netip.Prefix  `env:"-"`
+	ConditionalDeleteEndpoints   map[string]bool `env:"-"`
+	ConditionalCompleteEndpoints map[string]bool `env:"-"`
 }
 
 // Clone detaches mutable security settings. Callers own the returned snapshot.
@@ -37,31 +37,31 @@ func (c Config) Clone() Config {
 
 // Limits are process-local budgets; sessions cannot consume all transfer slots.
 type Limits struct {
-	Transfers           int
-	TransfersPerSession int
-	Logins              int
-	LoginBurst          int
-	LoginInterval       time.Duration
+	Transfers           int           `env:"API_MAX_TRANSFERS"`
+	TransfersPerSession int           `env:"API_MAX_TRANSFERS_PER_SESSION"`
+	Logins              int           `env:"API_MAX_LOGINS"`
+	LoginBurst          int           `env:"API_LOGIN_BURST"`
+	LoginInterval       time.Duration `env:"API_LOGIN_REFILL"`
 }
 
 // Database describes connection fields without exposing a driver-specific DSN.
 type Database struct {
-	Driver     string
-	Host       string
-	Port       int
-	Name       string
-	User       string
-	Password   string `json:"-"`
-	SQLitePath string
-	TLSMode    string
-	TLSCAFile  string
+	Driver     string `env:"DRIVER"`
+	Host       string `env:"HOST"`
+	Port       int    `env:"PORT"`
+	Name       string `env:"NAME"`
+	User       string `env:"USER"`
+	Password   string `env:"PASSWORD" json:"-"`
+	SQLitePath string `env:"SQLITE_PATH"`
+	TLSMode    string `env:"TLS_MODE"`
+	TLSCAFile  string `env:"TLS_CA_FILE"`
 }
 
 // State selects the persistence adapter and encryption settings.
 type State struct {
-	Database
-	KeyringFile string
-	MaxOpen     int
-	MaxIdle     int
-	Lifetime    time.Duration
+	Database    `env:"-"`
+	KeyringFile string        `env:"API_STATE_KEYRING_FILE"`
+	MaxOpen     int           `env:"API_DB_MAX_OPEN"`
+	MaxIdle     int           `env:"API_DB_MAX_IDLE"`
+	Lifetime    time.Duration `env:"API_DB_CONN_LIFETIME"`
 }

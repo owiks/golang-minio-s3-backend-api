@@ -7,6 +7,10 @@ Go API для работы с S3-совместимыми хранилищами
 В основе — официальные SDK: [minio-go/v7](https://github.com/minio/minio-go)
 для S3, [madmin-go/v3](https://github.com/minio/madmin-go) для MinIO Admin API
 и [minio/pkg/v3](https://github.com/minio/pkg) для IAM-политик.
+Маршруты сопоставляет [chi](https://github.com/go-chi/chi), OpenAPI строится
+и проверяется через [kin-openapi](https://github.com/getkin/kin-openapi).
+Настройки ENV разбирает [env](https://github.com/caarlos0/env), частоту попыток
+входа ограничивает [x/time/rate](https://pkg.go.dev/golang.org/x/time/rate).
 Версии закреплены в [go.mod](go.mod) и [go.sum](go.sum).
 
 ## Возможности

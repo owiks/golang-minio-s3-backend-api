@@ -208,3 +208,47 @@ func TestRegistryOwnsInputMetadata(t *testing.T) {
 		t.Fatal("input metadata aliases live registry")
 	}
 }
+
+func TestRegistryPreservesTotalLiteralPriority(t *testing.T) {
+	r, err := NewRegistry([]APIRoute{
+		registryRoute("items", "{name}/specific/detail", "POST"),
+		registryRoute("items", "fixed/{view}/{id}", "GET"),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := r.Match("GET", "/api/sessions/private/items/fixed/specific/detail")
+	if !m.Found || m.MethodAllowed || m.Template != "/api/sessions/{sessionID}/items/{name}/specific/detail" || len(m.Allow) != 1 || m.Allow[0] != "POST" {
+		t.Fatalf("segment precedence replaced catalog priority: %+v", m)
+	}
+}
+
+func TestRegistryDoesNotInterpretParametersOrLiteralAsterisks(t *testing.T) {
+	for _, tc := range []struct {
+		suffix, value, key string
+	}{
+		{"{name:[0-9]+}", "letters", "name:[0-9]+"},
+		{"{*}", "value", "*"},
+		{"a*b", "a*b", ""},
+		{"a*b$", "a*b$", ""},
+		{`a*b\$`, `a*b\$`, ""},
+		{`a*b\`, `a*b\`, ""},
+		{"^a*b$", "^a*b$", ""},
+	} {
+		r, err := NewRegistry([]APIRoute{registryRoute("items", tc.suffix, "GET")})
+		if err != nil {
+			t.Fatal(err)
+		}
+		m := r.Match("GET", "/api/sessions/private/items/"+tc.value)
+		if !m.MethodAllowed || tc.key != "" && m.Params[tc.key] != tc.value {
+			t.Fatalf("catalog acquired chi pattern semantics: %+v", m)
+		}
+		if tc.key == "" {
+			for _, value := range []string{"another", tc.value + "extra", "extra" + tc.value, tc.value + "/extra", tc.value + "\n"} {
+				if r.Match("GET", "/api/sessions/private/items/"+value).Found {
+					t.Errorf("literal %q matched %q", tc.value, value)
+				}
+			}
+		}
+	}
+}

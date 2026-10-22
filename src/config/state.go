@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -21,31 +20,30 @@ func loadState(c *Config, env func(string) string) error {
 	if err != nil {
 		return err
 	}
-	s.KeyringFile = strings.TrimSpace(env("API_STATE_KEYRING_FILE"))
+	invalid, err := parseEnvironment(s, env, "")
+	if err != nil {
+		return err
+	}
 	if s.Driver != "memory" && s.KeyringFile == "" {
 		return errors.New("persistent API_DB_DRIVER requires API_STATE_KEYRING_FILE")
 	}
-	for _, o := range []struct {
-		name   string
-		target *int
-	}{{"API_DB_MAX_OPEN", &s.MaxOpen}, {"API_DB_MAX_IDLE", &s.MaxIdle}} {
-		if v := strings.TrimSpace(env(o.name)); v != "" {
-			n, err := strconv.Atoi(v)
-			if err != nil || n < 1 || n > 100 {
-				return errors.New("invalid " + o.name)
-			}
-			*o.target = n
+	for _, option := range []struct {
+		name  string
+		field string
+		value int
+	}{
+		{"API_DB_MAX_OPEN", "MaxOpen", s.MaxOpen},
+		{"API_DB_MAX_IDLE", "MaxIdle", s.MaxIdle},
+	} {
+		if invalid[option.field] || option.value < 1 || option.value > 100 {
+			return errors.New("invalid " + option.name)
 		}
 	}
 	if s.MaxIdle > s.MaxOpen {
 		return errors.New("API_DB_MAX_IDLE exceeds API_DB_MAX_OPEN")
 	}
-	if v := strings.TrimSpace(env("API_DB_CONN_LIFETIME")); v != "" {
-		d, e := time.ParseDuration(v)
-		if e != nil || d < time.Second || d > 24*time.Hour {
-			return errors.New("invalid API_DB_CONN_LIFETIME")
-		}
-		s.Lifetime = d
+	if invalid["Lifetime"] || s.Lifetime < time.Second || s.Lifetime > 24*time.Hour {
+		return errors.New("invalid API_DB_CONN_LIFETIME")
 	}
 	return nil
 }
@@ -53,20 +51,13 @@ func loadState(c *Config, env func(string) string) error {
 // LoadDatabaseEnv uses the same field contract for the API and offline transfer.
 // Passwords are kept verbatim; validation errors contain variable names only.
 func LoadDatabaseEnv(env func(string) string, prefix string) (Database, error) {
-	d := Database{
-		Driver: strings.TrimSpace(env(prefix + "DRIVER")),
-		Host:   strings.TrimSpace(env(prefix + "HOST")),
-		Name:   env(prefix + "NAME"), User: env(prefix + "USER"), Password: env(prefix + "PASSWORD"),
-		SQLitePath: env(prefix + "SQLITE_PATH"),
-		TLSMode:    strings.TrimSpace(env(prefix + "TLS_MODE")),
-		TLSCAFile:  strings.TrimSpace(env(prefix + "TLS_CA_FILE")),
+	var d Database
+	invalid, err := parseEnvironment(&d, env, prefix, "NAME", "USER", "PASSWORD", "SQLITE_PATH")
+	if err != nil {
+		return Database{}, err
 	}
-	if port := strings.TrimSpace(env(prefix + "PORT")); port != "" {
-		n, err := strconv.Atoi(port)
-		if err != nil || n < 1 || n > 65535 {
-			return Database{}, errors.New("invalid " + prefix + "PORT")
-		}
-		d.Port = n
+	if invalid["Port"] || strings.TrimSpace(env(prefix+"PORT")) != "" && (d.Port < 1 || d.Port > 65535) {
+		return Database{}, errors.New("invalid " + prefix + "PORT")
 	}
 	return d.validated(prefix)
 }

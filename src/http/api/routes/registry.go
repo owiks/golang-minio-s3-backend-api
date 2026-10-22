@@ -2,9 +2,14 @@ package routes
 
 import (
 	"fmt"
+	"net/http"
 	"net/url"
+	"regexp"
 	"sort"
+	"strconv"
 	"strings"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type entry struct {
@@ -18,8 +23,16 @@ type entry struct {
 // Registry is compiled once at startup. It owns its catalog so callers cannot
 // change live dispatch, budgets or documentation by mutating a returned slice.
 type Registry struct {
-	entries []entry
+	paths   []pathTier
 	catalog []APIRoute
+}
+
+// Paths are resolved independently of methods so a wrong-method literal route
+// cannot fall through to a less specific parameter route. Separate chi trees
+// retain the catalog's total-literal priority, rather than chi's segment priority.
+type pathTier struct {
+	router *chi.Mux
+	routes map[string][]entry
 }
 
 func cloneOperation(op Operation) Operation {
@@ -46,6 +59,7 @@ func (r *Registry) Catalog() []APIRoute { return cloneCatalog(r.catalog) }
 
 func NewRegistry(catalog []APIRoute) (*Registry, error) {
 	r := &Registry{catalog: cloneCatalog(catalog)}
+	var entries []entry
 	for _, route := range r.catalog {
 		if route.Tag == "" || len(route.Operations) == 0 {
 			return nil, fmt.Errorf("incomplete API route: %s", route.Path)
@@ -100,7 +114,7 @@ func NewRegistry(catalog []APIRoute) (*Registry, error) {
 			if !route.Public && !names["sessionID"] {
 				return nil, fmt.Errorf("missing session parameter: %s", template)
 			}
-			for _, previous := range r.entries {
+			for _, previous := range entries {
 				if !overlap(previous, e) {
 					continue
 				}
@@ -108,10 +122,23 @@ func NewRegistry(catalog []APIRoute) (*Registry, error) {
 					return nil, fmt.Errorf("ambiguous API operation: %s %s", op.Method, template)
 				}
 			}
-			r.entries = append(r.entries, e)
+			entries = append(entries, e)
 		}
 	}
-	sort.SliceStable(r.entries, func(i, j int) bool { return r.entries[i].literals > r.entries[j].literals })
+	sort.SliceStable(entries, func(i, j int) bool { return entries[i].literals > entries[j].literals })
+	for i, e := range entries {
+		if i == 0 || entries[i-1].literals != e.literals {
+			r.paths = append(r.paths, pathTier{router: chi.NewRouter(), routes: make(map[string][]entry)})
+		}
+		tier := &r.paths[len(r.paths)-1]
+		pattern := chiPattern(e.parts)
+		if _, exists := tier.routes[pattern]; !exists {
+			// Find, not ServeHTTP, is used below. The execution pipeline remains
+			// responsible for authentication, method errors and controller budgets.
+			tier.router.Get(pattern, http.NotFound)
+		}
+		tier.routes[pattern] = append(tier.routes[pattern], e)
+	}
 	return r, nil
 }
 func overlap(a, b entry) bool {
@@ -138,62 +165,71 @@ type Match struct {
 	Allow         []string
 }
 
+// Internal parameter names prevent catalog parameter names from introducing
+// chi regular expressions. A literal asterisk must also remain literal.
+func chiPattern(parts []string) string {
+	pattern := make([]string, len(parts))
+	for i, part := range parts {
+		switch {
+		case strings.HasPrefix(part, "{"):
+			pattern[i] = "{p" + strconv.Itoa(i) + "}"
+		case strings.Contains(part, "*"):
+			// Explicit anchors avoid chi mistaking an escaped literal '$' for
+			// the regexp's end anchor when it normalizes custom patterns.
+			pattern[i] = "{l" + strconv.Itoa(i) + ":^(?:" + regexp.QuoteMeta(part) + ")$}"
+		default:
+			pattern[i] = part
+		}
+	}
+	return "/" + strings.Join(pattern, "/")
+}
+
 func (r *Registry) Match(method, path string) Match {
 	// Historically both session-root spellings close the same authenticated session.
 	if strings.HasPrefix(path, "/api/sessions/") && strings.Count(path, "/") == 4 && strings.HasSuffix(path, "/") {
 		path = strings.TrimSuffix(path, "/")
 	}
-	parts := strings.Split(strings.TrimPrefix(path, "/"), "/")
-	var result Match
-	specificity := -1
-	for _, e := range r.entries {
-		if specificity >= 0 && e.literals < specificity {
-			break
-		}
-		if len(parts) != len(e.parts) {
-			continue
-		}
-		matches := true
-		for i, p := range e.parts {
-			if parts[i] == "" || p != parts[i] && !strings.HasPrefix(p, "{") {
-				matches = false
-				break
-			}
-		}
-		if !matches {
-			continue
-		}
-		if !result.Found {
-			specificity = e.literals
-			params := map[string]string{}
-			for i, p := range e.parts {
-				if strings.HasPrefix(p, "{") {
-					params[p[1:len(p)-1]] = parts[i]
-				}
-			}
-			rest := ""
-			if e.operation.Suffix != "" {
-				rest = strings.Join(parts[len(parts)-len(strings.Split(e.operation.Suffix, "/")):], "/")
-			}
-			result = Match{Route: e.route, Operation: e.operation, Template: e.template, Params: params, Rest: rest, Found: true}
-		}
-		result.Allow = append(result.Allow, e.operation.Method)
-		if e.operation.Method == method {
-			result.MethodAllowed = true
-			result.Operation = e.operation
-			result.Route = e.route
-			if e.operation.Suffix == "" {
-				result.Rest = ""
-			} else {
-				result.Rest = strings.Join(parts[len(parts)-len(strings.Split(e.operation.Suffix, "/")):], "/")
-			}
-		}
+	if !strings.HasPrefix(path, "/") {
+		path = "/" + path
 	}
-	sort.Strings(result.Allow)
-	// Match exposes execution metadata, not the registry's backing catalog slices.
-	result.Route.Operations = nil
-	result.Operation = cloneOperation(result.Operation)
-	return result
+	for _, tier := range r.paths {
+		ctx := chi.NewRouteContext()
+		pattern := tier.router.Find(ctx, http.MethodGet, path)
+		if pattern == "" {
+			continue
+		}
+		entries := tier.routes[pattern]
+		first := entries[0]
+		params := make(map[string]string)
+		for i, part := range first.parts {
+			if strings.HasPrefix(part, "{") {
+				value := ctx.URLParam("p" + strconv.Itoa(i))
+				if value == "" {
+					return Match{}
+				}
+				params[part[1:len(part)-1]] = value
+			}
+		}
+		result := Match{Route: first.route, Operation: first.operation, Template: first.template, Params: params, Found: true}
+		for _, e := range entries {
+			result.Allow = append(result.Allow, e.operation.Method)
+			if e.operation.Method == method {
+				result.MethodAllowed = true
+				result.Operation = e.operation
+				result.Route = e.route
+			}
+		}
+		if suffix := result.Operation.Suffix; suffix != "" {
+			parts := strings.Split(strings.TrimPrefix(path, "/"), "/")
+			result.Rest = strings.Join(parts[len(parts)-len(strings.Split(suffix, "/")):], "/")
+		}
+		sort.Strings(result.Allow)
+		// Match exposes execution metadata, not the registry's backing catalog slices.
+		result.Route.Operations = nil
+		result.Operation = cloneOperation(result.Operation)
+		return result
+	}
+	return Match{}
 }
 
 func (m Match) Name(method string) string {
