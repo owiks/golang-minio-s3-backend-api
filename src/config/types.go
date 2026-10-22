@@ -19,6 +19,7 @@ type Config struct {
 	Endpoints                    endpoint.Policy `env:"-"`
 	SessionTTL                   time.Duration   `env:"-"`
 	TokenTTL                     time.Duration   `env:"API_TOKEN_TTL"`
+	OperatorToken                string          `env:"API_OPERATOR_TOKEN" json:"-"`
 	TemporaryBytes               int64           `env:"API_TEMPORARY_BYTES"`
 	Operations                   operationpolicy.Policy
 	Limits                       Limits

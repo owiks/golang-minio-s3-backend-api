@@ -64,14 +64,15 @@ type State struct {
 	Auth                           *authstate.Manager    `json:"-"`
 	Commands                       commandlog.Repository `json:"-"`
 	Operations                     operations.Repository `json:"-"`
-	Sessions                       *SessionStore         `json:"-"`
-	Archives                       *ArchiveStore         `json:"-"`
-	Invites                        *UploadInviteStore    `json:"-"`
-	Shares                         *FolderShareStore     `json:"-"`
-	ZIPs                           *ZIPCache             `json:"-"`
-	Capabilities                   *CapabilityStore      `json:"-"`
-	Multipart                      *MultipartStore       `json:"-"`
-	Temporary                      *staging.Budget       `json:"-"`
+	operationMonitor               *operations.Monitor
+	Sessions                       *SessionStore      `json:"-"`
+	Archives                       *ArchiveStore      `json:"-"`
+	Invites                        *UploadInviteStore `json:"-"`
+	Shares                         *FolderShareStore  `json:"-"`
+	ZIPs                           *ZIPCache          `json:"-"`
+	Capabilities                   *CapabilityStore   `json:"-"`
+	Multipart                      *MultipartStore    `json:"-"`
+	Temporary                      *staging.Budget    `json:"-"`
 	revisions                      *AccessRevisions
 	closeOnce                      sync.Once
 	mutations                      coordination.Locks
@@ -100,9 +101,10 @@ func NewWithOperations(c settings.Config, manager *authstate.Manager, commands c
 	temporary := staging.New(c.TemporaryBytes)
 	app := &State{
 		config: c, Auth: manager, Commands: commands, Operations: jobs, Sessions: sessions, Temporary: temporary,
-		Invites:      NewUploadInviteStore(),
-		Shares:       NewFolderShareStore(),
-		Capabilities: NewCapabilityStore(),
+		operationMonitor: operations.NewMonitor(),
+		Invites:          NewUploadInviteStore(),
+		Shares:           NewFolderShareStore(),
+		Capabilities:     NewCapabilityStore(),
 
 		revisions:       NewAccessRevisions(),
 		logins:          coordination.NewAdmission(c.Limits.Logins, 2),

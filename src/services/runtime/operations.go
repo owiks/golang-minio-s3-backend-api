@@ -133,6 +133,7 @@ func (a operationAdmission) Acquire(ctx context.Context, scope operations.Scope)
 
 func (app *State) RunOperations(ctx context.Context) {
 	operations.Worker{Repository: app.Operations, Executor: operationExecutor{app}, Admission: operationAdmission{app}, Concurrency: 2,
-		Report: func(code string) { slog.Warn("background operation worker", "code", code) },
+		Monitor: app.operationMonitor,
+		Report:  func(code string) { slog.Warn("background operation worker", "code", code) },
 	}.Run(ctx)
 }

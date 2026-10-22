@@ -86,6 +86,12 @@ func NewRegistry(catalog []APIRoute) (*Registry, error) {
 				return nil, fmt.Errorf("invalid access invalidation: %s", route.Path)
 			}
 			template := route.Template(op)
+			if op.Operator && (!route.Public || op.Method != http.MethodGet || !strings.HasPrefix(template, "/api/operator/") || len(op.Scopes) != 0) {
+				return nil, fmt.Errorf("invalid operator operation: %s", template)
+			}
+			if strings.HasPrefix(template, "/api/operator/") && !op.Operator {
+				return nil, fmt.Errorf("operator operation without authentication: %s", template)
+			}
 			if route.Public && strings.HasPrefix(template, "/api/sessions/") {
 				return nil, fmt.Errorf("public operation inside session namespace: %s", template)
 			}

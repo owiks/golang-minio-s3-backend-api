@@ -21,10 +21,11 @@ func Build(catalog []routes.APIRoute) *openapi3.T {
 		Paths:   openapi3.NewPaths(),
 		Components: &openapi3.Components{
 			SecuritySchemes: openapi3.SecuritySchemes{
-				"SessionCookie": {Value: &openapi3.SecurityScheme{Type: "apiKey", In: "header", Name: "Cookie", Description: "Cookie minio_session_{sessionID}, полученная после подключения. Браузер передаёт её автоматически; JavaScript не читает HttpOnly cookie."}},
-				"CSRF":          {Value: &openapi3.SecurityScheme{Type: "apiKey", In: "header", Name: "X-CSRF-Token", Description: "csrf из ответа POST /api/sessions; изменения также требуют Origin интерфейса."}},
-				"SessionBearer": {Value: &openapi3.SecurityScheme{Type: "http", Scheme: "bearer", Description: "token из POST /api/tokens или connections/{connectionID}/tokens, для соответствующего id в пути сессии. Не требует cookie, Origin и CSRF. Неверный Authorization возвращает 401 без перехода к cookie. Не является токеном приглашения/общей папки или STS-токеном MinIO."}},
-				"BearerGrant":   {Value: &openapi3.SecurityScheme{Type: "http", Scheme: "bearer", Description: "Токен приглашения загрузки или общей папки. Не сохраняется в Swagger UI."}},
+				"SessionCookie":  {Value: &openapi3.SecurityScheme{Type: "apiKey", In: "header", Name: "Cookie", Description: "Cookie minio_session_{sessionID}, полученная после подключения. Браузер передаёт её автоматически; JavaScript не читает HttpOnly cookie."}},
+				"CSRF":           {Value: &openapi3.SecurityScheme{Type: "apiKey", In: "header", Name: "X-CSRF-Token", Description: "csrf из ответа POST /api/sessions; изменения также требуют Origin интерфейса."}},
+				"SessionBearer":  {Value: &openapi3.SecurityScheme{Type: "http", Scheme: "bearer", Description: "token из POST /api/tokens или connections/{connectionID}/tokens, для соответствующего id в пути сессии. Не требует cookie, Origin и CSRF. Неверный Authorization возвращает 401 без перехода к cookie. Не является токеном приглашения/общей папки или STS-токеном MinIO."}},
+				"BearerGrant":    {Value: &openapi3.SecurityScheme{Type: "http", Scheme: "bearer", Description: "Токен приглашения загрузки или общей папки. Не сохраняется в Swagger UI."}},
+				"OperatorBearer": {Value: &openapi3.SecurityScheme{Type: "http", Scheme: "bearer", Description: "Отдельный API_OPERATOR_TOKEN оператора API. Не является пользовательским токеном или ключом MinIO. Только чтение сводки фоновой обработки."}},
 			},
 			Schemas: openapi3.Schemas{"Error": {Value: errorSchema()}},
 		},
@@ -34,6 +35,11 @@ func Build(catalog []routes.APIRoute) *openapi3.T {
 			path := route.Template(op)
 			documented := newOperation(path, route.Tag, op.Method, op.Summary, route.Public, d.Components.Schemas["Error"])
 			applyInput(documented, op)
+			if op.Operator {
+				security := openapi3.SecurityRequirements{{"OperatorBearer": {}}}
+				documented.Security = &security
+				documented.Responses.Value("401").Value.Headers["WWW-Authenticate"] = header(openapi3.NewStringSchema(), "Bearer realm=\"minio-s3-operator\", error=\"invalid_token\" при неверном операторском токене.")
+			}
 			if len(op.Scopes) > 0 {
 				documented.Extensions = map[string]any{"x-api-scopes": append([]string(nil), op.Scopes...)}
 			}

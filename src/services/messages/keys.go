@@ -611,7 +611,7 @@ func AllIDs() []ID {
 	return []ID{
 		OperationInvalid, OperationNotFound, OperationConflict, OperationLimit, OperationUnavailable,
 		CommandInvalid, CommandConflict, CommandRunning, CommandUnknown, CommandUnavailable, CommandLimit,
-		OperationDisabled, AuthStateUnavailable, AuthStateInvalid, AuthStateDenied, AuthStateNotFound, AuthStateConflict, AuthStateLimit, ResourceNameInvalid, Combined, ManagementUnsupported, RouteNotFound, HTTPStopping,
+		OperationDisabled, OperatorAuthentication, AuthStateUnavailable, AuthStateInvalid, AuthStateDenied, AuthStateNotFound, AuthStateConflict, AuthStateLimit, ResourceNameInvalid, Combined, ManagementUnsupported, RouteNotFound, HTTPStopping,
 		HttpInvalidBearerToken,
 		SessionsInvalidTokenTTL,
 		HttpMethodNotAllowed,

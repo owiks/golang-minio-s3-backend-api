@@ -2475,5 +2475,9 @@
   {
     "id": "operation.unavailable",
     "other": "The operation store is unavailable. Try again later."
+  },
+  {
+    "id": "operator.authentication",
+    "other": "A valid operator token is required."
   }
 ]

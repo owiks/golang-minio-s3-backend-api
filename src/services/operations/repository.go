@@ -13,6 +13,7 @@ import (
 // Repository implementations serialize each transition, including admission and
 // expired-lease recovery, across all workers sharing the same store.
 type Repository interface {
+	SummaryReader
 	Insert(context.Context, Scope, Spec, time.Time, time.Time) (Snapshot, error)
 	Get(context.Context, Scope, string) (Snapshot, error)
 	List(context.Context, Scope) ([]Snapshot, error)

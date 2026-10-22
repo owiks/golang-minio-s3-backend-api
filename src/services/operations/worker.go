@@ -29,6 +29,7 @@ type Worker struct {
 	Lease       time.Duration
 	Poll        time.Duration
 	Now         func() time.Time
+	Monitor     *Monitor
 	// StepTimeout may shorten the execution budget; it cannot exceed 30 minutes.
 	StepTimeout time.Duration
 	// Report receives only stable classifications, never raw upstream/panic text.
@@ -61,6 +62,8 @@ func (w Worker) Run(ctx context.Context) {
 	if n > 16 {
 		n = 16
 	}
+	w.Monitor.Started(n, w.clock())
+	defer func() { w.Monitor.Stopped(w.clock()) }()
 	poll := w.Poll
 	if poll < 10*time.Millisecond {
 		poll = 500 * time.Millisecond
@@ -98,6 +101,8 @@ func (w Worker) Run(ctx context.Context) {
 
 func failureCode(err error) string {
 	switch {
+	case err == nil:
+		return ""
 	case errors.Is(err, ErrNotFound), errors.Is(err, context.Canceled):
 		return ""
 	case errors.Is(err, ErrUnavailable):
@@ -123,6 +128,8 @@ func (w Worker) report(code string) {
 }
 
 func (w Worker) RunOnce(ctx context.Context) (resultErr error) {
+	w.Monitor.Polled(w.clock())
+	defer func() { w.Monitor.Failure(failureCode(resultErr), w.clock()) }()
 	var s Snapshot
 	// A defective executor is isolated to its claimed job. Persist a neutral
 	// result without logging panic values, which may contain credentials.
@@ -161,6 +168,8 @@ func (w Worker) RunOnce(ctx context.Context) (resultErr error) {
 	if err != nil || s.Terminal() {
 		return err
 	}
+	endStep := w.Monitor.BeginStep()
+	defer endStep()
 	budget := w.StepTimeout
 	if budget <= 0 || budget > MaxStepDuration {
 		budget = MaxStepDuration
@@ -221,6 +230,9 @@ func (w Worker) save(s Snapshot, c Checkpoint) (Snapshot, error) {
 	defer cancel()
 	for range 3 {
 		next, err := w.Repository.Save(ctx, s.ID, s.LeaseID, s.Revision, c, w.clock())
+		if err == nil {
+			w.Monitor.Checkpoint(next, c, w.clock())
+		}
 		if !errors.Is(err, ErrConflict) {
 			return next, err
 		}

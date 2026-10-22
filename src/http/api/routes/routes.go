@@ -54,6 +54,9 @@ type Operation struct {
 	Long              bool
 	Mutation          MutationScope
 	InvalidatesAccess bool
+	// Operator requires the independent process operator credential; session
+	// permissions and cookies never grant access to shared queue metadata.
+	Operator bool
 }
 
 // Session routes use relative paths; public routes use absolute paths.

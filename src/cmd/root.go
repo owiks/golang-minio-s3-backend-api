@@ -36,7 +36,7 @@ func newRootCommand(start func() error, output, errorOutput io.Writer) *cobra.Co
 	command.SetErr(errorOutput)
 	command.CompletionOptions.DisableDefaultCmd = true
 	command.SetFlagErrorFunc(func(_ *cobra.Command, _ error) error { return errMigrationCommand })
-	command.AddCommand(newStateCommand(), newMigrateCommand())
+	command.AddCommand(newStateCommand(), newMigrateCommand(), newOperationsCommand())
 	return command
 }
 

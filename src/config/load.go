@@ -12,9 +12,20 @@ import (
 	"time"
 
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/endpoint"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/operatoraccess"
 )
 
 func Load() (Config, error) { return LoadEnv(os.Getenv) }
+
+// LoadOperatorToken permits the live-status CLI to read its one credential
+// without opening state or requiring unrelated database configuration.
+func LoadOperatorToken() (string, error) {
+	value := os.Getenv("API_OPERATOR_TOKEN")
+	if !operatoraccess.ValidToken(value) {
+		return "", errors.New("invalid API_OPERATOR_TOKEN")
+	}
+	return value, nil
+}
 
 // LoadEnv permits isolated configuration tests without changing process state.
 // Errors contain variable names only; environment values can include secrets.
@@ -23,7 +34,7 @@ func LoadEnv(getenv func(string) string) (Config, error) {
 	if err := loadState(&c, getenv); err != nil {
 		return Config{}, err
 	}
-	invalid, err := parseEnvironment(&c, getenv, "")
+	invalid, err := parseEnvironment(&c, getenv, "", "API_OPERATOR_TOKEN")
 	if err != nil {
 		return Config{}, err
 	}
@@ -39,6 +50,9 @@ func LoadEnv(getenv func(string) string) (Config, error) {
 	}
 	if invalid["TokenTTL"] || c.TokenTTL < time.Second || c.TokenTTL > 24*time.Hour || c.TokenTTL%time.Second != 0 {
 		return Config{}, errors.New("invalid API_TOKEN_TTL")
+	}
+	if c.OperatorToken != "" && !operatoraccess.ValidToken(c.OperatorToken) {
+		return Config{}, errors.New("invalid API_OPERATOR_TOKEN")
 	}
 	if c.Language != "auto" && c.Language != "en" && c.Language != "ru" {
 		return Config{}, errors.New("invalid API_LANGUAGE")

@@ -68,6 +68,17 @@ func executeOperation(app *runtimesvc.State, w http.ResponseWriter, r *http.Requ
 	if !match.Found {
 		return apperror.New(404, "NotFound", messages.RouteNotFound)
 	}
+	if match.Operation.Operator {
+		if err := app.AuthorizeOperator(r.Header.Values("Authorization")); err != nil {
+			if apperror.Public(err).Status == http.StatusUnauthorized {
+				w.Header().Set("WWW-Authenticate", `Bearer realm="minio-s3-operator", error="invalid_token"`)
+			}
+			return err
+		}
+		if r.URL.RawQuery != "" || r.URL.ForceQuery {
+			return apperror.New(400, "InvalidOperation", messages.OperationInvalid)
+		}
+	}
 	if !match.MethodAllowed {
 		w.Header().Set("Allow", strings.Join(match.Allow, ", "))
 		return apperror.New(405, "MethodNotAllowed", messages.HttpMethodNotAllowed)
