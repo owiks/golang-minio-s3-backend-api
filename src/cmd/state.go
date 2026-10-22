@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/spf13/cobra"
 
 	"github.com/owiks/golang-minio-s3-backend-api/src/config"
 	"github.com/owiks/golang-minio-s3-backend-api/src/persistence"
@@ -20,25 +21,99 @@ import (
 
 var errStateCommand = errors.New("invalid state command; use: state keygen|key-add|migrate|verify|backup|restore|transfer|reencrypt|prune")
 
+type stateOptions struct {
+	before        string
+	out           string
+	in            string
+	keyfile       string
+	offline       bool
+	targetKeyring string
+}
+
+func newStateCommand() *cobra.Command {
+	command := &cobra.Command{
+		Use: "state", Short: "Maintain connections, access records and encryption keys",
+		SilenceUsage: true, SilenceErrors: true,
+		Args: noCommandArguments(errStateCommand),
+		RunE: func(_ *cobra.Command, _ []string) error { return errStateCommand },
+	}
+	command.SetFlagErrorFunc(func(_ *cobra.Command, _ error) error { return errStateCommand })
+	for _, action := range []struct{ name, description string }{
+		{"keygen", "Create a new private keyring file without overwriting existing files"},
+		{"key-add", "Add and activate a key while retaining existing decryption keys"},
+		{"verify", "Verify stored connections and access records"},
+		{"backup", "Export persistent state to a new private backup file"},
+		{"restore", "Restore a backup into an empty database and revoke restored access"},
+		{"transfer", "Transfer state to API_TARGET_DB_* while preserving access"},
+		{"reencrypt", "Reencrypt connections with the active key"},
+		{"prune", "Remove expired access records before an absolute retention boundary"},
+	} {
+		command.AddCommand(newStateAction(action.name, action.description))
+	}
+	// Compatibility alias: migration remains explicit and never runs as part of Open.
+	alias := newMigrationAction("up", "Apply migrations; compatibility alias for migrate up")
+	alias.Use = "migrate"
+	command.AddCommand(alias)
+	return command
+}
+
+func newStateAction(name, description string) *cobra.Command {
+	options := stateOptions{}
+	command := &cobra.Command{
+		Use: name, Short: description,
+		Args: noCommandArguments(errStateCommand),
+		RunE: maintenanceRun(func(ctx context.Context, output io.Writer) error {
+			return executeState(ctx, name, options, output)
+		}),
+	}
+	switch name {
+	case "keygen", "backup":
+		command.Flags().StringVar(&options.out, "out", "", "New output file (required)")
+	case "key-add":
+		command.Flags().StringVar(&options.keyfile, "file", "", "Existing keyring file (required)")
+	case "restore":
+		command.Flags().StringVar(&options.in, "in", "", "Input backup file (required)")
+		command.Flags().BoolVar(&options.offline, "offline", false, "Confirm all API writers on every host are stopped")
+	case "transfer":
+		command.Flags().BoolVar(&options.offline, "offline", false, "Confirm all API writers on every host are stopped")
+		command.Flags().StringVar(&options.targetKeyring, "target-keyring-file", "", "Destination keyring file")
+	case "prune":
+		command.Flags().StringVar(&options.before, "before", "", "Absolute expiry retention boundary in RFC3339 (required)")
+	}
+	return command
+}
+
 func stateCommand(ctx context.Context, args []string) error {
-	if len(args) == 0 {
-		return errStateCommand
-	}
-	name := args[0]
-	// Compatibility alias: migration remains an explicit command, never part of Open.
-	if name == "migrate" {
-		return migrateCommand(ctx, append([]string{"up"}, args[1:]...), os.Stdout)
-	}
-	flags := flag.NewFlagSet("state "+name, flag.ContinueOnError)
-	flags.SetOutput(io.Discard)
-	before := flags.String("before", "", "absolute expiry retention boundary, RFC3339")
-	out := flags.String("out", "", "new output file")
-	in := flags.String("in", "", "input backup")
-	keyfile := flags.String("file", "", "keyring file")
-	offline := flags.Bool("offline", false, "API writers are stopped")
-	targetKeyring := flags.String("target-keyring-file", "", "destination keyring file")
-	if flags.Parse(args[1:]) != nil || flags.NArg() != 0 {
-		return errStateCommand
+	command := newStateCommand()
+	command.SetArgs(append([]string{}, args...))
+	command.SetOut(os.Stdout)
+	command.SetErr(io.Discard)
+	return command.ExecuteContext(ctx)
+}
+
+func executeState(ctx context.Context, name string, options stateOptions, output io.Writer) error {
+	// Validate destructive command assertions before opening persistent state.
+	switch name {
+	case "keygen", "backup":
+		if options.out == "" {
+			return errStateCommand
+		}
+	case "key-add":
+		if options.keyfile == "" {
+			return errStateCommand
+		}
+	case "restore":
+		if options.in == "" || !options.offline {
+			return errors.New("restore requires --in and --offline with API writers stopped")
+		}
+	case "transfer":
+		if !options.offline {
+			return errors.New("transfer requires --offline and API_TARGET_DB_* connection fields")
+		}
+	case "prune":
+		if _, err := time.Parse(time.RFC3339, options.before); err != nil {
+			return errStateCommand
+		}
 	}
 	if name == "keygen" || name == "key-add" {
 		ring, err := secretbox.Generate()
@@ -46,15 +121,9 @@ func stateCommand(ctx context.Context, args []string) error {
 			return err
 		}
 		if name == "keygen" {
-			if *out == "" {
-				return errStateCommand
-			}
-			return writeJSONFile(*out, ring, false)
+			return writeJSONFile(options.out, ring, false)
 		}
-		if *keyfile == "" {
-			return errStateCommand
-		}
-		data, err := readBounded(*keyfile, 65536)
+		data, err := readBounded(options.keyfile, 65536)
 		if err != nil {
 			return err
 		}
@@ -71,7 +140,7 @@ func stateCommand(ctx context.Context, args []string) error {
 		if _, err = secretbox.New(existing); err != nil {
 			return err
 		}
-		return writeJSONFile(*keyfile, existing, true)
+		return writeJSONFile(options.keyfile, existing, true)
 	}
 	switch name {
 	case "verify", "backup", "restore", "transfer", "reencrypt", "prune":
@@ -94,19 +163,13 @@ func stateCommand(ctx context.Context, args []string) error {
 	case "verify":
 		return m.Verify(ctx)
 	case "backup":
-		if *out == "" {
-			return errStateCommand
-		}
 		b, err := m.Export(ctx)
 		if err != nil {
 			return err
 		}
-		return writeJSONFile(*out, b, false)
+		return writeJSONFile(options.out, b, false)
 	case "restore":
-		if *in == "" || !*offline {
-			return errors.New("restore requires --in and --offline with API writers stopped")
-		}
-		raw, err := readBounded(*in, 64*1024*1024)
+		raw, err := readBounded(options.in, 64*1024*1024)
 		if err != nil {
 			return err
 		}
@@ -117,9 +180,6 @@ func stateCommand(ctx context.Context, args []string) error {
 		}
 		return m.Restore(ctx, b, false)
 	case "transfer":
-		if !*offline {
-			return errors.New("transfer requires --offline and API_TARGET_DB_* connection fields")
-		}
 		database, err := config.LoadTransferDatabase()
 		if err != nil {
 			return err
@@ -133,8 +193,8 @@ func stateCommand(ctx context.Context, args []string) error {
 		}
 		target := cfg
 		target.State.Database = database
-		if *targetKeyring != "" {
-			target.State.KeyringFile = *targetKeyring
+		if options.targetKeyring != "" {
+			target.State.KeyringFile = options.targetKeyring
 		}
 		dest, err := persistence.Open(ctx, target)
 		if err != nil {
@@ -143,19 +203,19 @@ func stateCommand(ctx context.Context, args []string) error {
 		defer dest.Close()
 		return dest.Restore(ctx, b, true)
 	case "prune":
-		boundary, err := time.Parse(time.RFC3339, *before)
+		boundary, err := time.Parse(time.RFC3339, options.before)
 		if err != nil {
 			return errStateCommand
 		}
 		n, err := m.Prune(ctx, boundary)
 		if err == nil {
-			fmt.Fprintf(os.Stdout, "Pruned records: %d\n", n)
+			_, err = fmt.Fprintf(output, "Pruned records: %d\n", n)
 		}
 		return err
 	case "reencrypt":
 		n, err := m.Reencrypt(ctx)
 		if err == nil {
-			fmt.Fprintf(os.Stdout, "Reencrypted connections: %d\n", n)
+			_, err = fmt.Fprintf(output, "Reencrypted connections: %d\n", n)
 		}
 		return err
 	}
@@ -213,9 +273,4 @@ func writeJSONFile(path string, value any, replace bool) error {
 		return errors.New("cannot flush state directory")
 	}
 	return nil
-}
-func runState(args []string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-	defer cancel()
-	return stateCommand(ctx, args)
 }

@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
 	"io"
-	"os"
 	"time"
+
+	"github.com/spf13/cobra"
 
 	"github.com/owiks/golang-minio-s3-backend-api/src/config"
 	"github.com/owiks/golang-minio-s3-backend-api/src/persistence/database"
@@ -17,27 +17,58 @@ import (
 
 var errMigrationCommand = errors.New("use: api migrate up|status|version|down [--target] [--offline]")
 
+type migrationOptions struct {
+	target  bool
+	offline bool
+}
+
+func newMigrateCommand() *cobra.Command {
+	command := &cobra.Command{
+		Use: "migrate", Short: "Manage database schema with Goose",
+		SilenceUsage: true, SilenceErrors: true,
+		Args: noCommandArguments(errMigrationCommand),
+		RunE: func(_ *cobra.Command, _ []string) error { return errMigrationCommand },
+	}
+	command.SetFlagErrorFunc(func(_ *cobra.Command, _ error) error { return errMigrationCommand })
+	for _, action := range []struct{ name, description string }{
+		{"up", "Apply pending migrations"},
+		{"status", "Print migration status as JSON without changing the schema"},
+		{"version", "Print the current schema version"},
+		{"down", "Roll back one migration; all API writers must be stopped"},
+	} {
+		command.AddCommand(newMigrationAction(action.name, action.description))
+	}
+	return command
+}
+
+func newMigrationAction(action, description string) *cobra.Command {
+	options := migrationOptions{}
+	command := &cobra.Command{
+		Use: action, Short: description,
+		Args: noCommandArguments(errMigrationCommand),
+		RunE: maintenanceRun(func(ctx context.Context, output io.Writer) error {
+			return executeMigration(ctx, action, options, output)
+		}),
+	}
+	command.SetFlagErrorFunc(func(_ *cobra.Command, _ error) error { return errMigrationCommand })
+	command.Flags().BoolVar(&options.target, "target", false, "Use API_TARGET_DB_* instead of API_DB_*")
+	command.Flags().BoolVar(&options.offline, "offline", false, "Confirm all API writers on every host are stopped")
+	return command
+}
+
 func migrateCommand(ctx context.Context, args []string, output io.Writer) error {
-	if len(args) == 0 {
-		return errMigrationCommand
-	}
-	action := args[0]
-	switch action {
-	case "up", "status", "version", "down":
-	default:
-		return errMigrationCommand
-	}
-	flags := flag.NewFlagSet("migrate", flag.ContinueOnError)
-	flags.SetOutput(io.Discard)
-	target := flags.Bool("target", false, "use API_TARGET_DB_* instead of API_DB_*")
-	offline := flags.Bool("offline", false, "confirm all API writers are stopped, including other hosts; required for down and legacy adoption")
-	if flags.Parse(args[1:]) != nil || flags.NArg() != 0 {
-		return errMigrationCommand
-	}
-	if action == "down" && !*offline {
+	command := newMigrateCommand()
+	command.SetArgs(append([]string{}, args...))
+	command.SetOut(output)
+	command.SetErr(io.Discard)
+	return command.ExecuteContext(ctx)
+}
+
+func executeMigration(ctx context.Context, action string, options migrationOptions, output io.Writer) error {
+	if action == "down" && !options.offline {
 		return errors.New("migrate down requires --offline with API writers stopped")
 	}
-	cfg, err := config.LoadMigrationDatabase(*target)
+	cfg, err := config.LoadMigrationDatabase(options.target)
 	if err != nil {
 		return err
 	}
@@ -63,7 +94,7 @@ func migrateCommand(ctx context.Context, args []string, output io.Writer) error 
 	if err != nil {
 		return err
 	}
-	if action == "up" && status.Legacy && !*offline {
+	if action == "up" && status.Legacy && !options.offline {
 		return errors.New("legacy schema adoption requires migrate up --offline with API writers stopped")
 	}
 	switch action {
@@ -83,10 +114,4 @@ func migrateCommand(ctx context.Context, args []string, output io.Writer) error 
 		return err
 	}
 	return json.NewEncoder(output).Encode(status)
-}
-
-func runMigrate(args []string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-	defer cancel()
-	return migrateCommand(ctx, args, os.Stdout)
 }
