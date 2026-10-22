@@ -619,6 +619,37 @@ bin/api state verify
 Request-логи содержат шаблон операции, статус, длительность и безопасную причину
 ошибки, без ключей, cookie, Bearer-токенов, тел запросов и подписанных URL.
 
+### Повтор копирования и перемещения
+
+`POST /api/sessions/{sessionID}/objects/transfer` поддерживает необязательный
+`Idempotency-Key`: 1–128 печатных ASCII-символов без пробелов. Сохраняйте один ключ
+для повторов одного запроса:
+
+```sh
+curl -X POST "$BASE/api/sessions/$SESSION_ID/objects/transfer" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -H 'Idempotency-Key: transfer-report-2026-10-22' \
+  --data '{"sourceBucket":"reports","sourceKey":"report.csv","sourceRevision":"<verified-source-revision>","destinationBucket":"archive","destinationKey":"report.csv","destinationRevision":"absent","move":false}'
+```
+
+Сначала получите актуальные ревизии через `objects/transfer-prepare`.
+Журнал хранит ключи 24 часа и привязывает их к доступу, подключению и операции.
+Повтор возвращает сохранённый результат с `Idempotency-Replayed: true`;
+`X-Command-ID` идентифицирует команду. Права проверяются заново, текст ответа
+переводится по текущему языку. Другой JSON с тем же ключом даёт `409`.
+
+Выполняющаяся команда возвращает `409 / CommandInProgress`; повторите запрос
+позже с тем же ключом. При неизвестном результате — `CommandOutcomeUncertain`:
+автоматического повторного выполнения нет, сначала проверьте источник и назначение.
+После 24 часов прежний ключ может считаться новым. Лимиты журнала — 128 команд
+на доступ и 16 384 на процесс/БД. Без заголовка сохраняется обычное поведение API.
+
+При SQL-хранении журнал переживает рестарт и включён в `state backup/transfer`.
+Незавершённые команды при переносе считаются неопределёнными. Старые резервные
+копии без журнала допустимы для `state restore`, который отзывает доступы;
+сохранение действующих токенов требует копии с журналом.
+
 ## Границы гарантий
 
 Cookie-сессии живут час; срок Bearer задаётся через `API_TOKEN_TTL` и `ttlSeconds`.

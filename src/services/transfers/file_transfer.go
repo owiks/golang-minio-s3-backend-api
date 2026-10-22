@@ -34,6 +34,31 @@ type TransferResult struct {
 	Code    string       `json:"code,omitempty"`
 }
 
+// AuthorizeTransfer checks the mapping and current grants before execution or replay.
+func AuthorizeTransfer(ctx context.Context, s interface {
+	AuthorizeResource(context.Context, string, string, string) error
+}, body FileTransferRequest) error {
+	if body.SourceBucket == "" || body.DestinationBucket == "" || !ValidTransferMapping(body.SourceKey, body.DestinationKey, body.SourcePrefix, body.DestinationPrefix, body.SourceBucket == body.DestinationBucket) {
+		return apperror.New(400, "InvalidTransfer", messages.TransfersInvalidTransfer)
+	}
+	if body.SourceBucket == body.DestinationBucket && body.SourceKey == body.DestinationKey {
+		return apperror.New(400, "SameDestination", messages.TransfersSameDestination)
+	}
+	if err := s.AuthorizeResource(ctx, "objects:read", body.SourceBucket, body.SourceKey); err != nil {
+		return err
+	}
+	if err := s.AuthorizeResource(ctx, "objects:write", body.DestinationBucket, body.DestinationKey); err != nil {
+		return err
+	}
+	if body.Move {
+		if err := s.AuthorizeResource(ctx, "objects:delete", body.SourceBucket, body.SourceKey); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func Transfer(ctx context.Context, s TransferClient, body FileTransferRequest) (result TransferResult, err error) {
 	defer func() {
 		if err != nil {
@@ -45,22 +70,8 @@ func Transfer(ctx context.Context, s TransferClient, body FileTransferRequest) (
 		}
 	}()
 
-	if body.SourceBucket == "" || body.DestinationBucket == "" || !ValidTransferMapping(body.SourceKey, body.DestinationKey, body.SourcePrefix, body.DestinationPrefix, body.SourceBucket == body.DestinationBucket) {
-		return TransferResult{}, apperror.New(400, "InvalidTransfer", messages.TransfersInvalidTransfer)
-	}
-	if body.SourceBucket == body.DestinationBucket && body.SourceKey == body.DestinationKey {
-		return TransferResult{}, apperror.New(400, "SameDestination", messages.TransfersSameDestination)
-	}
-	if err = s.AuthorizeResource(ctx, "objects:read", body.SourceBucket, body.SourceKey); err != nil {
+	if err = AuthorizeTransfer(ctx, s, body); err != nil {
 		return TransferResult{}, err
-	}
-	if err = s.AuthorizeResource(ctx, "objects:write", body.DestinationBucket, body.DestinationKey); err != nil {
-		return TransferResult{}, err
-	}
-	if body.Move {
-		if err = s.AuthorizeResource(ctx, "objects:delete", body.SourceBucket, body.SourceKey); err != nil {
-			return TransferResult{}, err
-		}
 	}
 
 	source, err := s.StatObject(ctx, body.SourceBucket, body.SourceKey, minio.StatObjectOptions{})

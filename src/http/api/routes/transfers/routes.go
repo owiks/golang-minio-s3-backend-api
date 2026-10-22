@@ -42,7 +42,7 @@ func GetRoutes() []routes.APIRoute {
 			Tag:  "transfers",
 			Operations: []routes.Operation{
 				{Suffix: "", Method: "POST", Long: true, Summary: "Копирование и перемещение",
-					Input:      routes.Inputs(),
+					Input:      routes.Inputs(routes.Header("Idempotency-Key", false).Describe("Optional request key: 1–128 visible ASCII characters; retained for 24 hours. An uncertain command is never automatically repeated.")),
 					Controller: "HandleFileTransfer",
 					Request:    transferssvc.FileTransferRequest{},
 					Response:   transferssvc.TransferResult{},

@@ -89901,6 +89901,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "description": "Optional request key: 1–128 visible ASCII characters; retained for 24 hours. An uncertain command is never automatically repeated.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {

@@ -15,7 +15,6 @@ import (
 	"github.com/owiks/golang-minio-s3-backend-api/src/config"
 	"github.com/owiks/golang-minio-s3-backend-api/src/persistence"
 	"github.com/owiks/golang-minio-s3-backend-api/src/persistence/secretbox"
-	"github.com/owiks/golang-minio-s3-backend-api/src/services/authstate"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/securetoken"
 )
 
@@ -163,7 +162,7 @@ func executeState(ctx context.Context, name string, options stateOptions, output
 	case "verify":
 		return m.Verify(ctx)
 	case "backup":
-		b, err := m.Export(ctx)
+		b, err := persistence.ExportBackup(ctx, cfg, m)
 		if err != nil {
 			return err
 		}
@@ -174,11 +173,11 @@ func executeState(ctx context.Context, name string, options stateOptions, output
 			return err
 		}
 		defer clear(raw)
-		var b authstate.Backup
+		var b persistence.Backup
 		if json.Unmarshal(raw, &b) != nil {
 			return errStateCommand
 		}
-		return m.Restore(ctx, b, false)
+		return persistence.RestoreBackup(ctx, cfg, m, b, false)
 	case "transfer":
 		database, err := config.LoadTransferDatabase()
 		if err != nil {
@@ -187,7 +186,7 @@ func executeState(ctx context.Context, name string, options stateOptions, output
 		if database.Driver == "memory" {
 			return errors.New("transfer requires a persistent API_TARGET_DB_DRIVER")
 		}
-		b, err := m.Export(ctx)
+		b, err := persistence.ExportBackup(ctx, cfg, m)
 		if err != nil {
 			return err
 		}
@@ -201,7 +200,7 @@ func executeState(ctx context.Context, name string, options stateOptions, output
 			return err
 		}
 		defer dest.Close()
-		return dest.Restore(ctx, b, true)
+		return persistence.RestoreBackup(ctx, target, dest, b, true)
 	case "prune":
 		boundary, err := time.Parse(time.RFC3339, options.before)
 		if err != nil {
@@ -236,11 +235,6 @@ func readBounded(path string, limit int64) ([]byte, error) {
 
 // Write privately and publish atomically. New backups never overwrite a file.
 func writeJSONFile(path string, value any, replace bool) error {
-	raw, err := json.MarshalIndent(value, "", "  ")
-	if err != nil || len(raw) > 64*1024*1024 {
-		return errors.New("cannot encode state file within 64 MiB")
-	}
-	defer clear(raw)
 	f, err := os.CreateTemp(filepath.Dir(path), ".api-state-*")
 	if err != nil {
 		return errors.New("cannot create private state file")
@@ -250,8 +244,21 @@ func writeJSONFile(path string, value any, replace bool) error {
 	if f.Chmod(0600) != nil {
 		return errors.New("cannot secure state file")
 	}
-	if _, err = f.Write(append(raw, '\n')); err != nil {
-		return errors.New("cannot write state file")
+	writer := &stateFileWriter{Writer: f, remaining: 64 * 1024 * 1024}
+	if snapshot, ok := value.(interface{ WriteJSON(io.Writer) error }); ok {
+		err = snapshot.WriteJSON(writer)
+	} else {
+		// Keyrings are bounded by the 64 KiB input limit. Keep their temporary
+		// plaintext encoding explicitly erasable rather than in an encoder buffer.
+		var raw []byte
+		raw, err = json.MarshalIndent(value, "", "  ")
+		defer clear(raw)
+		if err == nil {
+			_, err = writer.Write(append(raw, '\n'))
+		}
+	}
+	if err != nil {
+		return errors.New("cannot encode state file within 64 MiB")
 	}
 	if f.Sync() != nil || f.Close() != nil {
 		return errors.New("cannot flush state file")
@@ -273,4 +280,20 @@ func writeJSONFile(path string, value any, replace bool) error {
 		return errors.New("cannot flush state directory")
 	}
 	return nil
+}
+
+// Reject the next chunk before crossing the output budget. The private temporary
+// file is discarded on failure and can never replace the original keyring.
+type stateFileWriter struct {
+	io.Writer
+	remaining int
+}
+
+func (w *stateFileWriter) Write(p []byte) (int, error) {
+	if len(p) > w.remaining {
+		return 0, errors.New("state file size limit")
+	}
+	n, err := w.Writer.Write(p)
+	w.remaining -= n
+	return n, err
 }

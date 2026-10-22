@@ -608,7 +608,9 @@ const (
 
 // AllIDs returns a detached inventory for catalog validation.
 func AllIDs() []ID {
-	return []ID{AuthStateUnavailable, AuthStateInvalid, AuthStateDenied, AuthStateNotFound, AuthStateConflict, AuthStateLimit, ResourceNameInvalid, Combined, ManagementUnsupported, RouteNotFound, HTTPStopping,
+	return []ID{
+		CommandInvalid, CommandConflict, CommandRunning, CommandUnknown, CommandUnavailable, CommandLimit,
+		AuthStateUnavailable, AuthStateInvalid, AuthStateDenied, AuthStateNotFound, AuthStateConflict, AuthStateLimit, ResourceNameInvalid, Combined, ManagementUnsupported, RouteNotFound, HTTPStopping,
 		HttpInvalidBearerToken,
 		SessionsInvalidTokenTTL,
 		HttpMethodNotAllowed,

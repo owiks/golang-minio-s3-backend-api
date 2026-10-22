@@ -24,6 +24,7 @@ func (app *State) Close() {
 		app.ZIPs.Close()
 		app.Capabilities.Close()
 		app.revisions.Close()
+		_ = app.Commands.Close()
 		_ = app.Auth.Close()
 	})
 	// This owner also retains failed and late closes after the stores let go.

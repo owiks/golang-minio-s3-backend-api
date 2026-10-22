@@ -12,6 +12,7 @@ import (
 	settings "github.com/owiks/golang-minio-s3-backend-api/src/config"
 	"github.com/owiks/golang-minio-s3-backend-api/src/persistence/secretbox"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/authstate"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/commandlog"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/coordination"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/iam"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/staging"
@@ -59,15 +60,16 @@ type sessionCore struct {
 // storage maps are private to each store; lifecycle coordination lives here.
 type State struct {
 	config                         settings.Config
-	Auth                           *authstate.Manager `json:"-"`
-	Sessions                       *SessionStore      `json:"-"`
-	Archives                       *ArchiveStore      `json:"-"`
-	Invites                        *UploadInviteStore `json:"-"`
-	Shares                         *FolderShareStore  `json:"-"`
-	ZIPs                           *ZIPCache          `json:"-"`
-	Capabilities                   *CapabilityStore   `json:"-"`
-	Multipart                      *MultipartStore    `json:"-"`
-	Temporary                      *staging.Budget    `json:"-"`
+	Auth                           *authstate.Manager    `json:"-"`
+	Commands                       commandlog.Repository `json:"-"`
+	Sessions                       *SessionStore         `json:"-"`
+	Archives                       *ArchiveStore         `json:"-"`
+	Invites                        *UploadInviteStore    `json:"-"`
+	Shares                         *FolderShareStore     `json:"-"`
+	ZIPs                           *ZIPCache             `json:"-"`
+	Capabilities                   *CapabilityStore      `json:"-"`
+	Multipart                      *MultipartStore       `json:"-"`
+	Temporary                      *staging.Budget       `json:"-"`
 	revisions                      *AccessRevisions
 	closeOnce                      sync.Once
 	mutations                      coordination.Locks
@@ -83,11 +85,16 @@ func New(c settings.Config) *State {
 	return NewWithAuth(c, authstate.NewManager(authstate.NewMemory(), box, c.WithDefaults().TokenTTL))
 }
 func NewWithAuth(c settings.Config, manager *authstate.Manager) *State {
+	return NewWithCommandLog(c, manager, commandlog.NewMemory())
+}
+
+func NewWithCommandLog(c settings.Config, manager *authstate.Manager, commands commandlog.Repository) *State {
+
 	c = c.WithDefaults().Clone()
 	sessions := NewSessionStore()
 	temporary := staging.New(c.TemporaryBytes)
 	app := &State{
-		config: c, Auth: manager, Sessions: sessions, Temporary: temporary,
+		config: c, Auth: manager, Commands: commands, Sessions: sessions, Temporary: temporary,
 		Invites:      NewUploadInviteStore(),
 		Shares:       NewFolderShareStore(),
 		Capabilities: NewCapabilityStore(),

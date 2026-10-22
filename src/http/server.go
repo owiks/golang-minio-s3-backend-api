@@ -29,16 +29,24 @@ var (
 func Run(ctx context.Context, cfg config.Config, logger *slog.Logger) error {
 	startup, cancel := context.WithTimeout(ctx, 30*time.Second)
 	manager, err := persistence.Open(startup, cfg)
-	cancel()
 	if err != nil {
+		cancel()
 		return err
 	}
+	commands, err := persistence.OpenCommands(startup, cfg)
+	if err != nil {
+		cancel()
+		_ = manager.Close()
+		return err
+	}
+	cancel()
 	listener, err := net.Listen("tcp", cfg.Listen)
 	if err != nil {
 		_ = manager.Close()
+		_ = commands.Close()
 		return ErrListen
 	}
-	return serve(ctx, httpapi.NewHandler(runtime.NewWithAuth(cfg, manager)), listener, logger)
+	return serve(ctx, httpapi.NewHandler(runtime.NewWithCommandLog(cfg, manager, commands)), listener, logger)
 }
 
 func serve(ctx context.Context, handler *httpapi.Handler, listener net.Listener, logger *slog.Logger) error {

@@ -64,8 +64,8 @@ func transferControllerHelpers(t *testing.T, fset *token.FileSet, path string, f
 		t.Fatal(err)
 	}
 	allowed := map[string]map[string]bool{
-		"github.com/owiks/golang-minio-s3-backend-api/src/services/transfers": {"PrepareFolderTransfer": true, "PrepareDestination": true, "Transfer": true},
-		"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime":   {"NewClients": true},
+		"github.com/owiks/golang-minio-s3-backend-api/src/services/transfers": {"PrepareFolderTransfer": true, "PrepareDestination": true, "Transfer": true, "TransferCommand": true},
+		"github.com/owiks/golang-minio-s3-backend-api/src/services/runtime":   {"NewClients": true, "SessionID": true, "ConnectionID": true},
 		"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror":  {"New": true},
 	}
 	var violations []string

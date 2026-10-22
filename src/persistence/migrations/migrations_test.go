@@ -48,9 +48,13 @@ func eachDatabase(t *testing.T, run func(*testing.T, *Runner)) {
 func TestVersionedMigrationLifecycle(t *testing.T) {
 	eachDatabase(t, func(t *testing.T, r *Runner) {
 		ctx := context.Background()
+		initial, err := r.Status(ctx)
+		if err != nil || initial.Target < 1 {
+			t.Fatal("migration catalog", initial, err)
+		}
 		for i := 0; i < 2; i++ {
 			s, err := r.Status(ctx)
-			if err != nil || s.Current != 0 || s.Target != 1 {
+			if err != nil || s.Current != 0 || s.Target != initial.Target {
 				t.Fatal("empty status", s, err)
 			}
 			if !errors.Is(r.Check(ctx), ErrNotCurrent) {
@@ -69,7 +73,8 @@ func TestVersionedMigrationLifecycle(t *testing.T) {
 		if err := r.Check(ctx); err != nil {
 			t.Fatal(err)
 		}
-		catalog := extend(t, r, "00002_probe.sql", "CREATE TABLE migration_probe (value TEXT NOT NULL);\nINSERT INTO migration_probe(value) VALUES('a;b');", "DROP TABLE migration_probe;")
+		probeVersion := initial.Target + 1
+		catalog := extend(t, r, fmt.Sprintf("%05d_probe.sql", probeVersion), "CREATE TABLE migration_probe (value TEXT NOT NULL);\nINSERT INTO migration_probe(value) VALUES('a;b');", "DROP TABLE migration_probe;")
 		r.fsys = catalog
 		if !errors.Is(r.Check(ctx), ErrNotCurrent) {
 			t.Fatal("pending schema accepted")
@@ -90,14 +95,16 @@ func TestVersionedMigrationLifecycle(t *testing.T) {
 		if err := r.Up(ctx); err != nil {
 			t.Fatal("reapply", err)
 		}
-		r.fsys = extend(t, r, "00003_failure.sql", "CREATE TABLE migration_failure (value TEXT);\nINSERT INTO no_such_table(value) VALUES('private-error-detail');", "DROP TABLE migration_failure;")
-		err := r.Up(ctx)
+		failureVersion := probeVersion + 1
+		failureName := fmt.Sprintf("%05d_failure.sql", failureVersion)
+		r.fsys = extend(t, r, failureName, "CREATE TABLE migration_failure (value TEXT);\nINSERT INTO no_such_table(value) VALUES('private-error-detail');", "DROP TABLE migration_failure;")
+		err = r.Up(ctx)
 		var failed *Error
-		if !errors.As(err, &failed) || failed.Version != 3 || failed.Name != "00003_failure.sql" || strings.Contains(err.Error(), "private-error-detail") {
+		if !errors.As(err, &failed) || failed.Version != failureVersion || failed.Name != failureName || strings.Contains(err.Error(), "private-error-detail") {
 			t.Fatal("migration failure metadata unsafe or missing", err)
 		}
 		s, err := r.Status(ctx)
-		if err != nil || s.Current != 2 || s.Entries[2].Applied {
+		if err != nil || s.Current != probeVersion || s.Entries[len(s.Entries)-1].Applied {
 			t.Fatal("failed migration recorded as applied", s, err)
 		}
 		exists, _ := tableExists(ctx, r.db, r.driver, "migration_failure")

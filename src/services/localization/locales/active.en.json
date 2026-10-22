@@ -2427,5 +2427,29 @@
   {
     "id": "authstate.limit",
     "other": "The connection or access limit has been reached. Revoke unused entries."
+  },
+  {
+    "id": "command.invalid",
+    "other": "Idempotency-Key must contain 1 to 128 visible ASCII characters."
+  },
+  {
+    "id": "command.conflict",
+    "other": "This idempotency key was already used for a different request."
+  },
+  {
+    "id": "command.running",
+    "other": "The previous request is still running. Retry with the same key later."
+  },
+  {
+    "id": "command.unknown",
+    "other": "The previous result is uncertain. Check the source and destination before starting a new command."
+  },
+  {
+    "id": "command.unavailable",
+    "other": "The command log is unavailable. Check the operation before retrying."
+  },
+  {
+    "id": "command.limit",
+    "other": "The command log limit has been reached. Try again later."
   }
 ]

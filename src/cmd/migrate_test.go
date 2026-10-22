@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"io"
 	"path/filepath"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/owiks/golang-minio-s3-backend-api/src/config"
 	"github.com/owiks/golang-minio-s3-backend-api/src/persistence/database"
+	"github.com/owiks/golang-minio-s3-backend-api/src/persistence/migrations"
 	"github.com/owiks/golang-minio-s3-backend-api/tests/migrationfixtures"
 )
 
@@ -25,6 +27,10 @@ func TestMigrationCommandsDoNotNeedSecretsAndStatusDoesNotCreateSchema(t *testin
 	var output bytes.Buffer
 	if err := migrateCommand(ctx, []string{"status"}, &output); err != nil || !strings.Contains(output.String(), `"current":0`) {
 		t.Fatal("status", err)
+	}
+	var status migrations.Status
+	if err := json.Unmarshal(output.Bytes(), &status); err != nil || status.Target < 1 || len(status.Entries) == 0 {
+		t.Fatal("migration catalog", err)
 	}
 	output.Reset()
 	if err := migrateCommand(ctx, []string{"version"}, &output); err != nil || output.String() != "0\n" {
@@ -46,15 +52,28 @@ func TestMigrationCommandsDoNotNeedSecretsAndStatusDoesNotCreateSchema(t *testin
 		t.Fatal(err)
 	}
 	output.Reset()
-	if err := migrateCommand(ctx, []string{"version"}, &output); err != nil || output.String() != "1\n" {
+	if err := migrateCommand(ctx, []string{"version"}, &output); err != nil || output.String() != fmt.Sprintf("%d\n", status.Target) {
 		t.Fatal("version after up", err)
 	}
 	if err := migrateCommand(ctx, []string{"down", "--offline"}, io.Discard); err != nil {
 		t.Fatal(err)
 	}
 	output.Reset()
-	if err := migrateCommand(ctx, []string{"version"}, &output); err != nil || output.String() != "0\n" {
+	previous := int64(0)
+	if len(status.Entries) > 1 {
+		previous = status.Entries[len(status.Entries)-2].Version
+	}
+	if err := migrateCommand(ctx, []string{"version"}, &output); err != nil || output.String() != fmt.Sprintf("%d\n", previous) {
 		t.Fatal("version after down", err)
+	}
+	for i := 1; i < len(status.Entries); i++ {
+		if err := migrateCommand(ctx, []string{"down", "--offline"}, io.Discard); err != nil {
+			t.Fatal("full rollback", err)
+		}
+	}
+	output.Reset()
+	if err := migrateCommand(ctx, []string{"version"}, &output); err != nil || output.String() != "0\n" {
+		t.Fatal("version after full rollback", err)
 	}
 	if err := stateCommand(ctx, []string{"migrate"}); err != nil {
 		t.Fatal("compatibility alias", err)
