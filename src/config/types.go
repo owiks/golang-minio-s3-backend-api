@@ -15,6 +15,7 @@ type Config struct {
 	Origin                       string
 	Endpoints                    endpoint.Policy
 	SessionTTL                   time.Duration
+	TokenTTL                     time.Duration
 	TemporaryBytes               int64
 	Limits                       Limits
 	TrustedProxies               []netip.Prefix

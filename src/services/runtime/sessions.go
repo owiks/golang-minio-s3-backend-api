@@ -29,6 +29,8 @@ type Session struct {
 	actionPolicy                   *iam.Policy
 	actionIssue                    *iam.ActionCheckIssue
 	id, token, csrf, actor, region string
+	bearer                         bool
+	bearerDigest                   [32]byte
 	conditionalDelete              bool
 	conditionalComplete            bool
 	secureCookies                  bool

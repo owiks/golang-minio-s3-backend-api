@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/owiks/golang-minio-s3-backend-api/src/config"
@@ -129,6 +130,54 @@ func TestLanguageHeadersIncludeGeneratedArchivesAndPreserveRawBinaryContract(t *
 		schema := content[tc.media].(map[string]any)["schema"].(openapi.Schema)
 		if schema["type"] != "string" || schema["format"] != "binary" {
 			t.Fatal("binary contract changed", schema)
+		}
+	}
+}
+
+func TestBearerDocumentationPreservesCookieAndGrantSecurity(t *testing.T) {
+	document := doc.Build(Catalog())
+	for _, route := range Catalog() {
+		if route.Public {
+			continue
+		}
+		for _, op := range route.Operations {
+			operation := document.Paths[route.Template(op)][strings.ToLower(op.Method)]
+			if len(operation.Security) != 2 {
+				t.Fatal("missing alternative authentication", route.Template(op))
+			}
+			if _, ok := operation.Security[0]["SessionCookie"]; !ok {
+				t.Fatal("cookie authentication removed")
+			}
+			if _, ok := operation.Security[1]["SessionBearer"]; !ok || len(operation.Security[1]) != 1 {
+				t.Fatal("bearer incorrectly requires cookie or CSRF")
+			}
+			_, csrf := operation.Security[0]["CSRF"]
+			if csrf != (op.Method != "GET") {
+				t.Fatal("cookie CSRF contract changed")
+			}
+			for _, p := range operation.Parameters {
+				if p.In == "header" && p.Name == "Origin" && p.Required {
+					t.Fatal("Origin is mandatory for bearer")
+				}
+			}
+		}
+	}
+	issue := document.Paths["/api/tokens"]["post"]
+	if len(issue.Security) != 0 {
+		t.Fatal("issuance requires an existing token")
+	}
+	schema := issue.RequestBody.(map[string]any)["content"].(map[string]any)["application/json"].(map[string]any)["schema"].(openapi.Schema)
+	properties := schema["properties"].(map[string]any)
+	if properties["secretKey"].(openapi.Schema)["writeOnly"] != true || properties["ttlSeconds"] == nil {
+		t.Fatal("invalid token request documentation")
+	}
+	for _, methods := range document.Paths {
+		for _, operation := range methods {
+			for _, requirement := range operation.Security {
+				if _, grant := requirement["BearerGrant"]; grant && len(operation.Security) != 1 {
+					t.Fatal("public grant now accepts a session bearer")
+				}
+			}
 		}
 	}
 }

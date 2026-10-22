@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"crypto/sha256"
 	"crypto/subtle"
 	"net/url"
 	"time"
@@ -13,12 +14,18 @@ func (s *Session) CSRFToken() string          { return s.csrf }
 func (s *Session) ExpiresAt() time.Time       { return s.expires }
 func (s *Session) InternalHost() string       { return s.internal.Host }
 func (s *Session) Expired(now time.Time) bool { return now.After(s.expires) }
+func (s *Session) UsesBearer() bool           { return s.bearer }
+
+func (s *Session) MatchesBearer(value string) bool {
+	digest := sha256.Sum256([]byte(value))
+	return s.bearer && value != "" && subtle.ConstantTimeCompare(digest[:], s.bearerDigest[:]) == 1
+}
 
 func (s *Session) MatchesToken(value string) bool {
-	return subtle.ConstantTimeCompare([]byte(value), []byte(s.token)) == 1
+	return !s.bearer && value != "" && subtle.ConstantTimeCompare([]byte(value), []byte(s.token)) == 1
 }
 func (s *Session) MatchesCSRF(value string) bool {
-	return subtle.ConstantTimeCompare([]byte(value), []byte(s.csrf)) == 1
+	return !s.bearer && value != "" && subtle.ConstantTimeCompare([]byte(value), []byte(s.csrf)) == 1
 }
 
 // CookieSnapshot is a detached transport value, never a JSON response DTO.

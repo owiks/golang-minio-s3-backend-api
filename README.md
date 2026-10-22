@@ -96,6 +96,7 @@ Access Key и Secret Key передаются при создании сесси
 | `API_PORT` | `8081` | Порт на Docker-хосте. |
 | `API_LISTEN` | `:8081` | Listener при запуске Go напрямую; для локальной разработки — `127.0.0.1:8081`. |
 | `API_LANGUAGE` | `auto` | Язык сообщений API: `auto` учитывает `Accept-Language`, `en` и `ru` задают язык принудительно. Без подходящего заголовка используется английский. |
+| `API_TOKEN_TTL` | `1h` | Срок Bearer-токена по умолчанию и верхний предел `ttlSeconds`: от `1s` до `24h`, целое число секунд. Cookie-сессии по-прежнему живут час. |
 | `APP_ORIGIN` | пусто | Разрешённый origin клиента: схема, хост и порт. Без значения проверяется origin самого API. |
 | `MINIO_ALLOWED_ENDPOINTS` | пусто | Разрешённые внутренние/HTTP endpoints через запятую. |
 | `MINIO_ENDPOINT_OVERRIDES` | пусто | JSON-соответствие публичных endpoints внутренним адресам; разрешает перечисленные исходные endpoints. |
@@ -143,9 +144,10 @@ curl -i -H 'Accept-Language: ru-RU, en;q=0.8' http://127.0.0.1:8081/api/sessions
 | `POST /objects/select` | Потоковый S3 Select. |
 | `DELETE /` | Завершение сессии. |
 
-Для запросов сессии нужна cookie; одного ID в URL недостаточно.
-Вход требует `Origin`. Все сессионные методы, кроме GET, дополнительно требуют
-`Origin` и `X-CSRF-Token`. Параметры остальных операций описаны в OpenAPI.
+Для запросов сессии нужна cookie или Bearer-токен; одного ID в URL недостаточно.
+Вход через `POST /api/sessions` требует `Origin`. В режиме cookie все методы,
+кроме GET, требуют `Origin` и `X-CSRF-Token`. Bearer-запросы их не требуют.
+Параметры остальных операций описаны в OpenAPI.
 
 ### Пример curl: подключение, чтение, выход
 
@@ -197,13 +199,91 @@ curl --fail-with-body --silent --show-error \
 
 Если настроен `APP_ORIGIN`, используйте его значение в переменной `origin`.
 
+### Bearer: запросы без cookie
+
+`POST /api/tokens` принимает те же ключи подключения и необязательное
+`ttlSeconds`. Без этого поля токен действует `API_TOKEN_TTL` (по умолчанию час).
+Можно запросить меньший срок; нулевой, отрицательный или превышающий лимит
+возвращает `400 / InvalidTokenTTL`.
+
+```json
+{
+  "id": "SESSION_ID",
+  "token": "ACCESS_TOKEN",
+  "tokenType": "Bearer",
+  "expiresAt": "2026-10-21T12:00:00Z",
+  "expiresIn": 900
+}
+```
+
+Токен возвращается один раз, cookie не устанавливается. Передавайте его только
+в `Authorization: Bearer …`, используя `id` в обычных адресах API.
+Пример: выдача на 15 минут, чтение списка бакетов, загрузка файла и отзыв.
+Используется тот же `connection.json`, что в примере выше.
+
+```sh
+#!/bin/sh
+set -eu
+umask 077
+
+base=http://127.0.0.1:8081
+connection_file=/absolute/path/to/connection.json
+upload_file=/absolute/path/to/example.txt
+bucket=my-bucket
+key=example.txt
+workdir=$(mktemp -d)
+trap 'rm -rf "$workdir"' EXIT
+
+jq '. + {ttlSeconds: 900}' "$connection_file" > "$workdir/request.json"
+curl --fail-with-body --silent --show-error \
+  -H 'Content-Type: application/json' \
+  --data-binary "@$workdir/request.json" \
+  "$base/api/tokens" > "$workdir/token.json"
+
+session_id=$(jq -er '.id' "$workdir/token.json")
+# Заголовок читается из закрытого файла и не попадает в аргументы процесса curl.
+jq -er '"Authorization: Bearer " + .token' "$workdir/token.json" > "$workdir/auth-header"
+
+curl --fail-with-body --silent --show-error \
+  -H "@$workdir/auth-header" \
+  "$base/api/sessions/$session_id/admin/buckets" | jq .
+
+# absent означает «создать, только если файла ещё нет»; совпадение даст 409.
+query=$(jq -nr --arg bucket "$bucket" --arg key "$key" \
+  '"bucket=" + ($bucket|@uri) + "&key=" + ($key|@uri)')
+curl --fail-with-body --silent --show-error \
+  -H "@$workdir/auth-header" -H 'Content-Type: application/octet-stream' \
+  -H 'X-Object-Revision: absent' --upload-file "$upload_file" \
+  "$base/api/sessions/$session_id/objects/upload?$query" | jq .
+
+curl --fail-with-body --silent --show-error \
+  -H "@$workdir/auth-header" \
+  -X DELETE "$base/api/sessions/$session_id" | jq .
+```
+
+Для сетевого доступа используйте HTTPS; HTTP в примере предназначен для localhost.
+У выдачи токена `Origin` необязателен. Если он передан, сервер проверяет его,
+как при входе в веб. Ограничения попыток входа общие для обоих способов.
+
+- Токен предоставляет права переданных ключей S3/MinIO. Он не расширяет IAM-права
+  и не продлевает срок исходных STS-учётных данных.
+- Cookie и Bearer создают отдельные сессии. Неверный `Authorization` даёт `401`,
+  даже если запрос содержит рабочую cookie. Cookie нельзя использовать как Bearer.
+- `DELETE /api/sessions/{id}` отзывает токен этой сессии. Следующие запросы
+  возвращают `401 / InvalidToken` с `WWW-Authenticate: Bearer …`.
+  Уже выполняющиеся запросы могут завершиться; остальные сессии сохраняются.
+- В памяти API хранится SHA-256 токена. Сессии и ключи подключения остаются
+  в памяти процесса; после перезапуска нужно получить новый токен.
+- Продление и refresh-токены не предусмотрены: после истечения срока создайте
+  новый токен. Не передавайте токен в URL и не сохраняйте в репозитории.
+
 ### Ошибки и длительные операции
 
 ```json
 {"error":{"code":"SessionExpired","message":"Сессия истекла. Отключитесь и подключитесь заново."}}
 ```
 
-- `401 / SessionExpired` требует нового подключения; `403 / AccessDenied` означает отказ в действии.
+- `401 / SessionExpired` требует нового cookie-подключения; `401 / InvalidToken` — нового Bearer-токена; `403 / AccessDenied` означает отказ в действии.
 - `409` при изменившейся ревизии требует перечитать состояние и повторно принять решение о записи.
 - Потоки используют `application/x-ndjson`. Читайте терминальное событие и результаты элементов:
   одного HTTP 200 недостаточно для подтверждения всей операции.
@@ -212,11 +292,12 @@ curl --fail-with-body --silent --show-error \
 
 Для диагностики используйте `X-Request-ID` из ответа и `make docker-logs`.
 Request-логи содержат шаблон операции, статус, длительность и безопасную причину
-ошибки, без ключей, cookie, тел запросов и подписанных URL.
+ошибки, без ключей, cookie, Bearer-токенов, тел запросов и подписанных URL.
 
 ## Границы гарантий
 
-Сессии живут до часа, учётные данные хранятся в памяти API.
+Cookie-сессии живут час; срок Bearer задаётся через `API_TOKEN_TTL` и `ttlSeconds`.
+Учётные данные хранятся в памяти API.
 Перезапуск сбрасывает сессии и локальное состояние операций.
 Управляемые загрузки возобновляются только в живой сессии и процессе.
 После аварии могут остаться незавершённые multipart в S3.

@@ -56,6 +56,9 @@ func executeOperation(app *runtimesvc.State, w http.ResponseWriter, r *http.Requ
 		var err error
 		s, err = middleware.Authenticate(app, r, id)
 		if err != nil {
+			if apperror.Public(err).Code == "InvalidToken" {
+				w.Header().Set("WWW-Authenticate", `Bearer realm="minio-s3-api", error="invalid_token"`)
+			}
 			return err
 		}
 		telemetry.Identify(r.Context(), s.ActorName(), s.InternalHost())

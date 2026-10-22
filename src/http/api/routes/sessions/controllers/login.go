@@ -19,9 +19,8 @@ func HandleLogin(app *runtimesvc.State, w http.ResponseWriter, r *http.Request) 
 	if !httpcommon.SameOrigin(r, cfg.Origin) {
 		return apperror.New(403, "OriginDenied", messages.HttpOriginDenied)
 	}
-	release, retryAfter, err := app.AdmitLogin(middleware.ClientAddress(r, cfg.TrustedProxies))
+	release, err := admitLogin(app, w, r)
 	if err != nil {
-		w.Header().Set("Retry-After", strconv.Itoa(max(1, int(math.Ceil(retryAfter.Seconds())))))
 		return err
 	}
 	defer release()
@@ -39,4 +38,12 @@ func HandleLogin(app *runtimesvc.State, w http.ResponseWriter, r *http.Request) 
 	http.SetCookie(w, httpcommon.SessionCookie(s, r, false))
 	httpcommon.WriteJSON(w, r, 201, value)
 	return nil
+}
+
+func admitLogin(app *runtimesvc.State, w http.ResponseWriter, r *http.Request) (func(), error) {
+	release, retryAfter, err := app.AdmitLogin(middleware.ClientAddress(r, app.Config().TrustedProxies))
+	if err != nil {
+		w.Header().Set("Retry-After", strconv.Itoa(max(1, int(math.Ceil(retryAfter.Seconds())))))
+	}
+	return release, err
 }

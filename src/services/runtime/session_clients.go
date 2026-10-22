@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"crypto/sha256"
 	"net/http"
 	"net/url"
 	"strings"
@@ -16,6 +17,27 @@ import (
 // NewConnectedSession constructs native clients after validation. The caller
 // owns tr until the session is successfully published in its registry.
 func NewConnectedSession(c Connection, cfg settings.Config, public, internal *url.URL, tr *http.Transport) (*Session, error) {
+	s, err := newSession(c, cfg, public, internal, tr)
+	if err != nil {
+		return nil, err
+	}
+	s.token, s.csrf = securetoken.New(), securetoken.New()
+	return s, nil
+}
+
+// NewBearerSession returns the credential once; the session retains only its
+// digest. Its authentication mode cannot be changed after publication.
+func NewBearerSession(c Connection, cfg settings.Config, public, internal *url.URL, tr *http.Transport) (*Session, string, error) {
+	s, err := newSession(c, cfg, public, internal, tr)
+	if err != nil {
+		return nil, "", err
+	}
+	token := securetoken.New()
+	s.bearer, s.bearerDigest = true, sha256.Sum256([]byte(token))
+	return s, token, nil
+}
+
+func newSession(c Connection, cfg settings.Config, public, internal *url.URL, tr *http.Transport) (*Session, error) {
 	// Endpoints are caller-owned mutable values; keep independent session copies.
 	public, internal = copyEndpoint(public), copyEndpoint(internal)
 	c.Region = strings.TrimSpace(c.Region)
@@ -41,7 +63,7 @@ func NewConnectedSession(c Connection, cfg settings.Config, public, internal *ur
 		// Conditional completion is an explicit operator assertion for the
 		// checked endpoint, never inferred from a hostname or successful PUT.
 		conditionalComplete: cfg.ConditionalCompleteEndpoints[public.String()] || cfg.ConditionalCompleteEndpoints[internal.String()],
-		id:                  securetoken.New(), token: securetoken.New(), csrf: securetoken.New(), actor: c.AccessKey,
+		id:                  securetoken.New(), actor: c.AccessKey,
 		secureCookies: strings.HasPrefix(cfg.Origin, "https://"), region: c.Region, expires: time.Now().Add(cfg.SessionTTL),
 		public: public, internal: internal, s3: s3, signer: signer, admin: admin, transport: tr, credentials: creds,
 	}, nil

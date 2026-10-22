@@ -2395,5 +2395,13 @@
   {
     "id": "http.stopping",
     "other": "API is stopping"
+  },
+  {
+    "id": "http.invalid_bearer_token",
+    "other": "The access token is invalid, expired or revoked. Create a new token."
+  },
+  {
+    "id": "sessions.invalid_token_ttl",
+    "other": "ttlSeconds must be a positive integer no greater than the configured token lifetime."
   }
 ]

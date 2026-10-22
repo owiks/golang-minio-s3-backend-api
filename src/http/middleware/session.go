@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
@@ -12,6 +13,18 @@ import (
 
 func Authenticate(state *runtime.State, r *http.Request, id string) (*runtime.Session, error) {
 	session := state.Session(id)
+	authorization := r.Header.Values("Authorization")
+	if len(authorization) > 0 || (session != nil && session.UsesBearer()) {
+		if session == nil || session.Expired(time.Now()) || len(authorization) != 1 {
+			return nil, invalidBearer()
+		}
+		scheme, token, ok := strings.Cut(authorization[0], " ")
+		if !ok || !strings.EqualFold(scheme, "Bearer") || !session.MatchesBearer(strings.TrimLeft(token, " ")) {
+			return nil, invalidBearer()
+		}
+		// Explicit credentials never fall back to an ambient browser cookie.
+		return session, nil
+	}
 	if session == nil || session.Expired(time.Now()) {
 		return nil, apperror.New(401, "SessionExpired", messages.HttpSessionExpired)
 	}
@@ -23,4 +36,8 @@ func Authenticate(state *runtime.State, r *http.Request, id string) (*runtime.Se
 		return nil, apperror.New(403, "CSRFDenied", messages.HttpCSRFDenied)
 	}
 	return session, nil
+}
+
+func invalidBearer() error {
+	return apperror.New(401, "InvalidToken", messages.HttpInvalidBearerToken)
 }

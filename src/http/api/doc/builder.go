@@ -11,11 +11,12 @@ import (
 func Build(catalog []routes.APIRoute) openapi.Document {
 	d := openapi.Document{OpenAPI: "3.0.3", Info: map[string]string{
 		"title": "MinIO S3 Backend API", "version": "1.0.0",
-		"description": "HTTP API для S3-совместимых хранилищ и MinIO Admin API. Подключение создаётся через POST /api/sessions. Cookie имеет динамическое имя minio_session_{sessionID}, HttpOnly и ограничен путём сессии. Для изменений нужны Origin интерфейса и X-CSRF-Token из ответа подключения. Swagger UI служит документацией; выполнение запросов отключено. Право на каждую операцию окончательно проверяет MinIO. Ключи и токены не сохраняются в документации.",
+		"description": "HTTP API для S3-совместимых хранилищ и MinIO Admin API. Для веба: POST /api/sessions выдаёт HttpOnly cookie minio_session_{sessionID}; изменения требуют Origin и X-CSRF-Token. Для скриптов: POST /api/tokens выдаёт отдельные id, token и expiresAt; передавайте Authorization: Bearer <token> на тех же /api/sessions/{id}/... без cookie и CSRF. DELETE /api/sessions/{id} отзывает токен. Токены живут в памяти до истечения срока, отзыва или перезапуска API. Передавайте ключи и токены через HTTPS. Swagger UI служит документацией; выполнение запросов отключено. Право на каждую операцию окончательно проверяет MinIO. Ключи и токены не сохраняются в документации.",
 	}, Servers: []map[string]string{{"url": "/"}}, Paths: map[string]map[string]openapi.Operation{}, Components: map[string]any{
 		"securitySchemes": map[string]any{
 			"SessionCookie": map[string]any{"type": "apiKey", "in": "header", "name": "Cookie", "description": "Cookie minio_session_{sessionID}, полученная после подключения. Браузер передаёт её автоматически; JavaScript не читает HttpOnly cookie."},
 			"CSRF":          map[string]any{"type": "apiKey", "in": "header", "name": "X-CSRF-Token", "description": "csrf из ответа POST /api/sessions; изменения также требуют Origin интерфейса."},
+			"SessionBearer": map[string]any{"type": "http", "scheme": "bearer", "description": "token из POST /api/tokens, для соответствующего id в пути сессии. Не требует cookie, Origin и CSRF. Неверный Authorization возвращает 401 без перехода к cookie. Не является токеном приглашения/общей папки или STS-токеном MinIO."},
 			"BearerGrant":   map[string]any{"type": "http", "scheme": "bearer", "description": "Токен приглашения загрузки или общей папки. Не сохраняется в Swagger UI."},
 		}, "schemas": map[string]any{"Error": map[string]any{"type": "object", "required": []string{"error"}, "properties": map[string]any{"error": map[string]any{"type": "object", "required": []string{"code", "message"}, "properties": map[string]any{"code": map[string]string{"type": "string"}, "message": map[string]string{"type": "string"}}}}}},
 	}}
@@ -88,11 +89,12 @@ func add(d *openapi.Document, path, tag, method, summary string, public bool) {
 			requirements["CSRF"] = []string{}
 		}
 		security = append(security, requirements)
+		security = append(security, map[string][]string{"SessionBearer": {}})
 	}
 	op := openapi.Operation{OperationID: strings.ToLower(method) + "_" + strings.NewReplacer("/", "_", "{", "", "}", "", "-", "_").Replace(strings.Trim(path, "/")), Tags: []string{tag}, Summary: summary, Security: security, Responses: map[string]any{}}
 	op.Parameters = append(op.Parameters, openapi.Parameter{Name: "Accept-Language", In: "header", Description: "Язык сообщений в режиме API_LANGUAGE=auto: en или ru, включая региональные варианты и приоритеты q. Без подходящего значения — en.", Schema: openapi.Schema{"type": "string"}})
 	if !public && method != "GET" {
-		op.Parameters = append(op.Parameters, openapi.Parameter{Name: "Origin", In: "header", Required: true, Description: "Адрес интерфейса; должен пройти проверку SameOrigin.", Schema: openapi.Schema{"type": "string"}})
+		op.Parameters = append(op.Parameters, openapi.Parameter{Name: "Origin", In: "header", Description: "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.", Schema: openapi.Schema{"type": "string"}})
 	}
 	for _, code := range []string{"400", "401", "403", "404", "409", "410", "413", "415", "422", "429", "500", "501", "502", "503", "504"} {
 		op.Responses[code] = map[string]any{"description": "Ошибка; code и message содержат безопасное описание.", "content": map[string]any{"application/json": map[string]any{"schema": map[string]string{"$ref": "#/components/schemas/Error"}}}}
@@ -116,6 +118,9 @@ func add(d *openapi.Document, path, tag, method, summary string, public bool) {
 	}
 	if value, ok := op.Responses["429"].(map[string]any); ok {
 		value["headers"].(map[string]any)["Retry-After"] = map[string]any{"description": "Секунды до повтора; передаётся при ограничении попыток входа.", "schema": map[string]string{"type": "integer"}}
+	}
+	if !public {
+		op.Responses["401"].(map[string]any)["headers"].(map[string]any)["WWW-Authenticate"] = map[string]any{"schema": map[string]string{"type": "string"}, "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене."}
 	}
 	d.Paths[path][key] = op
 }

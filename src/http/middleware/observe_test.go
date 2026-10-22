@@ -21,6 +21,7 @@ func TestObserveStreamingAndSafeErrors(t *testing.T) {
 	defer slog.SetDefault(old)
 	r := httptest.NewRequest("GET", "http://ui/api/receive?token=PRIVATE-SIGNED-TOKEN", nil)
 	r.Header.Set("Cookie", "PRIVATE-COOKIE")
+	r.Header.Set("Authorization", "Bearer PRIVATE-BEARER-TOKEN")
 	r.Header.Set("X-Request-ID", "FORGED-ID")
 	w := httptest.NewRecorder()
 	var metrics telemetry.Metrics

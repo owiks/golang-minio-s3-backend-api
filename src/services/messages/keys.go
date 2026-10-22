@@ -2,6 +2,8 @@
 package messages
 
 const (
+	HttpInvalidBearerToken                                                  ID = "http.invalid_bearer_token"
+	SessionsInvalidTokenTTL                                                 ID = "sessions.invalid_token_ttl"
 	HttpMethodNotAllowed                                                    ID = "http.method_not_allowed"
 	HttpInvalidPermissionQueries                                            ID = "http.invalid_permission_queries"
 	HttpInvalidPermissionQueriesActionAccess                                ID = "http.invalid_permission_queries_action_access"
@@ -600,6 +602,8 @@ const (
 // AllIDs returns a detached inventory for catalog validation.
 func AllIDs() []ID {
 	return []ID{ResourceNameInvalid, Combined, ManagementUnsupported, RouteNotFound, HTTPStopping,
+		HttpInvalidBearerToken,
+		SessionsInvalidTokenTTL,
 		HttpMethodNotAllowed,
 		HttpInvalidPermissionQueries,
 		HttpInvalidPermissionQueriesActionAccess,

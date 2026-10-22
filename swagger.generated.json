@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "description": "HTTP API для S3-совместимых хранилищ и MinIO Admin API. Подключение создаётся через POST /api/sessions. Cookie имеет динамическое имя minio_session_{sessionID}, HttpOnly и ограничен путём сессии. Для изменений нужны Origin интерфейса и X-CSRF-Token из ответа подключения. Swagger UI служит документацией; выполнение запросов отключено. Право на каждую операцию окончательно проверяет MinIO. Ключи и токены не сохраняются в документации.",
+    "description": "HTTP API для S3-совместимых хранилищ и MinIO Admin API. Для веба: POST /api/sessions выдаёт HttpOnly cookie minio_session_{sessionID}; изменения требуют Origin и X-CSRF-Token. Для скриптов: POST /api/tokens выдаёт отдельные id, token и expiresAt; передавайте Authorization: Bearer \u003ctoken\u003e на тех же /api/sessions/{id}/... без cookie и CSRF. DELETE /api/sessions/{id} отзывает токен. Токены живут в памяти до истечения срока, отзыва или перезапуска API. Передавайте ключи и токены через HTTPS. Swagger UI служит документацией; выполнение запросов отключено. Право на каждую операцию окончательно проверяет MinIO. Ключи и токены не сохраняются в документации.",
     "title": "MinIO S3 Backend API",
     "version": "1.0.0"
   },
@@ -1994,7 +1994,8 @@
         "tags": [
           "sessions"
         ],
-        "summary": "Завершение сессии",
+        "summary": "Завершение сессии / отзыв Bearer-токена",
+        "description": "Удаляет текущую сессию; следующие запросы с её токеном возвращают 401. Уже выполняющиеся запросы могут завершиться. Другие сессии и ключи MinIO сохраняются.",
         "parameters": [
           {
             "name": "Accept-Language",
@@ -2007,8 +2008,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -2121,6 +2121,12 @@
               },
               "Vary": {
                 "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
                 "schema": {
                   "type": "string"
                 }
@@ -2586,6 +2592,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -2814,6 +2823,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -3274,6 +3289,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -3406,6 +3424,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -3866,6 +3890,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -3889,8 +3916,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -4073,6 +4099,12 @@
               },
               "Vary": {
                 "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
                 "schema": {
                   "type": "string"
                 }
@@ -4538,6 +4570,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -4726,6 +4761,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -5186,6 +5227,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -5208,8 +5252,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -5365,6 +5408,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -5826,6 +5875,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -5850,8 +5902,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -5995,6 +6046,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -6456,6 +6513,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -6631,6 +6691,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -7091,6 +7157,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -7113,8 +7182,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -7274,6 +7342,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -7735,6 +7809,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -7759,8 +7836,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -7913,6 +7989,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -8374,6 +8456,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -8398,8 +8483,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -8547,6 +8631,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -9008,6 +9098,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -9160,6 +9253,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -9620,6 +9719,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -9641,8 +9743,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -9819,6 +9920,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -10280,6 +10387,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -10303,8 +10413,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -10448,6 +10557,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -10909,6 +11024,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -11214,6 +11332,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -11674,6 +11798,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -11865,6 +11992,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -12325,6 +12458,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -12590,6 +12726,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -13050,6 +13192,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -13072,8 +13217,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -13214,6 +13358,12 @@
               },
               "Vary": {
                 "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
                 "schema": {
                   "type": "string"
                 }
@@ -13679,6 +13829,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -13845,6 +13998,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -14305,6 +14464,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -14446,6 +14608,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -14906,6 +15074,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -14927,8 +15098,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -15063,6 +15233,12 @@
               },
               "Vary": {
                 "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
                 "schema": {
                   "type": "string"
                 }
@@ -15528,6 +15704,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -15551,8 +15730,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -15696,6 +15874,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -16157,6 +16341,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -16510,6 +16697,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -16970,6 +17163,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -16993,8 +17189,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -17199,6 +17394,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -17660,6 +17861,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -17802,6 +18006,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -18262,6 +18472,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -18283,8 +18496,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -18488,6 +18700,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -18949,6 +19167,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -18970,8 +19191,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -19175,6 +19395,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -19636,6 +19862,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -19921,6 +20150,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -20381,6 +20616,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -20525,6 +20763,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -20985,6 +21229,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -21006,8 +21253,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -21207,6 +21453,12 @@
               },
               "Vary": {
                 "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
                 "schema": {
                   "type": "string"
                 }
@@ -21672,6 +21924,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -21695,8 +21950,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -21915,6 +22169,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -22376,6 +22636,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -22518,6 +22781,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -22978,6 +23247,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -22999,8 +23271,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -23218,6 +23489,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -23679,6 +23956,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -23700,8 +23980,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -23919,6 +24198,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -24380,6 +24665,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -24401,8 +24689,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -24620,6 +24907,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -25081,6 +25374,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -25104,8 +25400,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -25399,6 +25694,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -25860,6 +26161,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -25883,8 +26187,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -26033,6 +26336,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -26494,6 +26803,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -26517,8 +26829,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -26671,6 +26982,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -27132,6 +27449,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -27155,8 +27475,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -27320,6 +27639,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -27781,6 +28106,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -27804,8 +28132,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -28097,6 +28424,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -28558,6 +28891,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -28801,6 +29137,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -29261,6 +29603,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -29436,6 +29781,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -29896,6 +30247,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -30023,6 +30377,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -30483,6 +30843,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -30505,8 +30868,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -30655,6 +31017,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -31116,6 +31484,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -31139,8 +31510,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -31284,6 +31654,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -31745,6 +32121,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -31903,6 +32282,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -32363,6 +32748,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -32386,8 +32774,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -32537,6 +32924,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -32998,6 +33391,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -33021,8 +33417,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -33166,6 +33561,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -33627,6 +34028,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -33911,6 +34315,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -34371,6 +34781,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -34394,8 +34807,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -34550,6 +34962,12 @@
               },
               "Vary": {
                 "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
                 "schema": {
                   "type": "string"
                 }
@@ -35015,6 +35433,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -35246,6 +35667,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -35706,6 +36133,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -35729,8 +36159,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -35888,6 +36317,12 @@
               },
               "Vary": {
                 "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
                 "schema": {
                   "type": "string"
                 }
@@ -36353,6 +36788,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -36511,6 +36949,12 @@
               },
               "Vary": {
                 "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
                 "schema": {
                   "type": "string"
                 }
@@ -36975,6 +37419,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -37173,6 +37620,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -37633,6 +38086,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -37656,8 +38112,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -37840,6 +38295,12 @@
               },
               "Vary": {
                 "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
                 "schema": {
                   "type": "string"
                 }
@@ -38305,6 +38766,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -38500,6 +38964,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -38960,6 +39430,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -38983,8 +39456,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -39170,6 +39642,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -39631,6 +40109,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -39796,6 +40277,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -40256,6 +40743,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -40383,6 +40873,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -40843,6 +41339,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -40865,8 +41364,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -41011,6 +41509,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -41472,6 +41976,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -41495,8 +42002,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -41640,6 +42146,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -42101,6 +42613,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -42245,6 +42760,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -42705,6 +43226,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -42726,8 +43250,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -42879,6 +43402,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -43340,6 +43869,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -43588,6 +44120,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -44048,6 +44586,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -44274,6 +44815,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -44734,6 +45281,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -44756,8 +45306,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -44917,6 +45466,12 @@
               },
               "Vary": {
                 "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
                 "schema": {
                   "type": "string"
                 }
@@ -45382,6 +45937,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -45825,6 +46383,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -46285,6 +46849,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -46516,6 +47083,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -46976,6 +47549,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -47231,6 +47807,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -47691,6 +48273,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -47712,8 +48297,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -47857,6 +48441,12 @@
               },
               "Vary": {
                 "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
                 "schema": {
                   "type": "string"
                 }
@@ -48322,6 +48912,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -48509,6 +49102,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -48969,6 +49568,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -49145,6 +49747,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -49605,6 +50213,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -49629,8 +50240,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -49802,6 +50412,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -50263,6 +50879,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -50429,6 +51048,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -50889,6 +51514,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -50911,8 +51539,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -51082,6 +51709,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -51543,6 +52176,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -51565,8 +52201,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -51740,6 +52375,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -52201,6 +52842,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -52361,6 +53005,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -52821,6 +53471,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -52843,8 +53496,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -52995,6 +53647,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -53456,6 +54114,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -53479,8 +54140,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -53624,6 +54284,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -54085,6 +54751,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -54247,6 +54916,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -54707,6 +55382,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -54730,8 +55408,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -54871,6 +55548,12 @@
               },
               "Vary": {
                 "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
                 "schema": {
                   "type": "string"
                 }
@@ -55336,6 +56019,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -55473,6 +56159,12 @@
               },
               "Vary": {
                 "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
                 "schema": {
                   "type": "string"
                 }
@@ -55937,6 +56629,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -56160,6 +56855,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -56620,6 +57321,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -56819,6 +57523,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -57279,6 +57989,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -57303,8 +58016,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -57570,6 +58282,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -58031,6 +58749,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -58054,8 +58775,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -58180,6 +58900,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -58641,6 +59367,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -58869,6 +59598,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -59329,6 +60064,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -59352,8 +60090,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -59564,6 +60301,12 @@
               },
               "Vary": {
                 "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
                 "schema": {
                   "type": "string"
                 }
@@ -60029,6 +60772,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -60155,6 +60901,12 @@
               },
               "Vary": {
                 "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
                 "schema": {
                   "type": "string"
                 }
@@ -60619,6 +61371,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -60640,8 +61395,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -60878,6 +61632,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -61339,6 +62099,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -61609,6 +62372,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -62069,6 +62838,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -62260,6 +63032,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -62720,6 +63498,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -62742,8 +63523,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -63000,6 +63780,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -63461,6 +64247,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -63627,6 +64416,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -64087,6 +64882,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -64108,8 +64906,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -64266,6 +65063,12 @@
               },
               "Vary": {
                 "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
                 "schema": {
                   "type": "string"
                 }
@@ -64731,6 +65534,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -64755,8 +65561,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -65023,6 +65828,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -65484,6 +66295,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -65507,8 +66321,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -65681,6 +66494,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -66142,6 +66961,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -66361,6 +67183,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -66821,6 +67649,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -66845,8 +67676,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -66968,6 +67798,12 @@
               },
               "Vary": {
                 "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
                 "schema": {
                   "type": "string"
                 }
@@ -67433,6 +68269,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -67595,6 +68434,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -68055,6 +68900,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -68077,8 +68925,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -68235,6 +69082,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -68696,6 +69549,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -68719,8 +69575,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -68867,6 +69722,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -69328,6 +70189,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -69492,6 +70356,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -69952,6 +70822,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -69976,8 +70849,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -70204,6 +71076,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -70665,6 +71543,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -70845,6 +71726,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -71305,6 +72192,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -71328,8 +72218,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -71451,6 +72340,12 @@
               },
               "Vary": {
                 "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
                 "schema": {
                   "type": "string"
                 }
@@ -71916,6 +72811,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -72080,6 +72978,12 @@
               },
               "Vary": {
                 "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
                 "schema": {
                   "type": "string"
                 }
@@ -72544,6 +73448,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -72565,8 +73472,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -72748,6 +73654,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -73209,6 +74121,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -73233,8 +74148,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -73883,6 +74797,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -74344,6 +75264,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -74368,8 +75291,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -74954,6 +75876,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -75415,6 +76343,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -76014,6 +76945,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -76474,6 +77411,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -76498,8 +77438,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -77084,6 +78023,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -77545,6 +78490,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -77568,8 +78516,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -77943,6 +78890,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -78404,6 +79357,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -78428,8 +79384,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -78638,6 +79593,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -79099,6 +80060,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -79265,6 +80229,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -79725,6 +80695,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -79867,6 +80840,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -80327,6 +81306,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -80515,6 +81497,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -80975,6 +81963,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -80996,8 +81987,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -81182,6 +82172,12 @@
               },
               "Vary": {
                 "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
                 "schema": {
                   "type": "string"
                 }
@@ -81647,6 +82643,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -81907,6 +82906,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -82367,6 +83372,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -82391,8 +83399,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -82728,6 +83735,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -83189,6 +84202,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -83212,8 +84228,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -83389,6 +84404,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -83850,6 +84871,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -84026,6 +85050,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -84486,6 +85516,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -84652,6 +85685,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -85112,6 +86151,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -85135,8 +86177,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -85465,6 +86506,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -85926,6 +86973,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -86110,6 +87160,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -86570,6 +87626,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -86779,6 +87838,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -87239,6 +88304,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -87432,6 +88500,12 @@
                   "type": "string"
                 }
               },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
+                "schema": {
+                  "type": "string"
+                }
+              },
               "X-Request-ID": {
                 "description": "Идентификатор запроса для поиска в логах API.",
                 "schema": {
@@ -87892,6 +88966,9 @@
         "security": [
           {
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       },
@@ -87913,8 +88990,7 @@
           {
             "name": "Origin",
             "in": "header",
-            "required": true,
-            "description": "Адрес интерфейса; должен пройти проверку SameOrigin.",
+            "description": "Обязателен при cookie-авторизации: адрес интерфейса должен пройти SameOrigin. Для SessionBearer не требуется.",
             "schema": {
               "type": "string"
             }
@@ -88089,6 +89165,12 @@
               },
               "Vary": {
                 "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer realm=\"minio-s3-api\", error=\"invalid_token\" при недействительном, истёкшем или отозванном токене.",
                 "schema": {
                   "type": "string"
                 }
@@ -88554,6 +89636,9 @@
           {
             "CSRF": [],
             "SessionCookie": []
+          },
+          {
+            "SessionBearer": []
           }
         ]
       }
@@ -90464,6 +91549,656 @@
         "security": []
       }
     },
+    "/api/tokens": {
+      "post": {
+        "operationId": "post_api_tokens",
+        "tags": [
+          "sessions"
+        ],
+        "summary": "Выдача Bearer-токена",
+        "description": "Принимает ключи S3/MinIO, создаёт отдельную сессию без cookie и возвращает токен один раз.\nttlSeconds — целое число от 1 до API_TOKEN_TTL в секундах; без поля используется API_TOKEN_TTL (по умолчанию 1 час).\nOrigin необязателен; если передан, должен совпадать с origin API/APP_ORIGIN. Для сетевого доступа используйте HTTPS.\n\nПример тела POST /api/tokens:\n\n    {\n      \"endpoint\": \"https://s3.example.com\",\n      \"accessKey\": \"YOUR_ACCESS_KEY\",\n      \"secretKey\": \"YOUR_SECRET_KEY\",\n      \"region\": \"us-east-1\",\n      \"ttlSeconds\": 900\n    }\n\nОтвет содержит id, token, tokenType, expiresAt и expiresIn. Используйте полученные id и token в запросах:\n\n    curl -H 'Authorization: Bearer ACCESS_TOKEN' https://api.example.com/api/sessions/SESSION_ID/admin/buckets\n\nОтзыв текущего токена:\n\n    curl -X DELETE -H 'Authorization: Bearer ACCESS_TOKEN' https://api.example.com/api/sessions/SESSION_ID\n\nCookie, Origin и X-CSRF-Token для этих Bearer-запросов не нужны. После отзыва, истечения срока или перезапуска API получите новый токен.\n",
+        "parameters": [
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "description": "Язык сообщений в режиме API_LANGUAGE=auto: en или ru, включая региональные варианты и приоритеты q. Без подходящего значения — en.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Origin",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "accessKey": {
+                    "description": "Максимум 256 байт UTF-8.",
+                    "type": "string",
+                    "x-maxBytes": 256
+                  },
+                  "endpoint": {
+                    "type": "string"
+                  },
+                  "region": {
+                    "type": "string"
+                  },
+                  "secretKey": {
+                    "description": "Максимум 4096 байт UTF-8.",
+                    "type": "string",
+                    "writeOnly": true,
+                    "x-maxBytes": 4096
+                  },
+                  "sessionToken": {
+                    "type": "string",
+                    "writeOnly": true
+                  },
+                  "ttlSeconds": {
+                    "format": "int64",
+                    "nullable": true,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "accessKey",
+                  "endpoint",
+                  "secretKey"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "expiresAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "expiresIn": {
+                      "format": "int64",
+                      "type": "integer"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "token": {
+                      "type": "string"
+                    },
+                    "tokenType": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "expiresAt",
+                    "expiresIn",
+                    "id",
+                    "token",
+                    "tokenType"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешный ответ.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Retry-After": {
+                "description": "Секунды до повтора; передаётся при ограничении попыток входа.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
     "/health": {
       "get": {
         "operationId": "get_health",
@@ -91082,6 +92817,11 @@
         "in": "header",
         "name": "X-CSRF-Token",
         "type": "apiKey"
+      },
+      "SessionBearer": {
+        "description": "token из POST /api/tokens, для соответствующего id в пути сессии. Не требует cookie, Origin и CSRF. Неверный Authorization возвращает 401 без перехода к cookie. Не является токеном приглашения/общей папки или STS-токеном MinIO.",
+        "scheme": "bearer",
+        "type": "http"
       },
       "SessionCookie": {
         "description": "Cookie minio_session_{sessionID}, полученная после подключения. Браузер передаёт её автоматически; JavaScript не читает HttpOnly cookie.",

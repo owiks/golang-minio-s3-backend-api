@@ -12,6 +12,7 @@ func Default() Config {
 		Listen:         ":8081",
 		Endpoints:      endpoint.Policy{Allowed: map[string]bool{}, Overrides: map[string]string{}},
 		SessionTTL:     time.Hour,
+		TokenTTL:       time.Hour,
 		TemporaryBytes: 2 * 1024 * 1024 * 1024,
 		Limits:         Limits{Transfers: 4, TransfersPerSession: 2, Logins: 8, LoginBurst: 60, LoginInterval: time.Second},
 	}
@@ -28,6 +29,9 @@ func (c Config) WithDefaults() Config {
 	}
 	if c.SessionTTL <= 0 {
 		c.SessionTTL = d.SessionTTL
+	}
+	if c.TokenTTL <= 0 {
+		c.TokenTTL = d.TokenTTL
 	}
 	if c.Limits.Transfers <= 0 {
 		c.Limits.Transfers = d.Limits.Transfers
