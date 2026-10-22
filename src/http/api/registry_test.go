@@ -30,7 +30,7 @@ func TestEveryDocumentedOperationResolvesThroughRegistry(t *testing.T) {
 			}
 		}
 	}
-	if total != 149 {
+	if total != 150 {
 		t.Fatal("unexpected operation count", total)
 	}
 }

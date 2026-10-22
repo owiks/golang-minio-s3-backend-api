@@ -56,7 +56,7 @@ func (m *Metrics) LogInterval(logger *slog.Logger) {
 	m.operations = nil
 	m.mu.Unlock()
 	for operation, c := range counters {
-		if operation == "GET /health" || operation == "documentation" {
+		if operation == "GET /health" || operation == "GET /ready" || operation == "documentation" {
 			continue
 		}
 		logger.Info("api interval", "operation", operation, "requests", c.Requests, "errors", c.Errors, "partial", c.Partial, "cancelled", c.Cancelled, "duration_ms", c.Duration.Milliseconds(), "active_requests", active)

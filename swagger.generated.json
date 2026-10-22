@@ -101968,6 +101968,587 @@
           "status"
         ]
       }
+    },
+    "/ready": {
+      "get": {
+        "description": "Проверяет доступность хранилища подключений и токенов с таймаутом 1 секунда. Не обращается к пользовательским S3-серверам. 503 StateUnavailable означает, что API пока не готов обслуживать запросы.",
+        "operationId": "get_ready",
+        "parameters": [
+          {
+            "description": "Язык сообщений в режиме API_LANGUAGE=auto: en или ru, включая региональные варианты и приоритеты q. Без подходящего значения — en.",
+            "in": "header",
+            "name": "Accept-Language",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "ok"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешный ответ.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Retry-After": {
+                "description": "Секунды до повтора; передаётся при ограничении попыток входа.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка; code и message содержат безопасное описание.",
+            "headers": {
+              "Content-Language": {
+                "description": "Язык сообщений API; не меняет содержимое файлов.",
+                "schema": {
+                  "enum": [
+                    "en",
+                    "ru"
+                  ],
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "В режиме auto содержит Accept-Language.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Request-ID": {
+                "description": "Идентификатор запроса для поиска в логах API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "summary": "Проверка готовности API",
+        "tags": [
+          "status"
+        ]
+      }
     }
   },
   "servers": [

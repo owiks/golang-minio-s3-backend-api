@@ -87,7 +87,7 @@ func Observe(w http.ResponseWriter, r *http.Request, operation string, metrics *
 		}
 		elapsed := time.Since(started)
 		metrics.End(operation, status, elapsed, trace.ResultName(ctx, status))
-		if operation != "GET /health" && operation != "documentation" {
+		if operation != "GET /health" && operation != "documentation" && (operation != "GET /ready" || status != http.StatusOK) {
 			trace.Log(ctx, status, rw.bytes, elapsed)
 		}
 		if abort {
