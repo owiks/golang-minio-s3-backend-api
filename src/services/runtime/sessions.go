@@ -15,6 +15,7 @@ import (
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/commandlog"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/coordination"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/iam"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/operations"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/staging"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/storage"
 )
@@ -62,6 +63,7 @@ type State struct {
 	config                         settings.Config
 	Auth                           *authstate.Manager    `json:"-"`
 	Commands                       commandlog.Repository `json:"-"`
+	Operations                     operations.Repository `json:"-"`
 	Sessions                       *SessionStore         `json:"-"`
 	Archives                       *ArchiveStore         `json:"-"`
 	Invites                        *UploadInviteStore    `json:"-"`
@@ -89,12 +91,15 @@ func NewWithAuth(c settings.Config, manager *authstate.Manager) *State {
 }
 
 func NewWithCommandLog(c settings.Config, manager *authstate.Manager, commands commandlog.Repository) *State {
+	return NewWithOperations(c, manager, commands, operations.NewMemory())
+}
 
+func NewWithOperations(c settings.Config, manager *authstate.Manager, commands commandlog.Repository, jobs operations.Repository) *State {
 	c = c.WithDefaults().Clone()
 	sessions := NewSessionStore()
 	temporary := staging.New(c.TemporaryBytes)
 	app := &State{
-		config: c, Auth: manager, Commands: commands, Sessions: sessions, Temporary: temporary,
+		config: c, Auth: manager, Commands: commands, Operations: jobs, Sessions: sessions, Temporary: temporary,
 		Invites:      NewUploadInviteStore(),
 		Shares:       NewFolderShareStore(),
 		Capabilities: NewCapabilityStore(),

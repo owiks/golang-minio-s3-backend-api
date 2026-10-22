@@ -24,6 +24,7 @@ func (app *State) Close() {
 		app.ZIPs.Close()
 		app.Capabilities.Close()
 		app.revisions.Close()
+		_ = app.Operations.Close()
 		_ = app.Commands.Close()
 		_ = app.Auth.Close()
 	})
@@ -32,6 +33,9 @@ func (app *State) Close() {
 	_ = app.Temporary.Close()
 }
 func (app *State) reap(now time.Time) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	_ = app.Operations.Prune(ctx, now)
+	cancel()
 	app.Multipart.Reap(now)
 	app.Sessions.Reap(now)
 	app.Archives.Reap(now)

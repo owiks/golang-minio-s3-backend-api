@@ -39,14 +39,21 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger) error {
 		_ = manager.Close()
 		return err
 	}
+	jobs, err := persistence.OpenOperations(startup, cfg)
 	cancel()
+	if err != nil {
+		_ = commands.Close()
+		_ = manager.Close()
+		return err
+	}
 	listener, err := net.Listen("tcp", cfg.Listen)
 	if err != nil {
 		_ = manager.Close()
 		_ = commands.Close()
+		_ = jobs.Close()
 		return ErrListen
 	}
-	return serve(ctx, httpapi.NewHandler(runtime.NewWithCommandLog(cfg, manager, commands)), listener, logger)
+	return serve(ctx, httpapi.NewHandler(runtime.NewWithOperations(cfg, manager, commands, jobs)), listener, logger)
 }
 
 func serve(ctx context.Context, handler *httpapi.Handler, listener net.Listener, logger *slog.Logger) error {
@@ -62,6 +69,12 @@ func serve(ctx context.Context, handler *httpapi.Handler, listener net.Listener,
 		<-reaped
 		handler.Close()
 	}()
+	workersDone := make(chan struct{})
+	go func() {
+		defer close(workersDone)
+		handler.RunOperations(reaperContext)
+	}()
+	defer func() { stopReaper(); <-workersDone }()
 	metricsDone := make(chan struct{})
 	go func() {
 		defer close(metricsDone)

@@ -15,6 +15,10 @@ func OperatorAction(route APIRoute, op Operation) operationpolicy.Action {
 		return 0
 	}
 	switch op.Controller {
+	case "CancelOperation", "CreateScanOperation", "RetryOperation":
+		return 0
+	case "CreateTransferOperation":
+		return operationpolicy.Upload
 	case "HandleToken", "HandleLogin", "HandleLogout", "IssueConnectionToken", "EditConnectionToken", "RevokeConnectionToken", "RotateConnectionToken", "RenewConnectionToken", "DeleteConnection", "ReplaceConnectionCredentials":
 		return 0
 	case "HandleActionAccess", "HandleSelectObject", "HandleContentSearch", "HandleCalculateChecksum", "HandlePrepareArchive", "HandleConfigureArchive", "HandleCancelArchive", "HandleForgetArchive", "HandleCreateFolderShare", "HandleRevokeFolderShare", "HandleRevokeUploadInvite", "HandleAbortMultipart", "HandleAbortIncompleteUpload", "HandleCancelBatchJob":

@@ -34,6 +34,12 @@ func (b Backup) WriteJSON(w io.Writer) error {
 	if err := writeBackupArray(w, b.Commands); err != nil {
 		return err
 	}
+	if _, err := io.WriteString(w, ",\n  \"operations\": "); err != nil {
+		return err
+	}
+	if err := writeBackupArray(w, b.Operations); err != nil {
+		return err
+	}
 	_, err := io.WriteString(w, "\n}\n")
 	return err
 }

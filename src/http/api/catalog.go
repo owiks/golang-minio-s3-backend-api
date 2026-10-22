@@ -16,6 +16,7 @@ import (
 	keysroutes "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/keys"
 	multipartroutes "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/multipart"
 	objectsroutes "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/objects"
+	operationsroutes "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/operations"
 	policiesroutes "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/policies"
 	searchroutes "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/search"
 	selectqueryroutes "github.com/owiks/golang-minio-s3-backend-api/src/http/api/routes/selectquery"
@@ -35,6 +36,7 @@ var registry = func() *routes.Registry {
 	result = append(result, accessroutes.GetRoutes()...)
 	result = append(result, capabilitiesroutes.GetRoutes()...)
 	result = append(result, objectsroutes.GetRoutes()...)
+	result = append(result, operationsroutes.GetRoutes()...)
 	result = append(result, attributesroutes.GetRoutes()...)
 	result = append(result, foldersroutes.GetRoutes()...)
 	result = append(result, transfersroutes.GetRoutes()...)

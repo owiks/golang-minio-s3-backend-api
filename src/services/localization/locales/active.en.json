@@ -2455,5 +2455,25 @@
   {
     "id": "command.limit",
     "other": "The command log limit has been reached. Try again later."
+  },
+  {
+    "id": "operation.invalid",
+    "other": "Invalid operation parameters."
+  },
+  {
+    "id": "operation.not_found",
+    "other": "The operation was not found or is no longer available."
+  },
+  {
+    "id": "operation.conflict",
+    "other": "The operation changed or cannot be retried safely. Refresh its status."
+  },
+  {
+    "id": "operation.limit",
+    "other": "The operation queue is full. Try again later."
+  },
+  {
+    "id": "operation.unavailable",
+    "other": "The operation store is unavailable. Try again later."
   }
 ]

@@ -5,6 +5,12 @@ import "strings"
 // Explicit authorization catalog. New protected operations must choose their
 // scopes before they can be registered; unknown operations fail at startup.
 var scopeContracts = map[string][]string{
+	"GET operations":                                       {},
+	"GET operations/{operationID}":                         {},
+	"POST operations/transfers":                            {"objects:read", "objects:write"},
+	"POST operations/scans":                                {"objects:read"},
+	"POST operations/{operationID}/cancel":                 {},
+	"POST operations/{operationID}/retry":                  {},
 	"GET tokens/{tokenID}":                                 {"access:manage"},
 	"DELETE ":                                              {},
 	"DELETE admin/access-keys/{name}":                      {"iam:manage"},

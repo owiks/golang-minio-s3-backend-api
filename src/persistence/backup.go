@@ -6,13 +6,16 @@ import (
 	"github.com/owiks/golang-minio-s3-backend-api/src/config"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/authstate"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/commandlog"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/operations"
 )
 
 // Backup retains the original auth-state JSON fields. Legacy files without
-// commands remain valid for restore, which revokes all restored credentials.
+// command or operation snapshots remain valid for restore, which revokes all
+// restored credentials.
 type Backup struct {
 	authstate.Backup
-	Commands []commandlog.Entry `json:"commands"`
+	Commands   []commandlog.Entry    `json:"commands"`
+	Operations []operations.Snapshot `json:"operations"`
 }
 
 // ExportBackup includes command fences as well as credentials. Preserving
@@ -30,11 +33,20 @@ func ExportBackup(ctx context.Context, cfg config.Config, manager *authstate.Man
 	if err != nil {
 		return Backup{}, err
 	}
+	jobs, err := OpenOperations(ctx, cfg)
+	if err != nil {
+		return Backup{}, err
+	}
+	defer jobs.Close()
+	records, err := jobs.Export(ctx)
+	if err != nil {
+		return Backup{}, err
+	}
 	access, err := manager.Export(ctx)
 	if err != nil {
 		return Backup{}, err
 	}
-	return Backup{Backup: access, Commands: entries}, nil
+	return Backup{Backup: access, Commands: entries, Operations: records}, nil
 }
 
 // RestoreBackup publishes execution fences before access records. These use
@@ -50,6 +62,12 @@ func RestoreBackup(ctx context.Context, cfg config.Config, manager *authstate.Ma
 	}
 	if preserve && backup.Commands == nil {
 		return commandlog.ErrInvalid
+	}
+	if preserve && backup.Operations == nil {
+		return operations.ErrInvalid
+	}
+	if !operations.ValidBackup(backup.Operations) {
+		return operations.ErrInvalid
 	}
 	entries := make([]commandlog.Entry, len(backup.Commands))
 	for i, entry := range backup.Commands {
@@ -75,6 +93,14 @@ func RestoreBackup(ctx context.Context, cfg config.Config, manager *authstate.Ma
 	}
 	defer commands.Close()
 	if err = commands.Import(ctx, entries); err != nil {
+		return err
+	}
+	jobs, err := OpenOperations(ctx, cfg)
+	if err != nil {
+		return err
+	}
+	defer jobs.Close()
+	if err = jobs.Import(ctx, backup.Operations); err != nil {
 		return err
 	}
 	return manager.Restore(ctx, backup.Backup, preserve)
