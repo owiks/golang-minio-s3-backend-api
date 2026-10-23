@@ -20,8 +20,26 @@ type CredentialsRequest struct {
 	SessionToken string `json:"sessionToken,omitempty"`
 }
 
+// CurrentView extends the caller's existing access projection with process-wide
+// restrictions. It never exposes the operator credential or runtime settings.
+type CurrentView struct {
+	authstate.AccessView
+	EffectiveOperations EffectiveOperationsView `json:"effectiveOperations"`
+}
+
+type EffectiveOperationsView struct {
+	ReadOnly            bool `json:"readOnly"`
+	DisableUploads      bool `json:"disableUploads"`
+	DisableDeletes      bool `json:"disableDeletes"`
+	DisableAdminChanges bool `json:"disableAdminChanges"`
+}
+
 func Current(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session, _ string) error {
-	common.WriteJSON(w, r, 200, s.Access().View())
+	policy := app.Config().Operations
+	common.WriteJSON(w, r, 200, CurrentView{AccessView: s.Access().View(), EffectiveOperations: EffectiveOperationsView{
+		ReadOnly: policy.ReadOnly, DisableUploads: policy.DisableUploads,
+		DisableDeletes: policy.DisableDeletes, DisableAdminChanges: policy.DisableAdminChanges,
+	}})
 	return nil
 }
 func Connections(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session, _ string) error {

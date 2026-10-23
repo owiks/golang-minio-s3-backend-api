@@ -62949,6 +62949,7 @@
     },
     "/api/sessions/{sessionID}/credential": {
       "get": {
+        "description": "effectiveOperations содержит действующие ограничения операций API без операторского секрета. Права доступа и IAM проверяются отдельно.",
         "operationId": "get_api_sessions_sessionID_credential",
         "parameters": [
           {
@@ -62984,6 +62985,30 @@
                     "createdAt": {
                       "format": "date-time",
                       "type": "string"
+                    },
+                    "effectiveOperations": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "disableAdminChanges": {
+                          "type": "boolean"
+                        },
+                        "disableDeletes": {
+                          "type": "boolean"
+                        },
+                        "disableUploads": {
+                          "type": "boolean"
+                        },
+                        "readOnly": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "disableAdminChanges",
+                        "disableDeletes",
+                        "disableUploads",
+                        "readOnly"
+                      ],
+                      "type": "object"
                     },
                     "expiresAt": {
                       "format": "date-time",
@@ -63056,6 +63081,7 @@
                     "active",
                     "connectionID",
                     "createdAt",
+                    "effectiveOperations",
                     "expiresAt",
                     "generation",
                     "id",
@@ -96135,6 +96161,55 @@
                         "format": "date-time",
                         "type": "string"
                       },
+                      "display": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "bucket": {
+                            "type": "string"
+                          },
+                          "items": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "destinationBucket": {
+                                  "type": "string"
+                                },
+                                "destinationKey": {
+                                  "type": "string"
+                                },
+                                "index": {
+                                  "format": "int64",
+                                  "type": "integer"
+                                },
+                                "move": {
+                                  "type": "boolean"
+                                },
+                                "sourceBucket": {
+                                  "type": "string"
+                                },
+                                "sourceKey": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "destinationBucket",
+                                "destinationKey",
+                                "index",
+                                "move",
+                                "sourceBucket",
+                                "sourceKey"
+                              ],
+                              "type": "object"
+                            },
+                            "nullable": true,
+                            "type": "array"
+                          },
+                          "prefix": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
                       "errors": {
                         "format": "int64",
                         "type": "integer"
@@ -96269,6 +96344,7 @@
                       "cancelRequested",
                       "completed",
                       "createdAt",
+                      "display",
                       "errors",
                       "id",
                       "kind",
@@ -96931,6 +97007,55 @@
                       "format": "date-time",
                       "type": "string"
                     },
+                    "display": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "bucket": {
+                          "type": "string"
+                        },
+                        "items": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "destinationBucket": {
+                                "type": "string"
+                              },
+                              "destinationKey": {
+                                "type": "string"
+                              },
+                              "index": {
+                                "format": "int64",
+                                "type": "integer"
+                              },
+                              "move": {
+                                "type": "boolean"
+                              },
+                              "sourceBucket": {
+                                "type": "string"
+                              },
+                              "sourceKey": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "destinationBucket",
+                              "destinationKey",
+                              "index",
+                              "move",
+                              "sourceBucket",
+                              "sourceKey"
+                            ],
+                            "type": "object"
+                          },
+                          "nullable": true,
+                          "type": "array"
+                        },
+                        "prefix": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
                     "errors": {
                       "format": "int64",
                       "type": "integer"
@@ -97065,6 +97190,7 @@
                     "cancelRequested",
                     "completed",
                     "createdAt",
+                    "display",
                     "errors",
                     "id",
                     "kind",
@@ -97756,6 +97882,55 @@
                       "format": "date-time",
                       "type": "string"
                     },
+                    "display": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "bucket": {
+                          "type": "string"
+                        },
+                        "items": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "destinationBucket": {
+                                "type": "string"
+                              },
+                              "destinationKey": {
+                                "type": "string"
+                              },
+                              "index": {
+                                "format": "int64",
+                                "type": "integer"
+                              },
+                              "move": {
+                                "type": "boolean"
+                              },
+                              "sourceBucket": {
+                                "type": "string"
+                              },
+                              "sourceKey": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "destinationBucket",
+                              "destinationKey",
+                              "index",
+                              "move",
+                              "sourceBucket",
+                              "sourceKey"
+                            ],
+                            "type": "object"
+                          },
+                          "nullable": true,
+                          "type": "array"
+                        },
+                        "prefix": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
                     "errors": {
                       "format": "int64",
                       "type": "integer"
@@ -97890,6 +98065,7 @@
                     "cancelRequested",
                     "completed",
                     "createdAt",
+                    "display",
                     "errors",
                     "id",
                     "kind",
@@ -98520,6 +98696,55 @@
                       "format": "date-time",
                       "type": "string"
                     },
+                    "display": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "bucket": {
+                          "type": "string"
+                        },
+                        "items": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "destinationBucket": {
+                                "type": "string"
+                              },
+                              "destinationKey": {
+                                "type": "string"
+                              },
+                              "index": {
+                                "format": "int64",
+                                "type": "integer"
+                              },
+                              "move": {
+                                "type": "boolean"
+                              },
+                              "sourceBucket": {
+                                "type": "string"
+                              },
+                              "sourceKey": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "destinationBucket",
+                              "destinationKey",
+                              "index",
+                              "move",
+                              "sourceBucket",
+                              "sourceKey"
+                            ],
+                            "type": "object"
+                          },
+                          "nullable": true,
+                          "type": "array"
+                        },
+                        "prefix": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
                     "errors": {
                       "format": "int64",
                       "type": "integer"
@@ -98654,6 +98879,7 @@
                     "cancelRequested",
                     "completed",
                     "createdAt",
+                    "display",
                     "errors",
                     "id",
                     "kind",
@@ -99945,6 +100171,55 @@
                       "format": "date-time",
                       "type": "string"
                     },
+                    "display": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "bucket": {
+                          "type": "string"
+                        },
+                        "items": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "destinationBucket": {
+                                "type": "string"
+                              },
+                              "destinationKey": {
+                                "type": "string"
+                              },
+                              "index": {
+                                "format": "int64",
+                                "type": "integer"
+                              },
+                              "move": {
+                                "type": "boolean"
+                              },
+                              "sourceBucket": {
+                                "type": "string"
+                              },
+                              "sourceKey": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "destinationBucket",
+                              "destinationKey",
+                              "index",
+                              "move",
+                              "sourceBucket",
+                              "sourceKey"
+                            ],
+                            "type": "object"
+                          },
+                          "nullable": true,
+                          "type": "array"
+                        },
+                        "prefix": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
                     "errors": {
                       "format": "int64",
                       "type": "integer"
@@ -100079,6 +100354,7 @@
                     "cancelRequested",
                     "completed",
                     "createdAt",
+                    "display",
                     "errors",
                     "id",
                     "kind",

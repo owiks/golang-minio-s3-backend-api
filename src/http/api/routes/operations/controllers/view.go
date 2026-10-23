@@ -31,6 +31,23 @@ type View struct {
 	Scan            *ScanView   `json:"scan,omitempty"`
 	CancelRequested bool        `json:"cancelRequested"`
 	Retryable       bool        `json:"retryable"`
+	Display         DisplayView `json:"display"`
+}
+
+// DisplayView exposes only resource names already authorized for this caller.
+// Revisions, execution fences and persisted request options remain private.
+type DisplayView struct {
+	Bucket string             `json:"bucket,omitempty"`
+	Prefix string             `json:"prefix,omitempty"`
+	Items  []TransferItemView `json:"items,omitempty"`
+}
+type TransferItemView struct {
+	Index             int    `json:"index"`
+	SourceBucket      string `json:"sourceBucket"`
+	SourceKey         string `json:"sourceKey"`
+	DestinationBucket string `json:"destinationBucket"`
+	DestinationKey    string `json:"destinationKey"`
+	Move              bool   `json:"move"`
 }
 type ItemView struct {
 	Index  int    `json:"index"`
@@ -77,6 +94,13 @@ func publicView(s operations.Snapshot, now time.Time) View {
 	}
 	if s.Spec.Scan != nil {
 		v.Scan = &ScanView{Objects: s.Scan.Objects, Bytes: s.Scan.Bytes, Pages: s.Scan.Pages}
+		v.Display.Bucket, v.Display.Prefix = s.Spec.Scan.Bucket, s.Spec.Scan.Prefix
+	}
+	for index, item := range s.Spec.Transfers {
+		v.Display.Items = append(v.Display.Items, TransferItemView{
+			Index: index, SourceBucket: item.SourceBucket, SourceKey: item.SourceKey,
+			DestinationBucket: item.DestinationBucket, DestinationKey: item.DestinationKey, Move: item.Move,
+		})
 	}
 	return v
 }

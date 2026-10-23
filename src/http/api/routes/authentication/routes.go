@@ -10,7 +10,7 @@ import (
 func GetRoutes() []routes.APIRoute {
 	return []routes.APIRoute{
 		{Path: "credential", Tag: "sessions", Operations: []routes.Operation{
-			{Method: "GET", Controller: "CurrentCredential", Summary: "Текущий доступ и ограничения", Input: routes.Inputs(), Response: authstate.AccessView{}, Handler: controllers.Current},
+			{Method: "GET", Controller: "CurrentCredential", Summary: "Текущий доступ и ограничения", Input: routes.Inputs().Describe("effectiveOperations содержит действующие ограничения операций API без операторского секрета. Права доступа и IAM проверяются отдельно."), Response: controllers.CurrentView{}, Handler: controllers.Current},
 		}},
 		{Path: "connections", Tag: "sessions", Operations: []routes.Operation{
 			{Method: "GET", Controller: "ListConnections", Summary: "Сохранённые подключения владельца", Input: routes.Inputs(), Response: []authstate.ConnectionView{}, Handler: controllers.Connections},

@@ -8,6 +8,7 @@ import (
 
 	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/openapi"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/operations"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/transfers"
 )
 
 func TestPublicOperationPhaseAndTimingRemainSafeAndDocumented(t *testing.T) {
@@ -41,6 +42,39 @@ func TestPublicOperationPhaseAndTimingRemainSafeAndDocumented(t *testing.T) {
 		if schema.Properties["timing"].Value.Properties[field] == nil {
 			t.Fatal("timing field missing from OpenAPI", field)
 		}
+	}
+}
+
+func TestPublicOperationDisplayProjectsNamesWithoutExecutionManifest(t *testing.T) {
+	now := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	s := operations.Snapshot{Spec: operations.Spec{Transfers: []transfers.FileTransferRequest{
+		{SourceBucket: "data", SourceKey: "reports/Первый.txt", SourceRevision: "private-source-revision", DestinationBucket: "archive", DestinationKey: "copy/Первый.txt", DestinationRevision: "private-destination-revision", SourcePrefix: "private-source-prefix", DestinationPrefix: "private-destination-prefix", Move: true},
+		{SourceBucket: "other", SourceKey: "second.txt", DestinationBucket: "other-archive", DestinationKey: "renamed.txt"},
+	}}}
+	v := publicView(s, now)
+	if len(v.Display.Items) != 2 || v.Display.Items[0].Index != 0 || !v.Display.Items[0].Move || v.Display.Items[1].Index != 1 || v.Display.Items[1].Move || v.Display.Items[1].SourceBucket != "other" || v.Display.Items[1].DestinationKey != "renamed.txt" {
+		t.Fatal("transfer display lost stable indices or resource names", v.Display)
+	}
+	raw, err := json.Marshal(v.Display)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, hidden := range []string{"revision", "private-", "sourcePrefix", "destinationPrefix"} {
+		if strings.Contains(string(raw), hidden) {
+			t.Fatal("public display exposed persisted options", string(raw))
+		}
+	}
+	s.Spec.Transfers[0].SourceKey = "changed.txt"
+	if v.Display.Items[0].SourceKey != "reports/Первый.txt" {
+		t.Fatal("display aliases persisted state")
+	}
+	s.Spec = operations.Spec{Scan: &operations.ScanSpec{Bucket: "data", Prefix: "reports/"}}
+	v = publicView(s, now)
+	if v.Display.Bucket != "data" || v.Display.Prefix != "reports/" || v.Display.Items != nil {
+		t.Fatal("scan display mixes transfer state", v.Display)
+	}
+	if openapi.TypeSchema(View{}, false).Value.Properties["display"] == nil {
+		t.Fatal("display missing from OpenAPI")
 	}
 }
 

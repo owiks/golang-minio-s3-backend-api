@@ -85,6 +85,20 @@ func TestOperationsSubmissionIdempotencyAndOwnership(t *testing.T) {
 	if created.ID == "" || created.State != operations.Queued || created.Total != 1 || created.Revision != 1 || created.Kind != "transfer" {
 		t.Fatal("unexpected submitted operation", created)
 	}
+	if len(created.Display.Items) != 1 || created.Display.Items[0].SourceBucket != "data" || created.Display.Items[0].SourceKey != "reports/file.txt" || created.Display.Items[0].DestinationBucket != "archive" || created.Display.Items[0].DestinationKey != "copy/file.txt" {
+		t.Fatal("submitted transfer cannot restore its display", created.Display)
+	}
+	for _, language := range []string{"en", "ru"} {
+		read := f.call("GET", "/"+created.ID, "", 200, "Accept-Language", language)
+		if got := operationView(t, read); len(got.Display.Items) != 1 || got.Display.Items[0] != created.Display.Items[0] {
+			t.Fatal("operation display depends on response language", language, got.Display)
+		}
+		for _, hidden := range []string{"source-revision", `"sourceRevision"`, `"destinationRevision"`, `"sourcePrefix"`, `"destinationPrefix"`} {
+			if strings.Contains(read.Body.String(), hidden) {
+				t.Fatal("operation display exposed conditional-write manifest", hidden)
+			}
+		}
+	}
 	location := "/api/sessions/" + f.token.ID + "/operations/" + created.ID
 	if w.Header().Get("Location") != location || w.Header().Get("X-Command-ID") == "" {
 		t.Fatal("missing operation location/command ID", w.Header())
@@ -140,7 +154,7 @@ func TestOperationsHideExecutionAndContinuationState(t *testing.T) {
 		}
 	}
 	v := operationView(t, w)
-	if v.Scan == nil || v.Scan.Objects != 2 || v.Scan.Bytes != 123 || v.Scan.Pages != 1 || v.State != operations.Running {
+	if v.Scan == nil || v.Scan.Objects != 2 || v.Scan.Bytes != 123 || v.Scan.Pages != 1 || v.State != operations.Running || v.Display.Bucket != "data" || v.Display.Prefix != "reports/" {
 		t.Fatal("scan progress missing", v)
 	}
 	f.call("POST", "/scans", `{"bucket":"data","prefix":"outside/"}`, 403)
