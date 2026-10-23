@@ -50,7 +50,7 @@ func (app *State) AuthorizeOperation(ctx context.Context, s *Session, spec opera
 type operationExecutor struct{ app *State }
 
 func (e operationExecutor) session(ctx context.Context, job operations.Snapshot) (*Session, context.Context, error) {
-	if !time.Now().Before(job.Deadline) {
+	if !authstate.ExpiryValid(job.Deadline, time.Now()) {
 		return nil, ctx, authstate.Denied()
 	}
 	a, c, err := e.app.Auth.Lookup(ctx, job.Scope.ActorID)

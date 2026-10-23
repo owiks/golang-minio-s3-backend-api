@@ -175,7 +175,7 @@ func (w Worker) RunOnce(ctx context.Context) (resultErr error) {
 		budget = MaxStepDuration
 	}
 	deadline := time.Now().Add(budget)
-	if s.Deadline.Before(deadline) {
+	if !s.Deadline.IsZero() && s.Deadline.Before(deadline) {
 		deadline = s.Deadline
 	}
 	stepCtx, cancel := context.WithDeadline(ctx, deadline)

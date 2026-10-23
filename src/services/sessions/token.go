@@ -31,7 +31,7 @@ func IssueToken(ctx context.Context, cfg config.Config, registry ConnectionRegis
 	if request.TTLSeconds != nil {
 		seconds := *request.TTLSeconds
 		// Compare before converting to Duration, which can overflow on input.
-		if seconds <= 0 || seconds > int64(ttl/time.Second) {
+		if seconds < 0 || seconds > int64(ttl/time.Second) {
 			return TokenResponse{}, apperror.New(400, "InvalidTokenTTL", messages.SessionsInvalidTokenTTL)
 		}
 		ttl = time.Duration(seconds) * time.Second

@@ -34,7 +34,7 @@ func (a Access) DigestExpiry(digest string, now time.Time) (time.Time, bool) {
 		return a.data.ExpiresAt, true
 	}
 	if now.Before(a.data.PreviousUntil) && equalDigest(digest, a.data.PreviousDigest) {
-		return minTime(a.data.ExpiresAt, a.data.PreviousUntil), true
+		return EarlierExpiry(a.data.ExpiresAt, a.data.PreviousUntil), true
 	}
 	return time.Time{}, false
 }

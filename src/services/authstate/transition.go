@@ -67,7 +67,7 @@ func TransitionAt(records Records, command Command, now time.Time) (Changes, err
 		if _, exists := records.Accesses[child.ID]; exists {
 			return Changes{}, Conflict()
 		}
-		if !ValidAccess(child) || child.Mode != "bearer" || !child.Renewable || child.Owner != a.Owner || !child.Policy.Valid() || !a.Policy.Contains(child.Policy) || !child.ExpiresAt.After(now) {
+		if !ValidAccess(child) || child.Mode != "bearer" || !child.Renewable || child.Owner != a.Owner || !child.Policy.Valid() || !a.Policy.Contains(child.Policy) || !ExpiryValid(child.ExpiresAt, now) {
 			return Changes{}, Denied()
 		}
 		if a.Mode == "bearer" && child.ParentID != a.ID || a.Mode == "cookie" && child.ParentID != "" {
@@ -117,12 +117,12 @@ func TransitionAt(records Records, command Command, now time.Time) (Changes, err
 			for _, access := range records.Accesses {
 				d := access.Snapshot()
 				if d.ConnectionID == c.ID && d.Active {
-					revokeAccess(&d)
+					revokeAccess(&d, now)
 					d.Revision++
 					changes.Accesses = append(changes.Accesses, NewAccess(d))
 				}
 			}
-			changes.Accesses = cascadeAccesses(records, changes.Accesses)
+			changes.Accesses = cascadeAccesses(records, changes.Accesses, now)
 		}
 	case "edit", "rotate", "renew", "revoke", "logout":
 		target, found := records.Accesses[command.TargetID]
@@ -154,7 +154,7 @@ func TransitionAt(records Records, command Command, now time.Time) (Changes, err
 			d.PreviousUntil = time.Time{}
 			if command.GraceSeconds > 0 {
 				d.PreviousDigest = d.Digest
-				d.PreviousUntil = minTime(now.Add(time.Duration(command.GraceSeconds)*time.Second), d.ExpiresAt)
+				d.PreviousUntil = EarlierExpiry(now.Add(time.Duration(command.GraceSeconds)*time.Second), d.ExpiresAt)
 			}
 			d.Digest = command.Digest
 			d.Generation++
@@ -165,12 +165,12 @@ func TransitionAt(records Records, command Command, now time.Time) (Changes, err
 				if !exists || !parent.Valid(now) {
 					return Changes{}, Denied()
 				}
-				expiry = minTime(expiry, parent.Snapshot().ExpiresAt)
+				expiry = EarlierExpiry(expiry, parent.Snapshot().ExpiresAt)
 			}
-			if !selfRenew || !d.Renewable {
-				expiry = minTime(expiry, a.ExpiresAt)
+			if a.Mode == "bearer" && (!selfRenew || !d.Renewable) {
+				expiry = EarlierExpiry(expiry, a.ExpiresAt)
 			}
-			if !expiry.After(now) {
+			if !ExpiryValid(expiry, now) {
 				return Changes{}, Invalid()
 			}
 			d.ExpiresAt = expiry
@@ -188,24 +188,17 @@ func TransitionAt(records Records, command Command, now time.Time) (Changes, err
 				d.Policy = command.Policy.Clone()
 			}
 		case "revoke", "logout":
-			revokeAccess(&d)
+			revokeAccess(&d, now)
 		}
 		d.Revision++
 		target = NewAccess(d)
-		changes.Accesses = cascadeAccesses(records, []Access{target})
+		changes.Accesses = cascadeAccesses(records, []Access{target}, now)
 		changes.Result.Access = target
 	default:
 		return Changes{}, Invalid()
 	}
 	return changes, nil
 }
-func minTime(a, b time.Time) time.Time {
-	if a.Before(b) {
-		return a
-	}
-	return b
-}
-
 func ValidateBootstrap(records Records, connection Connection, access Access) error {
 	c, a := connection.Snapshot(), access.Snapshot()
 	if !ValidConnection(c) || !ValidAccess(a) || a.ParentID != "" || c.Owner == "" || a.Owner != c.Owner || a.ConnectionID != c.ID || !a.Policy.Valid() || !a.Active || !c.Active || c.Revision != 1 || a.Revision != 1 || a.Generation != 1 || len(a.Digest) != 64 || len(c.Cipher.Data) < 28 || c.Cipher.KeyID == "" {

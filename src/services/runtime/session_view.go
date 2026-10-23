@@ -13,7 +13,7 @@ func (s *Session) ActorName() string          { return s.actor }
 func (s *Session) CSRFToken() string          { return s.csrf }
 func (s *Session) ExpiresAt() time.Time       { return s.expires }
 func (s *Session) InternalHost() string       { return s.internal.Host }
-func (s *Session) Expired(now time.Time) bool { return now.After(s.expires) }
+func (s *Session) Expired(now time.Time) bool { return !s.expires.IsZero() && now.After(s.expires) }
 func (s *Session) UsesBearer() bool           { return s.bearer }
 
 func (s *Session) MatchesBearer(value string) bool {

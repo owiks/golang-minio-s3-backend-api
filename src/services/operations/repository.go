@@ -120,7 +120,7 @@ func ClaimRecord(records map[string]Snapshot, worker string, now time.Time, leas
 			records[id] = s
 			continue
 		}
-		if !now.Before(s.Deadline) {
+		if !authorizationValid(s.Deadline, now) {
 			terminal(&s, Failed, "AuthorizationExpired", now)
 			records[id] = s
 			continue
@@ -207,7 +207,7 @@ func SaveRecord(s Snapshot, lease string, revision uint64, c Checkpoint, now tim
 		}
 		if s.CancelRequested {
 			terminal(&s, Cancelled, "", now)
-		} else if !now.Before(s.Deadline) {
+		} else if !authorizationValid(s.Deadline, now) {
 			terminal(&s, Failed, "AuthorizationExpired", now)
 		} else {
 			startTiming(&s, now)
@@ -246,7 +246,7 @@ func SaveRecord(s Snapshot, lease string, revision uint64, c Checkpoint, now tim
 			terminal(&s, Cancelled, "", now)
 			return s, nil
 		}
-		if !now.Before(s.Deadline) {
+		if !authorizationValid(s.Deadline, now) {
 			terminal(&s, Failed, "AuthorizationExpired", now)
 			return s, nil
 		}
@@ -345,7 +345,7 @@ func CancelRecord(s Snapshot, revision uint64, now time.Time) (Snapshot, error) 
 }
 func RetryRecord(s Snapshot, revision uint64, now time.Time) (Snapshot, error) {
 	now = recordTime(s, now)
-	if revision != s.Revision || !s.Retryable() || !now.Before(s.Deadline) {
+	if revision != s.Revision || !s.Retryable() || !authorizationValid(s.Deadline, now) {
 		return Snapshot{}, ErrConflict
 	}
 	s = s.Clone()

@@ -27,7 +27,7 @@ func ValidateLineage(access Access, connection Connection, lookup func(string) (
 			return Unavailable()
 		}
 		p := parent.Snapshot()
-		if p.Owner != d.Owner || p.Mode != "bearer" || d.Active && (!p.Active || !p.Policy.Contains(d.Policy) || d.ExpiresAt.After(p.ExpiresAt)) {
+		if p.Owner != d.Owner || p.Mode != "bearer" || d.Active && (!p.Active || !p.Policy.Contains(d.Policy) || !EarlierExpiry(d.ExpiresAt, p.ExpiresAt).Equal(d.ExpiresAt)) {
 			return Unavailable()
 		}
 		access, connection = parent, parentConnection

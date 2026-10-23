@@ -54,7 +54,7 @@ func (s *Session) signPermission(ctx context.Context, scope, bucket, key string,
 	if !p.Allows(scope) || !p.AllowsObject(bucket, key) {
 		return 0, authstate.Denied()
 	}
-	if s.manager == nil && expiry.IsZero() {
+	if expiry.IsZero() {
 		return ttl, nil
 	}
 	remaining := time.Until(expiry).Truncate(time.Second)
@@ -77,18 +77,14 @@ func (s *Session) credentialExpiry(ctx context.Context, current authstate.Access
 	}
 	if presented, deadline, ok := authstate.CredentialFor(ctx, s.id); ok {
 		digest = presented
-		if deadline.Before(expiry) {
-			expiry = deadline
-		}
+		expiry = authstate.EarlierExpiry(expiry, deadline)
 	}
 	deadline, valid := current.DigestExpiry(digest, now)
 	if !valid {
 		return time.Time{}, false
 	}
-	if deadline.Before(expiry) {
-		expiry = deadline
-	}
-	return expiry, now.Before(expiry)
+	expiry = authstate.EarlierExpiry(expiry, deadline)
+	return expiry, authstate.ExpiryValid(expiry, now)
 }
 
 // Bound clients keep one immutable native credential version. A replacement

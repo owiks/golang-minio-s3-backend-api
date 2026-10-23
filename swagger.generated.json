@@ -62255,7 +62255,7 @@
         ]
       },
       "post": {
-        "description": "policy обязателен; права не шире вызывающего доступа. Через Bearer создаётся дочерний токен с parentID и сроком не дольше родителя; через cookie — самостоятельный сервисный токен. Срок ограничен API_TOKEN_TTL. Секрет возвращается один раз.",
+        "description": "policy обязателен; права не шире вызывающего доступа. Через Bearer создаётся дочерний токен с parentID и сроком не дольше родителя; через cookie — самостоятельный сервисный токен. ttlSeconds обязателен: 0 — без собственного ограничения срока, положительный срок ограничен API_TOKEN_TTL. Cookie не ограничивает срок самостоятельного токена. Бессрочный ответ: expiresAt=0001-01-01T00:00:00Z и expiresIn=0. Секрет возвращается один раз.",
         "operationId": "post_api_sessions_sessionID_connections_connectionID_tokens",
         "parameters": [
           {
@@ -62334,6 +62334,9 @@
                     "type": "integer"
                   }
                 },
+                "required": [
+                  "ttlSeconds"
+                ],
                 "type": "object"
               }
             }
@@ -62949,7 +62952,7 @@
     },
     "/api/sessions/{sessionID}/credential": {
       "get": {
-        "description": "effectiveOperations содержит действующие ограничения операций API без операторского секрета. Права доступа и IAM проверяются отдельно.",
+        "description": "effectiveOperations содержит действующие ограничения операций API без операторского секрета. maxTokenTTLSeconds — настроенный API_TOKEN_TTL в секундах, верхний предел положительного ttlSeconds Bearer-токена. ttlSeconds=0 — без собственного ограничения срока; конечный срок родительского Bearer всё равно действует. expiresAt=0001-01-01T00:00:00Z означает отсутствие срока. Права доступа и IAM проверяются отдельно.",
         "operationId": "get_api_sessions_sessionID_credential",
         "parameters": [
           {
@@ -63025,6 +63028,10 @@
                       "format": "date-time",
                       "type": "string"
                     },
+                    "maxTokenTTLSeconds": {
+                      "format": "int64",
+                      "type": "integer"
+                    },
                     "mode": {
                       "type": "string"
                     },
@@ -63086,6 +63093,7 @@
                     "generation",
                     "id",
                     "lastUsedAt",
+                    "maxTokenTTLSeconds",
                     "mode",
                     "name",
                     "policy",
@@ -103026,7 +103034,7 @@
     },
     "/api/sessions/{sessionID}/tokens/{tokenID}/renew": {
       "post": {
-        "description": "Собственный токен с renewable=true продлевается без access:manage, с текущими секретом и revision, до текущего времени + API_TOKEN_TTL; дочерний — не дольше родителя. Для другого токена нужны access:manage и достаточные права, срок не дольше вызывающего доступа. ID, секрет и права сохраняются. Сокращение срока распространяется на потомков. Истёкшие и отозванные токены не восстанавливаются; cookie не продлевается. Старые записи с renewable=false не получают самостоятельного продления.",
+        "description": "Собственный токен с renewable=true продлевается без access:manage, с текущими секретом и revision, ttlSeconds обязателен: 0 снимает собственное ограничение срока, положительный срок — до текущего времени + API_TOKEN_TTL; дочерний — не дольше родителя. Для другого токена нужны access:manage и достаточные права; срок ограничен вызывающим Bearer, а cookie не ограничивает срок сервисного токена. ID, секрет и права сохраняются. Сокращение срока распространяется на потомков. Истёкшие и отозванные токены не восстанавливаются; cookie не продлевается. Старые записи с renewable=false не получают самостоятельного продления.",
         "operationId": "post_api_sessions_sessionID_tokens_tokenID_renew",
         "parameters": [
           {
@@ -106329,7 +106337,7 @@
     },
     "/api/tokens": {
       "post": {
-        "description": "Принимает ключи S3/MinIO, создаёт отдельную сессию без cookie и возвращает токен один раз.\nttlSeconds — целое число от 1 до API_TOKEN_TTL в секундах; без поля используется API_TOKEN_TTL (по умолчанию 1 час).\nOrigin необязателен; если передан, должен совпадать с origin API/APP_ORIGIN. Для сетевого доступа используйте HTTPS.\n\nПример тела POST /api/tokens:\n\n    {\n      \"endpoint\": \"https://s3.example.com\",\n      \"accessKey\": \"YOUR_ACCESS_KEY\",\n      \"secretKey\": \"YOUR_SECRET_KEY\",\n      \"region\": \"us-east-1\",\n      \"ttlSeconds\": 900\n    }\n\nОтвет содержит id, connectionID, revision, token, tokenType, expiresAt и expiresIn. Используйте полученные id и token в запросах:\n\n    curl -H 'Authorization: Bearer ACCESS_TOKEN' https://api.example.com/api/sessions/SESSION_ID/admin/buckets\n\nОтзыв текущего токена:\n\n    curl -X DELETE -H 'Authorization: Bearer ACCESS_TOKEN' https://api.example.com/api/sessions/SESSION_ID\n\nCookie, Origin и X-CSRF-Token для этих Bearer-запросов не нужны. До истечения срока собственный токен с renewable=true можно продлить через POST /api/sessions/{id}/tokens/{id}/renew с revision и ttlSeconds; ID, секрет и права сохраняются. После отзыва или истечения срока получите новый токен. В postgres/mysql/sqlite доступ сохраняется после перезапуска; memory остаётся временным режимом.\n",
+        "description": "Принимает ключи S3/MinIO, создаёт отдельную сессию без cookie и возвращает токен один раз.\nttlSeconds — целое число от 0 до API_TOKEN_TTL в секундах; 0 создаёт бессрочный токен, без поля используется API_TOKEN_TTL (по умолчанию 1 час). Бессрочный ответ содержит expiresAt=0001-01-01T00:00:00Z и expiresIn=0. Cookie-сессии остаются конечными.\nOrigin необязателен; если передан, должен совпадать с origin API/APP_ORIGIN. Для сетевого доступа используйте HTTPS.\n\nПример тела POST /api/tokens:\n\n    {\n      \"endpoint\": \"https://s3.example.com\",\n      \"accessKey\": \"YOUR_ACCESS_KEY\",\n      \"secretKey\": \"YOUR_SECRET_KEY\",\n      \"region\": \"us-east-1\",\n      \"ttlSeconds\": 900\n    }\n\nОтвет содержит id, connectionID, revision, token, tokenType, expiresAt и expiresIn. Используйте полученные id и token в запросах:\n\n    curl -H 'Authorization: Bearer ACCESS_TOKEN' https://api.example.com/api/sessions/SESSION_ID/admin/buckets\n\nОтзыв текущего токена:\n\n    curl -X DELETE -H 'Authorization: Bearer ACCESS_TOKEN' https://api.example.com/api/sessions/SESSION_ID\n\nCookie, Origin и X-CSRF-Token для этих Bearer-запросов не нужны. До истечения срока собственный токен с renewable=true можно продлить через POST /api/sessions/{id}/tokens/{id}/renew с revision и ttlSeconds; ID, секрет и права сохраняются. После отзыва или истечения срока получите новый токен. В postgres/mysql/sqlite доступ сохраняется после перезапуска; memory остаётся временным режимом.\n",
         "operationId": "post_api_tokens",
         "parameters": [
           {

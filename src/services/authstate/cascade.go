@@ -7,16 +7,21 @@ import (
 	"time"
 )
 
-func revokeAccess(d *AccessData) {
+func revokeAccess(d *AccessData, now time.Time) {
 	d.Active = false
 	d.PreviousDigest = ""
 	d.PreviousUntil = time.Time{}
+	// A permanent grant must become eligible for retention pruning after
+	// revocation, just as an expired finite grant does.
+	if d.ExpiresAt.IsZero() {
+		d.ExpiresAt = now
+	}
 }
 
 // cascadeAccesses runs inside the same repository write fence as the initiating
 // change. Descendants retain their secrets, but cannot retain wider authority
 // or a longer lifetime than their parent. Empty intersections revoke access.
-func cascadeAccesses(records Records, initial []Access) []Access {
+func cascadeAccesses(records Records, initial []Access, now time.Time) []Access {
 	children := map[string][]string{}
 	for id, access := range records.Accesses {
 		if parent := access.Snapshot().ParentID; parent != "" {
@@ -52,16 +57,16 @@ func cascadeAccesses(records Records, initial []Access) []Access {
 			if d.Active {
 				before := d
 				if !p.Active {
-					revokeAccess(&d)
+					revokeAccess(&d, now)
 				} else if !p.Policy.Contains(d.Policy) {
 					policy, ok := intersectPolicies(d.Policy, p.Policy)
 					if !ok {
-						revokeAccess(&d)
+						revokeAccess(&d, now)
 					} else {
 						d.Policy = policy
 					}
 				}
-				d.ExpiresAt = minTime(d.ExpiresAt, p.ExpiresAt)
+				d.ExpiresAt = EarlierExpiry(d.ExpiresAt, p.ExpiresAt)
 				if d.Active != before.Active || !d.ExpiresAt.Equal(before.ExpiresAt) || !samePolicy(d.Policy, before.Policy) {
 					d.Revision++
 					updated[childID] = NewAccess(d)

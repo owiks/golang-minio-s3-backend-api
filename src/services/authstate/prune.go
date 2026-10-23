@@ -13,7 +13,7 @@ func Prunable(r Records, before time.Time) ([]string, []string) {
 	retained := map[string]bool{}
 	for id, a := range r.Accesses {
 		d := a.Snapshot()
-		if !d.ExpiresAt.Before(before) {
+		if d.ExpiresAt.IsZero() || !d.ExpiresAt.Before(before) {
 			// Keep the ancestry of retained grants even if an ancestor has been
 			// revoked and its expiry is older than the retention boundary.
 			for current := id; current != "" && !retained[current]; {

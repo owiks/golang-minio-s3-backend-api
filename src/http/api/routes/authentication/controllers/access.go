@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/common"
 	"github.com/owiks/golang-minio-s3-backend-api/src/http/validation"
@@ -20,11 +21,23 @@ type CredentialsRequest struct {
 	SessionToken string `json:"sessionToken,omitempty"`
 }
 
-// CurrentView extends the caller's existing access projection with process-wide
-// restrictions. It never exposes the operator credential or runtime settings.
+type TokenIssueRequest struct {
+	Name       string           `json:"name"`
+	TTLSeconds *int64           `json:"ttlSeconds" validate:"required"`
+	Policy     authstate.Policy `json:"policy"`
+}
+
+type TokenRenewRequest struct {
+	Revision   int64  `json:"revision" validate:"required"`
+	TTLSeconds *int64 `json:"ttlSeconds" validate:"required"`
+}
+
+// CurrentView extends the caller's access projection with safe operation and TTL
+// limits. It never exposes operator credentials or private connection settings.
 type CurrentView struct {
 	authstate.AccessView
 	EffectiveOperations EffectiveOperationsView `json:"effectiveOperations"`
+	MaxTokenTTLSeconds  int64                   `json:"maxTokenTTLSeconds"`
 }
 
 type EffectiveOperationsView struct {
@@ -39,7 +52,7 @@ func Current(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runt
 	common.WriteJSON(w, r, 200, CurrentView{AccessView: s.Access().View(), EffectiveOperations: EffectiveOperationsView{
 		ReadOnly: policy.ReadOnly, DisableUploads: policy.DisableUploads,
 		DisableDeletes: policy.DisableDeletes, DisableAdminChanges: policy.DisableAdminChanges,
-	}})
+	}, MaxTokenTTLSeconds: int64(app.Config().TokenTTL / time.Second)})
 	return nil
 }
 func Connections(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session, _ string) error {
@@ -98,11 +111,14 @@ func Tokens(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runti
 		common.WriteJSON(w, r, 200, v)
 		return nil
 	}
-	var req authstate.IssueRequest
+	var req TokenIssueRequest
 	if err := validation.Decode(w, r, &req); err != nil {
 		return err
 	}
-	v, err := m.Issue(r.Context(), g, id, req)
+	if req.TTLSeconds == nil {
+		return authstate.Invalid()
+	}
+	v, err := m.Issue(r.Context(), g, id, authstate.IssueRequest{Name: req.Name, TTLSeconds: *req.TTLSeconds, Policy: req.Policy})
 	if err != nil {
 		return err
 	}
@@ -145,11 +161,14 @@ func Rotate(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runti
 	return nil
 }
 func Renew(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session, _ string) error {
-	var req authstate.RenewRequest
+	var req TokenRenewRequest
 	if err := validation.Decode(w, r, &req); err != nil {
 		return err
 	}
-	v, err := managerFor(app, s).Renew(r.Context(), s.AccessGuard(), r.PathValue("tokenID"), req)
+	if req.TTLSeconds == nil {
+		return authstate.Invalid()
+	}
+	v, err := managerFor(app, s).Renew(r.Context(), s.AccessGuard(), r.PathValue("tokenID"), authstate.RenewRequest{Revision: req.Revision, TTLSeconds: *req.TTLSeconds})
 	if err != nil {
 		return err
 	}

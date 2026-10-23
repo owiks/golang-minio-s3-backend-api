@@ -30,14 +30,14 @@ func throttleRecord(s Snapshot, now time.Time) (Snapshot, error) {
 	// or exhausts its retry budget. Keep the shared fence for sibling jobs.
 	delay := ScanThrottleDelay(min(s.ThrottleConsecutive+1, MaxScanThrottleRetries))
 	s.NotBefore = normalized(now.Add(delay))
-	if now.Before(s.Deadline) && s.Deadline.Before(s.NotBefore) {
+	if !s.Deadline.IsZero() && now.Before(s.Deadline) && s.Deadline.Before(s.NotBefore) {
 		s.NotBefore = s.Deadline
 	}
 	if s.CancelRequested {
 		terminal(&s, Cancelled, "", now)
 		return s, nil
 	}
-	if !now.Before(s.Deadline) {
+	if !authorizationValid(s.Deadline, now) {
 		terminal(&s, Failed, "AuthorizationExpired", now)
 		return s, nil
 	}
@@ -62,7 +62,7 @@ func WaitForCooldown(s Snapshot, until, now time.Time) (Snapshot, error) {
 	s = s.Clone()
 	if s.CancelRequested {
 		terminal(&s, Cancelled, "", now)
-	} else if !now.Before(s.Deadline) {
+	} else if !authorizationValid(s.Deadline, now) {
 		terminal(&s, Failed, "AuthorizationExpired", now)
 	} else {
 		yield(&s, now)

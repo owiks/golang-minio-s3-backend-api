@@ -204,7 +204,7 @@ func (m *Manager) Issue(ctx context.Context, g Guard, cid string, r IssueRequest
 	if err != nil {
 		return Issued{}, err
 	}
-	if len(r.Name) > 128 || !r.Policy.Valid() || r.TTLSeconds < 1 || r.TTLSeconds > int64(m.maxTTL/time.Second) {
+	if len(r.Name) > 128 || !r.Policy.Valid() || r.TTLSeconds < 0 || r.TTLSeconds > int64(m.maxTTL/time.Second) {
 		return Issued{}, Invalid()
 	}
 	connection, err := m.Connection(ctx, g, cid)
@@ -212,11 +212,11 @@ func (m *Manager) Issue(ctx context.Context, g Guard, cid string, r IssueRequest
 		return Issued{}, err
 	}
 	now := m.now().UTC()
-	expiry := now.Add(time.Duration(r.TTLSeconds) * time.Second)
+	expiry := requestedExpiry(now, r.TTLSeconds)
 	parent := ""
 	if actor.Snapshot().Mode == "bearer" {
 		parent = actor.Snapshot().ID
-		expiry = minTime(expiry, actor.Snapshot().ExpiresAt)
+		expiry = EarlierExpiry(expiry, actor.Snapshot().ExpiresAt)
 	}
 	token := securetoken.New()
 	id := securetoken.New()
@@ -229,7 +229,11 @@ func (m *Manager) Issue(ctx context.Context, g Guard, cid string, r IssueRequest
 }
 func issued(a Access, token string, now time.Time) Issued {
 	d := a.Snapshot()
-	return Issued{ID: d.ID, Token: token, TokenType: "Bearer", ExpiresAt: d.ExpiresAt, ExpiresIn: max(0, int64(d.ExpiresAt.Sub(now).Seconds())), Revision: d.Revision}
+	remaining := int64(0)
+	if !d.ExpiresAt.IsZero() {
+		remaining = max(0, int64(d.ExpiresAt.Sub(now).Seconds()))
+	}
+	return Issued{ID: d.ID, Token: token, TokenType: "Bearer", ExpiresAt: d.ExpiresAt, ExpiresIn: remaining, Revision: d.Revision}
 }
 
 type RotateRequest struct {
@@ -254,11 +258,11 @@ func (m *Manager) Rotate(ctx context.Context, g Guard, id string, r RotateReques
 
 type RenewRequest struct {
 	Revision   int64 `json:"revision" validate:"required"`
-	TTLSeconds int64 `json:"ttlSeconds" validate:"required"`
+	TTLSeconds int64 `json:"ttlSeconds"`
 }
 
 func (m *Manager) Renew(ctx context.Context, g Guard, id string, r RenewRequest) (AccessView, error) {
-	if r.Revision < 1 || r.TTLSeconds < 1 || r.TTLSeconds > int64(m.maxTTL/time.Second) {
+	if r.Revision < 1 || r.TTLSeconds < 0 || r.TTLSeconds > int64(m.maxTTL/time.Second) {
 		return AccessView{}, Invalid()
 	}
 	actor, err := m.guardedAccess(ctx, g, id != g.ActorID)
@@ -270,9 +274,9 @@ func (m *Manager) Renew(ctx context.Context, g Guard, id string, r RenewRequest)
 			return AccessView{}, err
 		}
 	}
-	expiry := m.now().Add(time.Duration(r.TTLSeconds) * time.Second)
-	if id != g.ActorID || !actor.Snapshot().Renewable {
-		expiry = minTime(expiry, actor.Snapshot().ExpiresAt)
+	expiry := requestedExpiry(m.now(), r.TTLSeconds)
+	if actor.Snapshot().Mode == "bearer" && (id != g.ActorID || !actor.Snapshot().Renewable) {
+		expiry = EarlierExpiry(expiry, actor.Snapshot().ExpiresAt)
 	}
 	result, err := m.repository.Apply(ctx, Command{Kind: "renew", Guard: g, TargetID: id, Revision: r.Revision, ExpiresAt: expiry.UnixMicro(), Event: m.event(g.Owner, g.ActorID, id, "access.renewed")})
 	if err != nil {

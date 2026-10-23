@@ -24,7 +24,7 @@ func ValidAccess(a AccessData) bool {
 	if a.ParentID != "" && (!validID(a.ParentID) || a.ParentID == a.ID || a.Mode != "bearer" || !a.Renewable) || a.Mode == "cookie" && a.Renewable {
 		return false
 	}
-	return validID(a.ID) && validID(a.ConnectionID) && validHash(a.Owner) && a.Revision > 0 && a.Generation > 0 && !a.CreatedAt.IsZero() && !a.ExpiresAt.IsZero() && utf8.ValidString(a.Name) && len(a.Name) <= 128 && validHash(a.Digest) && a.Policy.Valid() && (a.Mode == "cookie" && validHash(a.CSRFDigest) || a.Mode == "bearer") && (a.PreviousDigest == "" || validHash(a.PreviousDigest) && !a.PreviousUntil.IsZero())
+	return validID(a.ID) && validID(a.ConnectionID) && validHash(a.Owner) && a.Revision > 0 && a.Generation > 0 && !a.CreatedAt.IsZero() && (a.Mode == "bearer" || !a.ExpiresAt.IsZero()) && utf8.ValidString(a.Name) && len(a.Name) <= 128 && validHash(a.Digest) && a.Policy.Valid() && (a.Mode == "cookie" && validHash(a.CSRFDigest) || a.Mode == "bearer") && (a.PreviousDigest == "" || validHash(a.PreviousDigest) && !a.PreviousUntil.IsZero())
 }
 
 func validSecrets(s Secrets) bool {

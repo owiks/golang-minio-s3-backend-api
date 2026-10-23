@@ -163,10 +163,17 @@ func recordTime(s Snapshot, now time.Time) time.Time {
 	}
 	return now
 }
+
+// A zero deadline means the submitting credential has no expiration. Work
+// remains bounded by per-step timeouts, admission and manifest limits.
+func authorizationValid(deadline, now time.Time) bool {
+	return deadline.IsZero() || now.Before(deadline)
+}
+
 func New(scope Scope, spec Spec, deadline, now time.Time) (Snapshot, error) {
 	now = normalized(now)
 	deadline = normalized(deadline)
-	if !scope.Valid() || !spec.Valid() || now.IsZero() || !deadline.After(now) || deadline.Year() > 9998 {
+	if !scope.Valid() || !spec.Valid() || now.IsZero() || !authorizationValid(deadline, now) || deadline.Year() > 9998 {
 		return Snapshot{}, ErrInvalid
 	}
 	kind := "transfer"
@@ -176,7 +183,7 @@ func New(scope Scope, spec Spec, deadline, now time.Time) (Snapshot, error) {
 	return Snapshot{ID: securetoken.New(), Scope: scope, Spec: spec.Clone(), Kind: kind, State: Queued, Revision: 1, CreatedAt: now, UpdatedAt: now, Deadline: deadline, Timing: &Timing{WaitingSince: now}}, nil
 }
 func Valid(s Snapshot) bool {
-	if !validID(s.ID) || !s.Scope.Valid() || !s.Spec.Valid() || s.Revision == 0 || s.CreatedAt.IsZero() || s.UpdatedAt.Before(s.CreatedAt) || !s.Deadline.After(s.CreatedAt) || len(s.Items) > MaxTransfers || s.NextIndex < 0 || s.NextIndex > len(s.Spec.Transfers) || len(s.Scan.Token) > 16384 || s.Scan.Pages < 0 || s.Scan.Pages > MaxScanPages || len(s.Scan.Seen) > MaxScanPages || s.Scan.Objects < 0 || s.Scan.Bytes < 0 || !safeCode(s.Code) {
+	if !validID(s.ID) || !s.Scope.Valid() || !s.Spec.Valid() || s.Revision == 0 || s.CreatedAt.IsZero() || s.UpdatedAt.Before(s.CreatedAt) || !authorizationValid(s.Deadline, s.CreatedAt) || len(s.Items) > MaxTransfers || s.NextIndex < 0 || s.NextIndex > len(s.Spec.Transfers) || len(s.Scan.Token) > 16384 || s.Scan.Pages < 0 || s.Scan.Pages > MaxScanPages || len(s.Scan.Seen) > MaxScanPages || s.Scan.Objects < 0 || s.Scan.Bytes < 0 || !safeCode(s.Code) {
 		return false
 	}
 	if s.Kind != "transfer" && s.Kind != "scan" || (s.Kind == "scan") != (s.Spec.Scan != nil) {

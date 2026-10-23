@@ -16,6 +16,7 @@ import (
 // historical clock makes any accidental wall-clock dependency fail immediately.
 func RunClock(t *testing.T, open func(*testing.T, func() time.Time) authstate.Repository) {
 	t.Helper()
+	runNonexpiringClock(t, open)
 	t.Run("rotation-and-expiry-boundaries", func(t *testing.T) {
 		f := newClockLifecycle(t, open)
 		issued := f.issue(120)

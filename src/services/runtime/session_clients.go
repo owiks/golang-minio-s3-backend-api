@@ -34,6 +34,9 @@ func NewBearerSession(c Connection, cfg settings.Config, public, internal *url.U
 	}
 	token := securetoken.New()
 	s.bearer, s.bearerDigest = true, sha256.Sum256([]byte(token))
+	if cfg.SessionTTL == 0 {
+		s.expires = time.Time{}
+	}
 	return s, token, nil
 }
 

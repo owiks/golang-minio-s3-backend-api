@@ -43,7 +43,7 @@ func GetRoutes() []routes.APIRoute {
 }
 
 const tokenDescription = `Принимает ключи S3/MinIO, создаёт отдельную сессию без cookie и возвращает токен один раз.
-ttlSeconds — целое число от 1 до API_TOKEN_TTL в секундах; без поля используется API_TOKEN_TTL (по умолчанию 1 час).
+ttlSeconds — целое число от 0 до API_TOKEN_TTL в секундах; 0 создаёт бессрочный токен, без поля используется API_TOKEN_TTL (по умолчанию 1 час). Бессрочный ответ содержит expiresAt=0001-01-01T00:00:00Z и expiresIn=0. Cookie-сессии остаются конечными.
 Origin необязателен; если передан, должен совпадать с origin API/APP_ORIGIN. Для сетевого доступа используйте HTTPS.
 
 Пример тела POST /api/tokens:

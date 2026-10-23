@@ -65,7 +65,11 @@ func issueTestToken(t *testing.T, origin, user, secret string, ttl *int64) sessi
 	if ttl != nil {
 		want = *ttl
 	}
-	if result.Token == "" || result.TokenType != "Bearer" || result.ID == "" || result.ExpiresIn != want || result.ExpiresAt.Before(before.Add(time.Duration(want)*time.Second)) || result.ExpiresAt.After(time.Now().Add(time.Duration(want)*time.Second)) {
+	expiryValid := result.ExpiresAt.IsZero()
+	if want != 0 {
+		expiryValid = !result.ExpiresAt.IsZero() && !result.ExpiresAt.Before(before.Add(time.Duration(want)*time.Second)) && !result.ExpiresAt.After(time.Now().Add(time.Duration(want)*time.Second))
+	}
+	if result.Token == "" || result.TokenType != "Bearer" || result.ID == "" || result.ExpiresIn != want || !expiryValid {
 		t.Fatal("invalid token response")
 	}
 	var fields map[string]any

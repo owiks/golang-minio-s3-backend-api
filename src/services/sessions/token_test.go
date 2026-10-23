@@ -13,7 +13,7 @@ import (
 func TestTokenTTLRejectedBeforeConnecting(t *testing.T) {
 	cfg := config.Default()
 	cfg.TokenTTL = time.Minute
-	for _, seconds := range []int64{-1, 0, 61, math.MaxInt64} {
+	for _, seconds := range []int64{-1, 61, math.MaxInt64} {
 		_, err := IssueToken(context.Background(), cfg, nil, TokenRequest{TTLSeconds: &seconds})
 		if err == nil || apperror.Public(err).Code != "InvalidTokenTTL" {
 			t.Fatal("invalid lifetime accepted", seconds, err)

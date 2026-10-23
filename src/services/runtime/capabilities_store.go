@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/apperror"
+	"github.com/owiks/golang-minio-s3-backend-api/src/services/authstate"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/capabilities"
 	"github.com/owiks/golang-minio-s3-backend-api/src/services/messages"
 )
@@ -77,7 +78,7 @@ func (v *capabilityView) Resolve(ctx context.Context, id capabilities.Identifier
 			s.mu.Unlock()
 			return capabilities.Result{}, closingError()
 		}
-		if !now.Before(v.expires) || v.alive != nil && !v.alive() {
+		if !authstate.ExpiryValid(v.expires, now) || v.alive != nil && !v.alive() {
 			s.mu.Unlock()
 			return capabilities.Result{}, expiredSessionError()
 		}
@@ -117,7 +118,7 @@ func (v *capabilityView) Resolve(ctx context.Context, id capabilities.Identifier
 			err = ctx.Err()
 		}
 		s.mu.Lock()
-		if err == nil && !s.closed && s.now().Before(v.expires) && (v.alive == nil || v.alive()) {
+		if err == nil && !s.closed && authstate.ExpiryValid(v.expires, s.now()) && (v.alive == nil || v.alive()) {
 			// An actual operation may have published newer evidence while this
 			// read was in flight. Never replace that newer observation.
 			if existing := s.entries[key]; existing == nil || !existing.Value.(*capabilityEntry).result.CheckedAt.After(value.CheckedAt) {
@@ -147,7 +148,7 @@ func (v *capabilityView) Observe(ctx context.Context, observation capabilities.O
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	now := s.now()
-	if s.closed || !now.Before(v.expires) || v.alive != nil && !v.alive() {
+	if s.closed || !authstate.ExpiryValid(v.expires, now) || v.alive != nil && !v.alive() {
 		return
 	}
 	result := capabilities.Outcome(observation.ID, observation.Scope, "observed_operation", observation.Err, now)
@@ -155,9 +156,7 @@ func (v *capabilityView) Observe(ctx context.Context, observation capabilities.O
 }
 
 func (s *CapabilityStore) put(key capabilityKey, value capabilities.Result, sessionExpiry time.Time) capabilities.Result {
-	if value.ExpiresAt.After(sessionExpiry) {
-		value.ExpiresAt = sessionExpiry
-	}
+	value.ExpiresAt = authstate.EarlierExpiry(value.ExpiresAt, sessionExpiry)
 	if item := s.entries[key]; item != nil {
 		item.Value.(*capabilityEntry).result = value
 		s.recent.MoveToBack(item)

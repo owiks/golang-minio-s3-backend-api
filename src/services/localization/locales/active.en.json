@@ -2402,7 +2402,7 @@
   },
   {
     "id": "sessions.invalid_token_ttl",
-    "other": "ttlSeconds must be a positive integer no greater than the configured token lifetime."
+    "other": "ttlSeconds must be an integer from 0 to the configured token lifetime limit. 0 means no expiration."
   },
   {
     "id": "authstate.unavailable",

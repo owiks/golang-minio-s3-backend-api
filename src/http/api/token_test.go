@@ -23,7 +23,7 @@ func TestTokenIssuanceGuardsAndLocalizedErrors(t *testing.T) {
 		{"foreign-origin", "https://evil.example", `{}`, "ru", "OriginDenied", 403},
 		{"null-origin", "null", `{}`, "en", "OriginDenied", 403},
 		{"malformed", "", `{`, "ru", "InvalidJSON", 400},
-		{"ttl-zero", "", `{"ttlSeconds":0}`, "en", "InvalidTokenTTL", 400},
+		{"ttl-zero-needs-credentials", "", `{"ttlSeconds":0}`, "en", "InvalidCredentials", 400},
 		{"ttl-over-limit", "", `{"ttlSeconds":3601}`, "ru", "InvalidTokenTTL", 400},
 		{"ttl-negative", "", `{"ttlSeconds":-1}`, "ru", "InvalidTokenTTL", 400},
 		{"ttl-fractional", "", `{"ttlSeconds":1.5}`, "en", "InvalidJSON", 400},

@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/owiks/golang-minio-s3-backend-api/src/config"
 	"github.com/owiks/golang-minio-s3-backend-api/src/http/api/openapi"
@@ -18,6 +19,7 @@ func TestCurrentCredentialReportsOnlySafeEffectiveOperationRestrictions(t *testi
 	for _, policy := range []operationpolicy.Policy{{}, {ReadOnly: true, DisableUploads: true, DisableDeletes: true, DisableAdminChanges: true}} {
 		cfg := config.Default()
 		cfg.Operations = policy
+		cfg.TokenTTL = 2 * time.Hour
 		cfg.OperatorToken = "operator-secret-must-never-enter-a-session-response"
 		app := runtime.New(cfg)
 		t.Cleanup(app.Close)
@@ -38,11 +40,14 @@ func TestCurrentCredentialReportsOnlySafeEffectiveOperationRestrictions(t *testi
 			if got.EffectiveOperations != want {
 				t.Fatal("effective operations changed with language or maintenance", language, got.EffectiveOperations, want)
 			}
+			if got.MaxTokenTTLSeconds != 7200 {
+				t.Fatal("token TTL limit changed with language or maintenance", language, got.MaxTokenTTLSeconds)
+			}
 			var raw map[string]json.RawMessage
 			if err := json.Unmarshal(w.Body.Bytes(), &raw); err != nil {
 				t.Fatal(err)
 			}
-			if raw["AccessView"] != nil || raw["id"] == nil || raw["policy"] == nil || raw["effectiveOperations"] == nil {
+			if raw["AccessView"] != nil || raw["id"] == nil || raw["policy"] == nil || raw["effectiveOperations"] == nil || raw["maxTokenTTLSeconds"] == nil {
 				t.Fatal("additive fields must retain the flat credential contract", w.Body.String())
 			}
 			for _, hidden := range []string{cfg.OperatorToken, "operatorToken", "cookieToken", "secretKey", "digest", "previousDigest"} {
@@ -53,10 +58,13 @@ func TestCurrentCredentialReportsOnlySafeEffectiveOperationRestrictions(t *testi
 		}
 	}
 	properties := openapi.TypeSchema(authcontrollers.CurrentView{}, false).Value.Properties
-	for _, field := range []string{"id", "connectionID", "policy", "effectiveOperations"} {
+	for _, field := range []string{"id", "connectionID", "policy", "effectiveOperations", "maxTokenTTLSeconds"} {
 		if properties[field] == nil {
 			t.Fatal("current credential response missing from OpenAPI", field)
 		}
+	}
+	if !properties["maxTokenTTLSeconds"].Value.Type.Is("integer") {
+		t.Fatal("token TTL limit must remain an integer in OpenAPI")
 	}
 	for _, field := range []string{"readOnly", "disableUploads", "disableDeletes", "disableAdminChanges"} {
 		if properties["effectiveOperations"].Value.Properties[field] == nil {

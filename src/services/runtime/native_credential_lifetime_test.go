@@ -29,7 +29,11 @@ func nativeLifetimeFixture(t *testing.T, ttl time.Duration) (*State, *Session, *
 	t.Cleanup(app.Close)
 	id, cid := securetoken.New(), securetoken.New()
 	ctx := context.Background()
-	if err := app.Auth.Bootstrap(ctx, authstate.Bootstrap{ID: id, ConnectionID: cid, Endpoint: upstream.URL, Region: "us-east-1", Mode: "bearer", Digest: authstate.Digest("native-lifetime-token"), ExpiresAt: time.Now().Add(ttl), Secrets: authstate.Secrets{AccessKey: "fixture-access", SecretKey: "fixture-secret"}}); err != nil {
+	var expires time.Time
+	if ttl != 0 {
+		expires = time.Now().Add(ttl)
+	}
+	if err := app.Auth.Bootstrap(ctx, authstate.Bootstrap{ID: id, ConnectionID: cid, Endpoint: upstream.URL, Region: "us-east-1", Mode: "bearer", Digest: authstate.Digest("native-lifetime-token"), ExpiresAt: expires, Secrets: authstate.Secrets{AccessKey: "fixture-access", SecretKey: "fixture-secret"}}); err != nil {
 		t.Fatal(err)
 	}
 	access, connection, err := app.Auth.Lookup(ctx, id)

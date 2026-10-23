@@ -141,7 +141,7 @@ func Create(ctx context.Context, store Store, c Client, input CreateRequest) (Sn
 }
 
 func minTime(a, b time.Time) time.Time {
-	if a.Before(b) {
+	if b.IsZero() || !a.IsZero() && a.Before(b) {
 		return a
 	}
 	return b

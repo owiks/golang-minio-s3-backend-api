@@ -177,9 +177,11 @@ type AccessData struct {
 }
 type Access struct{ data AccessData }
 
-func NewAccess(d AccessData) Access       { d.Policy = d.Policy.Clone(); return Access{data: d} }
-func (a Access) Snapshot() AccessData     { d := a.data; d.Policy = d.Policy.Clone(); return d }
-func (a Access) Valid(now time.Time) bool { return a.data.Active && now.Before(a.data.ExpiresAt) }
+func NewAccess(d AccessData) Access   { d.Policy = d.Policy.Clone(); return Access{data: d} }
+func (a Access) Snapshot() AccessData { d := a.data; d.Policy = d.Policy.Clone(); return d }
+func (a Access) Valid(now time.Time) bool {
+	return a.data.Active && (a.data.Mode == "bearer" || !a.data.ExpiresAt.IsZero()) && ExpiryValid(a.data.ExpiresAt, now)
+}
 func (a Access) Match(secret string, now time.Time) (bool, bool) {
 	if !a.Valid(now) {
 		return false, false

@@ -60,7 +60,9 @@ func (app *State) BindAccess(ctx context.Context, a authstate.Access, _ authstat
 				return nil, err
 			}
 			cfg := app.config
-			cfg.SessionTTL = time.Until(d.ExpiresAt)
+			if !d.ExpiresAt.IsZero() {
+				cfg.SessionTTL = time.Until(d.ExpiresAt)
+			}
 			root, err = NewConnectedSession(Connection{Endpoint: cd.Endpoint, Region: cd.Region, AccessKey: credentials.AccessKey, SecretKey: credentials.SecretKey, SessionToken: credentials.SessionToken}, cfg, public, internal, tr)
 			if err != nil {
 				tr.CloseIdleConnections()
@@ -83,8 +85,8 @@ func (app *State) BindAccess(ctx context.Context, a authstate.Access, _ authstat
 	// Only immutable identity and auth snapshots are per request. Native resources
 	// and their coordination owners remain shared, with no copying of locks.
 	expiry := d.ExpiresAt
-	if previous && d.PreviousUntil.Before(expiry) {
-		expiry = d.PreviousUntil
+	if previous {
+		expiry = authstate.EarlierExpiry(expiry, d.PreviousUntil)
 	}
 	bound := &Session{sessionCore: root.sessionCore, id: d.ID, expires: expiry, bearer: d.Mode == "bearer", access: a, previous: previous, manager: app.Auth}
 	s3, err := storage.NewS3(bound.clientConfig(), bound.requestTransport())
