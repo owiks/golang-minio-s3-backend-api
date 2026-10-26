@@ -6,7 +6,6 @@ import (
 	"embed"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"io/fs"
 	"slices"
@@ -142,6 +141,7 @@ var defaultCatalog = sync.OnceValue(func() *Catalog {
 func Default() *Catalog { return defaultCatalog() }
 
 type Localizer struct {
+	catalog          *Catalog
 	current, english *i18n.Localizer
 	parameters       map[string][]string
 }
@@ -150,8 +150,12 @@ func (c *Catalog) For(lang string) *Localizer {
 	if lang != "ru" {
 		lang = "en"
 	}
-	return &Localizer{current: i18n.NewLocalizer(c.bundle, lang), english: i18n.NewLocalizer(c.bundle, "en"), parameters: c.parameters}
+	return &Localizer{catalog: c, current: i18n.NewLocalizer(c.bundle, lang), english: i18n.NewLocalizer(c.bundle, "en"), parameters: c.parameters}
 }
+
+// ForLanguage creates a request-local view of the same immutable catalog.
+func (l *Localizer) ForLanguage(lang string) *Localizer { return l.catalog.For(lang) }
+
 func (l *Localizer) Render(text messages.Ref) string { return l.render(text, 0) }
 func (l *Localizer) render(text messages.Ref, depth int) string {
 	if messages.Empty(text) {
@@ -193,13 +197,4 @@ func (l *Localizer) render(text messages.Ref, depth int) string {
 		return translated
 	}
 	return "The API could not complete the request."
-}
-
-// Validate exposes only detached catalog diagnostics for checks, never inputs.
-func Validate() error {
-	_, err := New(catalogs)
-	if err != nil {
-		return fmt.Errorf("API localization: %w", err)
-	}
-	return nil
 }

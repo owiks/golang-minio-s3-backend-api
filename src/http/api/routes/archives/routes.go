@@ -66,7 +66,7 @@ func GetRoutes() []routes.APIRoute {
 			Tag:  "archives",
 			Operations: []routes.Operation{
 				{Suffix: "{ticket}", Method: "GET", Long: true, Summary: "Скачивание и отмена ZIP",
-					Input:      routes.Inputs(),
+					Input:      routes.Inputs(routes.EnumQuery("lang", false, "en", "ru").Describe("Язык сообщений в отчёте ZIP. В режиме API_LANGUAGE=auto переопределяет Accept-Language только для этого скачивания; без параметра используется заголовок. Фиксированный API_LANGUAGE=en или ru имеет приоритет.")),
 					Controller: "HandleDownloadArchive",
 					Responses:  []routes.Response{{Status: 200, MediaType: "application/zip", Binary: true, Localized: true}}, Handler: func(app *runtime.State, w http.ResponseWriter, r *http.Request, s *runtime.Session, rest string) error {
 						if rest == "" {

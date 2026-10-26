@@ -67157,6 +67157,18 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "description": "Язык сообщений в отчёте ZIP. В режиме API_LANGUAGE=auto переопределяет Accept-Language только для этого скачивания; без параметра используется заголовок. Фиксированный API_LANGUAGE=en или ru имеет приоритет.",
+            "in": "query",
+            "name": "lang",
+            "schema": {
+              "enum": [
+                "en",
+                "ru"
+              ],
+              "type": "string"
+            }
           }
         ],
         "responses": {

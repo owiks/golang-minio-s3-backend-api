@@ -49,6 +49,11 @@ func HandleConfigureArchive(app *runtimesvc.State, w http.ResponseWriter, r *htt
 	return nil
 }
 func HandleDownloadArchive(app *runtimesvc.State, w http.ResponseWriter, r *http.Request, s *runtimesvc.Session, ticket string) error {
+	localized, err := archiveDownloadLanguage(r)
+	if err != nil {
+		return err
+	}
+	r = localized
 	download, err := archivessvc.StartDownload(r.Context(), app.Archives, runtimesvc.NewClients(s), ticket)
 	if err != nil {
 		return err
