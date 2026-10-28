@@ -4,7 +4,7 @@ go 1.26.10
 
 require (
 	github.com/caarlos0/env/v11 v11.4.1
-	github.com/getkin/kin-openapi v0.151.0
+	github.com/getkin/kin-openapi v0.152.0
 	github.com/go-chi/chi/v5 v5.5.0
 	github.com/go-sql-driver/mysql v1.10.1
 	github.com/gofrs/flock v0.13.1
