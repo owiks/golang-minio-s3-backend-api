@@ -12,7 +12,7 @@ require (
 	github.com/minio/madmin-go/v3 v3.0.110
 	github.com/minio/minio-go/v7 v7.4.1
 	github.com/minio/pkg/v3 v3.11.0
-	github.com/nicksnyder/go-i18n/v2 v2.6.1
+	github.com/nicksnyder/go-i18n/v2 v2.7.0
 	github.com/pressly/goose/v3 v3.29.0
 	github.com/prometheus/client_model v0.6.3
 	github.com/prometheus/common v0.72.1
